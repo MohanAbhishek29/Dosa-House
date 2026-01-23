@@ -1,0 +1,177 @@
+/* Hero Container Override */
+.hero {
+    overflow: hidden;
+    /* Contain the flying elements */
+    perspective: 1000px;
+    /* For 3D feel */
+}
+
+/* Animation Container */
+.hero-anim-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    /* Let clicks pass through to text/buttons */
+}
+
+/* The Falling Elements */
+.falling-item {
+    position: absolute;
+    top: -150%;
+    /* Start way above screen */
+    left: 50%;
+    /* Center horizontally */
+    transform: translateX(-50%);
+    filter: drop-shadow(0 50px 30px rgba(0, 0, 0, 0.5));
+}
+
+/* Dosa (Center) */
+.hero-dosa {
+    width: 500px;
+    /* Big! */
+    z-index: 3;
+    animation:
+        dropBounce 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards 0.5s,
+        /* Drop */
+        splitCenter 1s cubic-bezier(0.19, 1, 0.22, 1) forwards 2.5s;
+    /* Fade/Shrink slightly on split */
+}
+
+/* Idli (Left) */
+.hero-idli {
+    width: 250px;
+    z-index: 2;
+    top: 50%;
+    /* Start at final vertical position */
+    left: 50%;
+    /* Start at center to be hidden behind dosa */
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+    /* Hidden state */
+    animation: revealLeft 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards 2.6s;
+}
+
+/* Vada (Right) */
+.hero-vada {
+    width: 230px;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+    animation: revealRight 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards 2.6s;
+}
+
+/* Big Typography Behind */
+.hero-bg-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 15vw;
+    font-family: var(--font-heading);
+    color: rgba(255, 255, 255, 0.1);
+    font-weight: 900;
+    width: 100%;
+    text-align: center;
+    z-index: 0;
+    letter-spacing: 10px;
+    animation: textZoom 2s ease-out forwards 2.5s;
+    /* Triggers with split */
+}
+
+/* Keyframes */
+
+@keyframes dropBounce {
+    0% {
+        top: -150%;
+        transform: translateX(-50%) rotate(-10deg);
+    }
+
+    60% {
+        top: 50%;
+        transform: translateX(-50%) translateY(-40%) rotate(5deg);
+    }
+
+    /* Overshoot */
+    80% {
+        top: 45%;
+        transform: translateX(-50%) translateY(-50%) rotate(-2deg);
+    }
+
+    /* Bounce up */
+    100% {
+        top: 50%;
+        transform: translateX(-50%) translateY(-50%) rotate(0deg);
+    }
+
+    /* Settle */
+}
+
+@keyframes splitCenter {
+    to {
+        transform: translate(-50%, -60%) scale(1.1);
+        /* Zoom up slightly */
+        /* opacity: 0; Optional: if you want it to disappear, but overlapping is better */
+    }
+}
+
+@keyframes revealLeft {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(45deg);
+    }
+
+    100% {
+        opacity: 1;
+        left: 20%;
+        /* Move Left */
+        transform: translate(-50%, -50%) scale(1) rotate(-15deg);
+    }
+}
+
+@keyframes revealRight {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-45deg);
+    }
+
+    100% {
+        opacity: 1;
+        left: 80%;
+        /* Move Right */
+        transform: translate(-50%, -50%) scale(1) rotate(15deg);
+    }
+}
+
+@keyframes textZoom {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.15;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-dosa {
+        width: 300px;
+    }
+
+    .hero-idli,
+    .hero-vada {
+        width: 150px;
+    }
+
+    .hero-bg-text {
+        font-size: 20vw;
+    }
+}

@@ -1,0 +1,260 @@
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Modal Content (Glassmorphism) */
+.modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    width: 90%;
+    max-width: 800px;
+    border-radius: 20px;
+    padding: 0;
+    /* Remove default padding for layout */
+    position: relative;
+    transform: scale(0.8) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 85vh;
+    /* Prevent tall modals */
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Layout */
+.modal-gallery {
+    position: relative;
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.modal-img-container {
+    padding: 2rem;
+    position: relative;
+}
+
+.modal-img {
+    width: 100%;
+    max-width: 350px;
+    filter: drop-shadow(0 15px 15px rgba(0, 0, 0, 0.2));
+    animation: float 6s ease-in-out infinite;
+}
+
+.modal-steam {
+    position: absolute;
+    top: 50%;
+    /* Center steam */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.modal-details {
+    padding: 2.5rem;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Close Button */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s;
+}
+
+.modal-close:hover {
+    transform: rotate(90deg) scale(1.1);
+    color: var(--color-sambar);
+}
+
+/* Modal Typography */
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+}
+
+.modal-price {
+    font-size: 1.8rem;
+    color: var(--color-sambar);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.modal-description {
+    font-size: 1.05rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+/* Ingredients Section */
+.modal-ingredients {
+    margin-top: 1.5rem;
+}
+
+.modal-ingredients h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-primary);
+}
+
+.ingredients-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.ingredient-tag {
+    background: var(--color-bg-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-green-leaf);
+    border: 1px solid var(--color-border);
+    transition: transform 0.2s;
+}
+
+.ingredient-tag:hover {
+    transform: translateY(-2px);
+    background: white;
+    border-color: var(--color-green-leaf);
+}
+
+/* Modal Actions */
+.modal-actions {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Quantity Control (Large) */
+.qty-control-lg {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg-secondary);
+    border-radius: 50px;
+    padding: 5px;
+    border: 1px solid var(--color-border);
+}
+
+.qty-btn-lg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.2s;
+}
+
+.qty-btn-lg:hover {
+    background: var(--color-saffron);
+    color: white;
+}
+
+.qty-val-lg {
+    font-size: 1.2rem;
+    font-weight: 600;
+    width: 40px;
+    text-align: center;
+}
+
+/* Add to Plate Button */
+.btn-add-plate {
+    flex: 1;
+    background: var(--color-saffron);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(245, 127, 23, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-add-plate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 127, 23, 0.4);
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(1deg);
+    }
+
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .modal-content {
+        grid-template-columns: 1fr;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-gallery {
+        height: 250px;
+    }
+
+    .modal-img {
+        max-width: 200px;
+    }
+
+    .modal-details {
+        padding: 1.5rem;
+    }
+}

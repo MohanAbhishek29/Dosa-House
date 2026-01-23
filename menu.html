@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 50C10 25 30 10 50 10C70 10 90 25 90 50C90 75 70 90 50 90C30 90 10 75 10 50Z"
+                        fill="#F57F17" />
+                    <path d="M20 50C20 30 50 30 50 30C50 30 80 30 80 50C80 70 50 80 50 80C50 80 20 70 20 50Z"
+                        fill="#FFF8E1" />
+                    <path d="M50 80C50 80 30 60 50 40C70 60 50 80 50 80Z" fill="#2E7D32" />
+                </svg>
+                <span style="color:var(--color-text-primary); margin-left:10px;">DOSA HOUSE</span>
+            </a>
+            <div style="display: flex; gap: 2rem;">
+                <a href="index.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">HOME</a>
+                <a href="menu.html"
+                    style="font-weight: 700; color: var(--color-sambar); text-decoration: none; font-size: 1.1rem;">MENU</a>
+                <a href="booking.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">BOOK
+                    TABLE</a>
+                <a href="orders.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
+                <a href="about.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mini Hero -->
+    <header class="hero" style="height: 40vh; min-height: 300px;">
+        <div class="container hero-content">
+            <h1 class="hero-title" style="font-size: 3rem;">Our <span class="text-saffron">Menu</span></h1>
+            <p class="hero-subtitle">Freshly prepared South Indian delicacies.</p>
+        </div>
+    </header>
+
+    <!-- Menu Section -->
+    <section id="menu" class="menu-section">
+        <div class="container">
+            <h2 class="section-title">Our <span class="text-saffron">Collections</span></h2>
+
+            <!-- Search & Filter Controls -->
+            <div class="menu-controls"
+                style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+
+                <!-- Search Bar -->
+                <div class="search-wrapper" style="width: 100%; max-width: 500px; position: relative;">
+                    <input type="text" id="menu-search" placeholder="Search for dosas, idlis..."
+                        style="width: 100%; padding: 1rem 1.5rem; padding-left: 3rem; border-radius: 50px; border: 2px solid #eee; font-size: 1rem; outline: none; transition: border-color 0.3s; box-shadow: var(--shadow-clay);">
+                    <span
+                        style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: #888;">🔍</span>
+                </div>
+
+                <!-- Categories -->
+                <div class="category-filter">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="dosas">Dosas</button>
+                    <button class="category-btn" data-category="idli_vada">Idli & Vada</button>
+                    <button class="category-btn" data-category="bonda_bajji">Bonda & Bajji</button>
+                    <button class="category-btn" data-category="upma_bath">Upma & Bath</button>
+                    <button class="category-btn" data-category="rice_specials">Rice Specials</button>
+                    <button class="category-btn" data-category="beverages">Beverages</button>
+                </div>
+            </div>
+
+            <!-- Menu Grid -->
+            <div class="menu-grid" id="menu-grid">
+                <!-- Items will be injected here by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>DOSA HOUSE</h3>
+                    <p>Authentic South Indian vegetarian cuisine made with love and tradition.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="booking.html">Book Table</a></li>
+                        <li><a href="orders.html">Orders</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="about.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Visit Us</h4>
+                    <p>Railway Station Road</p>
+                    <p>Bhimavaram, 534201</p>
+                    <p>+91 9392421941</p>
+                    <p>mohanabhishek098@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2024 Dosa House. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Item Modal -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+
+            <div class="modal-gallery">
+                <!-- Steam Effect in Modal -->
+                <div class="steam-container modal-steam">
+                    <div class="steam-particle"></div>
+                    <div class="steam-particle"></div>
+                    <div class="steam-particle"></div>
+                    <div class="steam-particle"></div>
+                </div>
+                <div class="modal-img-container">
+                    <img src="" alt="Dish" class="modal-img" id="modal-img">
+                </div>
+            </div>
+
+            <div class="modal-details">
+                <h2 class="modal-title" id="modal-title">Title</h2>
+                <span class="modal-price" id="modal-price">₹0</span>
+                <p class="modal-description" id="modal-desc">Description</p>
+
+                <div class="modal-ingredients">
+                    <h4>Ingredients</h4>
+                    <div class="ingredients-list" id="modal-ingredients">
+                        <!-- Tags injected by JS -->
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <div class="qty-control-lg">
+                        <button class="qty-btn-lg" id="modal-minus">-</button>
+                        <span class="qty-val-lg" id="modal-qty">1</span>
+                        <button class="qty-btn-lg" id="modal-plus">+</button>
+                    </div>
+                    <button class="btn-add-plate" id="modal-add-btn">Add to Plate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Cart Toggle -->
+    <button class="cart-toggle" id="cart-toggle">
+        🛒
+        <span class="cart-count" id="cart-count">0</span>
+    </button>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3>Your Order</h3>
+            <button class="btn-close-cart" id="close-cart">&times;</button>
+        </div>
+
+        <div class="order-type-switch">
+            <div class="switch-option active" data-type="dine-in">Dine In</div>
+            <div class="switch-option" data-type="takeaway">Takeaway</div>
+        </div>
+
+        <div class="cart-items" id="cart-items">
+            <!-- Items injected by JS -->
+            <div class="cart-empty-state">
+                <p>Your plate is empty! <br> Add some delicious tiffins.</p>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div class="bill-row">
+                <span>Subtotal</span>
+                <span id="bill-subtotal">₹0</span>
+            </div>
+            <div class="bill-row">
+                <span>GST (5%)</span>
+                <span id="bill-tax">₹0</span>
+            </div>
+            <div class="bill-row" id="packing-row" style="display: none;">
+                <span>Packing Charges</span>
+                <span id="bill-packing">₹0</span>
+            </div>
+            <div class="bill-total">
+                <span>Total</span>
+                <span id="bill-total">₹0</span>
+            </div>
+            <button class="btn-checkout">Place Order</button>
+        </div>
+        <!-- Receipt Modal -->
+        <div class="receipt-overlay" id="receipt-modal">
+            <div class="receipt-paper">
+                <div class="receipt-header">
+                    <span class="receipt-logo">DOSA HOUSE</span>
+                    <div class="receipt-info">
+                        <p>Railway Station Road, Bhimavaram</p>
+                        <p>Pin: 534201</p>
+                        <p>Ph: 9392421941</p>
+                        <p>Date: <span id="receipt-date"></span></p>
+                        <p>Token: #<span id="receipt-token"></span></p>
+                        <p>Mode: <span id="receipt-mode">Dine-in</span></p>
+                    </div>
+                </div>
+
+                <div class="receipt-body" id="receipt-body">
+                    <!-- Items injected here -->
+                </div>
+
+                <div class="receipt-summary">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="receipt-subtotal">₹0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>GST (5%)</span>
+                        <span id="receipt-tax">₹0</span>
+                    </div>
+                    <div class="summary-row" id="receipt-packing-row" style="display: none;">
+                        <span>Packing</span>
+                        <span id="receipt-packing">₹0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="receipt-total">₹0</span>
+                    </div>
+                </div>
+
+                <div class="receipt-footer">
+                    <p>Thank you for dining with us!</p>
+                    <p>Visit Again</p>
+                </div>
+
+                <div class="receipt-actions">
+                    <button class="btn-receipt btn-close-receipt" id="close-receipt">Close</button>
+                    <button class="btn-receipt btn-print" onclick="window.print()">Print</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="scripts/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Table | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        .booking-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-clay);
+        }
+
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--color-charcoal);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 1.2rem;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--color-saffron);
+            outline: none;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--color-saffron), var(--color-turmeric));
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 153, 51, 0.4);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 50C10 25 30 10 50 10C70 10 90 25 90 50C90 75 70 90 50 90C30 90 10 75 10 50Z"
+                        fill="#F57F17" />
+                    <path d="M20 50C20 30 50 30 50 30C50 30 80 30 80 50C80 70 50 80 50 80C50 80 20 70 20 50Z"
+                        fill="#FFF8E1" />
+                    <path d="M50 80C50 80 30 60 50 40C70 60 50 80 50 80Z" fill="#2E7D32" />
+                </svg>
+                <span style="color:var(--color-text-primary); margin-left:10px;">DOSA HOUSE</span>
+            </a>
+            <div style="display: flex; gap: 2rem;">
+                <a href="menu.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">MENU</a>
+                <a href="booking.html"
+                    style="font-weight: 700; color: var(--color-sambar); text-decoration: none; font-size: 1.1rem;">BOOK
+                    TABLE</a>
+                <a href="orders.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
+                <a href="about.html"
+                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="page-header"
+        style="background: var(--color-banana-leaf); color: white; padding: 4rem 0 2rem; padding-top: 140px; text-align: center;">
+        <div class="container">
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem;">Reserve Your
+                Spot</h1>
+            <p>Skip the wait. Book a table for your family.</p>
+        </div>
+    </header>
+
+    <!-- Booking Content -->
+    <div class="booking-container">
+        <form id="booking-form" class="booking-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="e.g. Rahul Verma" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" placeholder="+91 93924..." required>
+            </div>
+
+            <div class="form-group">
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="time">Time</label>
+                        <input type="time" id="time" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="guests">Number of Guests</label>
+                <select id="guests" required>
+                    <option value="2">2 People</option>
+                    <option value="3">3 People</option>
+                    <option value="4">4 People</option>
+                    <option value="5">5 People</option>
+                    <option value="6">6 People</option>
+                    <option value="8">8+ People</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-confirm">Confirm Booking</button>
+        </form>
+
+        <div id="booking-success" class="success-message">
+            <h3>🎉 Booking Confirmed!</h3>
+            <p>Your table has been reserved. We'll see you soon!</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Redirecting to orders...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>DOSA HOUSE</h3>
+                    <p>Authentic South Indian vegetarian cuisine made with love and tradition.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="booking.html">Book Table</a></li>
+                        <li><a href="orders.html">Orders</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="about.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Visit Us</h4>
+                    <p>Railway Station Road</p>
+                    <p>Bhimavaram, 534201</p>
+                    <p>+91 9392421941</p>
+                    <p>mohanabhishek098@gmail.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2024 Dosa House. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="scripts/booking.js"></script>
+</body>
+
+</html>
