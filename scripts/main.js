@@ -123,6 +123,20 @@ const billTax = document.getElementById('bill-tax');
 const billTotal = document.getElementById('bill-total');
 const orderTypeBtns = document.querySelectorAll('.switch-option');
 
+// Receipt Modal Elements (Added)
+const receiptModal = document.getElementById('receipt-modal');
+const closeReceiptBtn = document.getElementById('close-receipt');
+// Receipt Modal Elements (Safe Selection)
+const receiptDate = document.getElementById('receipt-date');
+const receiptToken = document.getElementById('receipt-token');
+const receiptMode = document.getElementById('receipt-mode');
+const receiptBody = document.getElementById('receipt-body');
+const receiptSubtotal = document.getElementById('receipt-subtotal');
+const receiptTax = document.getElementById('receipt-tax');
+const receiptTotal = document.getElementById('receipt-total');
+const receiptPackingRow = document.getElementById('receipt-packing-row');
+const receiptPacking = document.getElementById('receipt-packing');
+
 // --- Functions ---
 
 function getSteamEffect() {
@@ -258,21 +272,8 @@ function updateCartUI() {
 
 // --- Checkout Logic ---
 
-let isTakeaway = false;
 const PACKING_COST_PER_ITEM = 5;
-
-// Receipt Elements
-const receiptModal = document.getElementById('receipt-modal');
-const closeReceiptBtn = document.getElementById('close-receipt');
-const receiptBody = document.getElementById('receipt-body');
-const receiptDate = document.getElementById('receipt-date');
-const receiptToken = document.getElementById('receipt-token');
-const receiptMode = document.getElementById('receipt-mode');
-const receiptSubtotal = document.getElementById('receipt-subtotal');
-const receiptTax = document.getElementById('receipt-tax');
-const receiptPackingRow = document.getElementById('receipt-packing-row');
-const receiptPacking = document.getElementById('receipt-packing');
-const receiptTotal = document.getElementById('receipt-total');
+let isTakeaway = false;
 
 function calculateBill() {
     let subtotal = 0;
@@ -280,23 +281,27 @@ function calculateBill() {
 
     cart.forEach(cartItem => {
         const product = menuItems.find(i => i.id === cartItem.itemId);
-        subtotal += product.price * cartItem.quantity;
-        totalQty += cartItem.quantity;
+        if (product) {
+            subtotal += product.price * cartItem.quantity;
+            totalQty += cartItem.quantity;
+        }
     });
 
     const tax = Math.round(subtotal * 0.05); // 5% GST
 
     // Packing Logic
     let packingCharge = 0;
-    const packingRow = document.getElementById('receipt-packing-row');
-    const packingEl = document.getElementById('receipt-packing');
+    // Sidebar Elements (DOM might be null on other pages)
+    const sidebarPackingRow = document.getElementById('packing-row');
+    const sidebarPackingEl = document.getElementById('bill-packing');
 
     if (isTakeaway) {
         packingCharge = totalQty * PACKING_COST_PER_ITEM;
-        if (packingRow) packingRow.style.display = 'flex';
-        if (packingEl) packingEl.textContent = `₹${packingCharge}`;
+        if (sidebarPackingRow) sidebarPackingRow.style.display = 'flex';
+        if (sidebarPackingEl) sidebarPackingEl.textContent = `₹${packingCharge}`;
     } else {
-        if (packingRow) packingRow.style.display = 'none';
+        if (sidebarPackingRow) sidebarPackingRow.style.display = 'none';
+        packingCharge = 0;
     }
 
     const total = subtotal + tax + packingCharge;

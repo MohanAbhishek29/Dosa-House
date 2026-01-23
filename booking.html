@@ -11,6 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="styles/booking.css">
     <style>
         .booking-container {
             max-width: 600px;
@@ -159,6 +160,23 @@
                     <option value="6">6 People</option>
                     <option value="8">8+ People</option>
                 </select>
+            </div>
+
+            <!-- Table Map Section -->
+            <div class="table-map-container" id="table-map-container">
+                <div class="table-map-header">
+                    <h3>Select Your Table</h3>
+                    <div class="table-legend">
+                        <div class="legend-item"><span class="legend-color legend-available"></span> Available</div>
+                        <div class="legend-item"><span class="legend-color legend-booked"></span> Booked</div>
+                        <div class="legend-item"><span class="legend-color legend-selected"></span> Selected</div>
+                    </div>
+                </div>
+                <div class="table-grid" id="table-grid">
+                    <!-- Tables injected via JS -->
+                </div>
+                <!-- Hidden Input to store selection -->
+                <input type="hidden" id="selected-table-id" required>
             </div>
 
             <button type="submit" class="btn-confirm">Confirm Booking</button>

@@ -131,24 +131,66 @@
 }
 
 @media print {
-    body * {
-        visibility: hidden;
+
+    /* 1. Hide everything at full body level */
+    body>* {
+        display: none !important;
     }
 
-    .receipt-paper,
-    .receipt-paper * {
-        visibility: visible;
-    }
-
-    .receipt-paper {
+    /* 2. BUT show the sidebar wrapper (because receipt is inside it) */
+    .cart-sidebar {
+        display: block !important;
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* 3. Hide all Sidebar children (header, items, footer, etc.) */
+    .cart-sidebar>* {
+        display: none !important;
+    }
+
+    /* 4. EXCEPT the receipt modal overlay */
+    .receipt-overlay {
+        display: flex !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: none !important;
+        z-index: 9999;
+    }
+
+    /* 5. Ensure Receipt Paper is visible */
+    .receipt-paper,
+    .receipt-paper * {
+        display: block !important;
+        visibility: visible !important;
+        color: #000;
+    }
+
+    .receipt-paper {
+        width: 100%;
+        max-width: 100%;
         box-shadow: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: none !important;
+    }
+
+    /* Restore Flex layouts for receipt internals */
+    .receipt-item,
+    .summary-row {
+        display: flex !important;
+        justify-content: space-between;
     }
 
     .receipt-actions {
-        display: none;
+        display: none !important;
     }
 }
