@@ -150,31 +150,61 @@ function getSteamEffect() {
 }
 
 
-function getMotionEmoji(item) {
-    // Determine Emoji based on title/category
+function getDishMeta(item) {
     const title = item.title.toLowerCase();
+    const cat = item.category;
 
-    if (title.includes('masala') || title.includes('chilli') || title.includes('spicy') || title.includes('555')) return '🥵'; // Hot/Spicy
-    if (title.includes('sweet') || title.includes('mysore pak') || title.includes('payasam') || title.includes('badam')) return '🤤'; // Drooling/Sweet
-    if (title.includes('coffee') || title.includes('tea')) return '😵'; // Buzz/Strong
-    if (title.includes('ghee') || title.includes('butter') || title.includes('paneer')) return '😋'; // Yummy/Rich
+    let emoji = '😋';
+    let tags = ['Veg']; // Base tag
 
-    return '😋'; // Default tasty
+    // --- Emoji Logic ---
+    if (title.includes('masala') || title.includes('karam') || title.includes('chilli') || title.includes('spicy') || title.includes('555')) emoji = '🥵'; // Spicy
+    else if (title.includes('sweet') || title.includes('mysore pak') || title.includes('payasam') || title.includes('kesari') || title.includes('badam')) emoji = '🤤'; // Sweet
+    else if (title.includes('coffee') || title.includes('tea')) emoji = '😵'; // Caffeine
+    else if (title.includes('ghee') || title.includes('butter') || title.includes('paneer') || title.includes('cashew')) emoji = '😋'; // Rich
+    else if (cat === 'dosas') emoji = '🥞';
+    else if (cat === 'idli_vada') {
+        if (title.includes('vada')) emoji = '🍩';
+        else emoji = '🍥';
+    }
+    else if (cat === 'rice_specials' || cat === 'upma_bath') emoji = '🍚';
+    else if (cat === 'bonda_bajji') emoji = '🥣';
+    else if (cat === 'beverages') emoji = '🥤';
+
+    // --- Tags Logic ---
+    if (title.includes('ghee') || title.includes('butter') || title.includes('roast') || title.includes('fry')) tags.push('Rich');
+    if (title.includes('masala') || title.includes('spicy') || title.includes('karam') || title.includes('podi') || title.includes('mirchi')) tags.push('Spicy');
+    if (title.includes('sweet') || title.includes('kesari') || title.includes('payasam') || title.includes('sugar')) tags.push('Sweet');
+
+    // Texture/Category Tags
+    if (cat === 'dosas') {
+        if (title.includes('roast') || title.includes('paper')) tags.push('Crispy');
+        else tags.push('Classic');
+    }
+    if (title.includes('idli') && !title.includes('fry')) tags.push('Steamed');
+    if (title.includes('vada') || title.includes('bonda') || title.includes('bajji')) tags.push('Crispy');
+    if (title.includes('rice') || title.includes('bath')) tags.push('Heavy');
+    if (title.includes('coffee') || title.includes('tea')) tags.push('Hot');
+    if (title.includes('juice') || title.includes('lassi') || title.includes('milk')) tags.push('Chilled');
+
+    // Dedupe and Slice
+    tags = [...new Set(tags)].slice(0, 3);
+
+    return { emoji, tags };
 }
 
-// function renderMenu(items) {
 function renderMenu(items) {
     if (!menuGrid) return;
 
     // Staggered Animation Delay Logic
     menuGrid.innerHTML = items.map((item, index) => {
         const delay = (index % 10) * 0.1; // Stagger first 10 items
-        const emoji = getMotionEmoji(item);
+        const meta = getDishMeta(item);
 
         return `
         <article class="menu-card" data-id="${item.id}" onclick="openModal('${item.id}')" style="animation-delay: ${delay}s">
             ${getSteamEffect()}
-            <div class="motion-emoji">${emoji}</div>
+            <div class="motion-emoji">${meta.emoji}</div>
             
             <div class="card-image-container">
                 <img src="${item.image}" alt="${item.title}" class="card-image ${item.customClass || ''}">
@@ -183,9 +213,7 @@ function renderMenu(items) {
                 <div class="card-overlay">
                     <div class="overlay-title">Taste Profile</div>
                     <div class="overlay-tags">
-                        <span class="tag-badge">Fresh</span>
-                        <span class="tag-badge">Vegetarian</span>
-                        <span class="tag-badge">Hot</span>
+                        ${meta.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}
                     </div>
                 </div>
             </div>
