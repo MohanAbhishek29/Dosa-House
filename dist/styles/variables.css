@@ -1,0 +1,45 @@
+:root {
+    /* Colors - Authentic South Indian Palette */
+    --color-bg-primary: #fdfbf7;
+    /* Rice/Dosa batter white off-white */
+    --color-bg-secondary: #fff8e1;
+    /* Warm creamy tone */
+    --color-bg-accent: #3e2723;
+    /* Clay pot brown */
+
+    --color-text-primary: #2c1810;
+    /* Dark Coffee brown */
+    --color-text-secondary: #5d4037;
+    /* Lighter brown */
+    --color-text-muted: #8d6e63;
+
+    --color-green-leaf: #2e7d32;
+    /* Banana Leaf Green */
+    --color-saffron: #f57f17;
+    /* Saffron/Chutney orange */
+    --color-sambar: #d84315;
+    /* Sambar Red/Orange */
+    --color-turmeric: #ffb300;
+    /* Turmeric Yellow */
+    --color-banana-leaf: #2e7d32;
+    /* Banana Leaf Green (Alias) */
+
+    --color-border: #d7ccc8;
+
+    /* Typography */
+    --font-heading: 'Kalam', cursive;
+    /* Handwritten feel */
+    --font-body: 'Outfit', sans-serif;
+
+    /* Spacing */
+    --container-padding: 2rem;
+    --header-height: 90px;
+
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Shadows & Effects */
+    --shadow-soft: 0 10px 30px -10px rgba(62, 39, 35, 0.15);
+    --shadow-clay: 0 4px 15px rgba(62, 39, 35, 0.1);
+}

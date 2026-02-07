@@ -1,0 +1,333 @@
+/* Receipt Modal Overlay */
+.receipt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.receipt-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Animation Keyframes */
+@keyframes printReceipt {
+    0% {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Receipt Paper */
+.receipt-paper {
+    background: #fff8e1;
+    /* Warm Cream Paper */
+    /* Subtle paper texture using repeating gradient */
+    background-image: repeating-linear-gradient(0deg,
+            rgba(255, 255, 255, 0.4) 0px,
+            rgba(255, 255, 255, 0.4) 1px,
+            transparent 1px,
+            transparent 2px);
+    width: 340px;
+    /* Remove padding from here to let scrollbar sit nicely or manage it in inner */
+    padding: 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    font-family: 'Courier New', Courier, monospace;
+    color: #4e342e;
+    /* Dark Brown Text */
+    position: relative;
+    max-height: 85vh;
+    border-radius: 0 0 5px 5px;
+    overflow: visible;
+    /* CRITICAL: visible for standard view to show ::after tear */
+
+    /* Animation */
+    animation: printReceipt 0.6s ease-out forwards;
+}
+
+.receipt-scroll-content {
+    max-height: 85vh;
+    /* Match paper max-height */
+    overflow-y: auto;
+    /* Scroll inside */
+    padding: 2.5rem 2rem 2rem;
+    /* Content padding */
+
+    /* Scrollbar Styling */
+    scrollbar-width: thin;
+    scrollbar-color: #8d6e63 transparent;
+}
+
+.receipt-overlay.active .receipt-paper {
+    /* Animation handles the movement, but we ensure it stays put */
+    transform: none;
+}
+
+/* Receipt Header */
+.receipt-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px dashed #8d6e63;
+    padding-bottom: 1rem;
+    position: relative;
+}
+
+/* Rubber Stamp Styling (SVG) */
+.receipt-stamp-container {
+    position: absolute;
+    bottom: -3.5rem;
+    /* Move completely below the text */
+    right: -2rem;
+    /* Move partially off the paper edge */
+    width: 140px;
+    /* Slightly larger for dramatic effect */
+    height: 140px;
+    transform: rotate(-25deg);
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.5;
+    /* Very transparent */
+    mix-blend-mode: multiply;
+}
+
+.stamp-svg {
+    width: 100%;
+    height: 100%;
+    color: #d32f2f;
+    /* Red Ink */
+    overflow: visible;
+}
+
+.stamp-text-curve {
+    font-family: var(--font-heading);
+    /* Kalam */
+    font-size: 11px;
+    font-weight: 700;
+    fill: currentColor;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stamp-text-center {
+    font-family: var(--font-body);
+    /* Outfit */
+    font-size: 24px;
+    font-weight: 900;
+    fill: currentColor;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+
+/* Decorative top border */
+.receipt-paper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: repeating-linear-gradient(45deg,
+            var(--color-saffron) 0,
+            var(--color-saffron) 10px,
+            var(--color-green-leaf) 10px,
+            var(--color-green-leaf) 20px);
+}
+
+/* Zigzag bottom edge */
+.receipt-paper::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background:
+        linear-gradient(45deg, transparent 33.333%, #fff8e1 33.333%, #fff8e1 66.667%, transparent 66.667%),
+        linear-gradient(-45deg, transparent 33.333%, #fff8e1 33.333%, #fff8e1 66.667%, transparent 66.667%);
+    background-size: 20px 20px;
+    background-position: 0 0;
+}
+
+.receipt-logo {
+    font-family: var(--font-heading);
+    /* Brand font (Kalam) */
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: var(--color-sambar);
+    margin-bottom: 0.5rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+    /* Above stamp */
+}
+
+.receipt-info {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+}
+
+/* Receipt Items */
+.receipt-body {
+    margin-bottom: 1.5rem;
+}
+
+.receipt-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.receipt-item span:first-child {
+    flex: 1;
+}
+
+/* Receipt Summary */
+.receipt-summary {
+    border-top: 2px dashed #8d6e63;
+    /* Matching dashed line */
+    padding-top: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    /* Anchor for the absolute stamp */
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.summary-row.total {
+    font-weight: 900;
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #4e342e;
+    padding-top: 0.5rem;
+    position: relative;
+    /* Create stacking context */
+    z-index: 20;
+    /* Ensure Total is ALWAYS above the stamp for readability */
+}
+
+/* Receipt Footer */
+.receipt-footer {
+    text-align: center;
+    font-size: 1.1rem;
+    /* Slightly larger for handwriting */
+    margin-top: 1.5rem;
+    font-family: 'Kalam', cursive;
+    /* Handwritten Style */
+    color: var(--color-text-muted);
+}
+
+.receipt-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-receipt {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.btn-print {
+    background: #333;
+    color: white;
+}
+
+.btn-close-receipt {
+    background: #e0e0e0;
+    color: #333;
+}
+
+@media print {
+
+    /* 1. Hide everything at full body level */
+    body>* {
+        display: none !important;
+    }
+
+    /* 2. BUT show the sidebar wrapper (because receipt is inside it) */
+    .cart-sidebar {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* 3. Hide all Sidebar children (header, items, footer, etc.) */
+    .cart-sidebar>* {
+        display: none !important;
+    }
+
+    /* 4. EXCEPT the receipt modal overlay */
+    .receipt-overlay {
+        display: flex !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: none !important;
+        z-index: 9999;
+    }
+
+    /* 5. Ensure Receipt Paper is visible */
+    .receipt-paper,
+    .receipt-paper * {
+        display: block !important;
+        visibility: visible !important;
+        color: #000;
+    }
+
+    .receipt-paper {
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: none !important;
+    }
+
+    /* Restore Flex layouts for receipt internals */
+    .receipt-item,
+    .summary-row {
+        display: flex !important;
+        justify-content: space-between;
+    }
+
+    .receipt-actions {
+        display: none !important;
+    }
+}

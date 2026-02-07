@@ -1,0 +1,344 @@
+/* Table Booking Styles */
+.booking-container {
+    max-width: 800px;
+    /* Wider for map */
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-clay);
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--color-charcoal);
+}
+
+.form-group input,
+.form-group select {
+    padding: 1.2rem;
+    border: 2px solid #eee;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--color-saffron);
+    outline: none;
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, var(--color-saffron), var(--color-turmeric));
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 1rem;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 153, 51, 0.4);
+}
+
+.success-message {
+    display: none;
+    text-align: center;
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+/* --- Visual Floor Plan --- */
+.table-map-container {
+    background: #fdf5e6;
+    /* Light warm floor color */
+    border: 4px solid #8d6e63;
+    border-radius: 15px;
+    padding: 2rem;
+    position: relative;
+    margin-top: 2rem;
+    overflow: hidden;
+    /* Contains absolute zones */
+}
+
+/* Zones Text */
+.floor-zone {
+    position: absolute;
+    font-family: var(--font-heading);
+    color: rgba(141, 110, 99, 0.25);
+    text-transform: uppercase;
+    font-weight: 700;
+    pointer-events: none;
+    letter-spacing: 2px;
+    z-index: 1;
+}
+
+.zone-kitchen {
+    top: 1rem;
+    right: 2rem;
+    font-size: 1.5rem;
+}
+
+.zone-entrance {
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.5;
+}
+
+/* Simpler rotation and positioning */
+.zone-window {
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    color: rgba(141, 110, 99, 0.5);
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* Header & Legend */
+.table-map-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.table-map-header h3 {
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.table-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-available {
+    background: white;
+    border-color: #ddd;
+}
+
+.legend-booked {
+    background: #ffebee;
+    border-color: #ef9a9a;
+}
+
+.legend-selected {
+    background: var(--color-saffron);
+    border-color: var(--color-saffron);
+}
+
+/* Floor Grid */
+.restaurant-floor {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1fr;
+    /* Window | Center | Quiet */
+    gap: 1rem;
+    min-height: 450px;
+    position: relative;
+    z-index: 2;
+    padding: 1rem;
+    padding-left: 3.5rem;
+    /* Make space for 'Window View' label */
+}
+
+.floor-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Table Slots */
+.table-slot {
+    position: relative;
+    background: white;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    color: var(--color-charcoal);
+    font-weight: 600;
+}
+
+.table-slot:hover {
+    border-color: var(--color-saffron);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px rgba(255, 153, 51, 0.2);
+}
+
+.table-slot.selected {
+    background: var(--color-saffron);
+    color: white;
+    border-color: var(--color-saffron);
+    box-shadow: 0 0 0 4px rgba(255, 153, 51, 0.2);
+    /* Glow ring */
+}
+
+.table-slot.selected small {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.table-slot.booked {
+    background: #ffebee;
+    color: #ef5350;
+    border-color: #ef9a9a;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+/* Shapes */
+.table-round {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+}
+
+.table-rect-4 {
+    width: 110px;
+    height: 70px;
+    border-radius: 8px;
+}
+
+.table-rect-6 {
+    width: 140px;
+    height: 80px;
+    border-radius: 12px;
+}
+
+/* Chairs (Pseudo-elements) */
+.table-slot::before,
+.table-slot::after {
+    content: '';
+    position: absolute;
+    background: #8d6e63;
+    opacity: 0.4;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.table-slot.selected::before,
+.table-slot.selected::after {
+    background: var(--color-saffron);
+    opacity: 0.6;
+}
+
+/* Round Chairs (Top/Bottom) */
+.table-round::before {
+    width: 40px;
+    height: 12px;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.table-round::after {
+    width: 40px;
+    height: 12px;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Rect Chairs (Left/Right) */
+.table-rect-4::before {
+    width: 12px;
+    height: 40px;
+    top: 50%;
+    left: -18px;
+    transform: translateY(-50%);
+}
+
+.table-rect-4::after {
+    width: 12px;
+    height: 40px;
+    top: 50%;
+    right: -18px;
+    transform: translateY(-50%);
+}
+
+/* Rect-6 Chairs (Top/Bottom Wide) */
+.table-rect-6::before {
+    width: 80px;
+    height: 12px;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.table-rect-6::after {
+    width: 80px;
+    height: 12px;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Styles for Validation */
+.table-map-container.error {
+    animation: shake 0.4s ease-in-out;
+    border-color: #ef5350;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}

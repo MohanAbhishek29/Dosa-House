@@ -1,0 +1,273 @@
+/* Menu Section */
+.menu-section {
+    padding: 5rem 0;
+    background-color: var(--color-bg-primary);
+    background-image: radial-gradient(var(--color-bg-secondary) 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100vh;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 3.5rem;
+    font-family: var(--font-heading);
+    margin-bottom: 3rem;
+    color: var(--color-text-primary);
+}
+
+.section-title span {
+    color: var(--color-saffron);
+}
+
+/* Categories */
+.menu-categories {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 0.8rem 2.5rem;
+    border: 2px solid var(--color-border);
+    border-radius: 50px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-clay);
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background: var(--color-green-leaf);
+    color: white;
+    border-color: var(--color-green-leaf);
+    transform: translateY(-3px);
+}
+
+/* Menu Grid */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
+    padding: 1rem;
+}
+
+@keyframes fadeInUpItem {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menu-card {
+    background: white;
+    border-radius: 16px;
+    overflow: visible;
+    /* Changed for steam effect */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    box-shadow: var(--shadow-soft);
+    border: 2px solid transparent;
+    cursor: pointer;
+
+    /* Animation defaults */
+    animation: fadeInUpItem 0.6s ease backwards;
+    overflow: hidden;
+    /* Ensure overlay stays inside */
+}
+
+.menu-card:hover {
+    transform: translateY(-15px) scale(1.05);
+    /* Stronger lift and zoom */
+    border-color: var(--color-saffron);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    /* Deep shadow */
+    z-index: 10;
+}
+
+.card-image-container {
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 14px 14px 0 0;
+}
+
+.card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Shows full image */
+    background: #fff;
+    /* Fills empty space if aspect ratio differs */
+    padding: 5px;
+    /* Slight breathing room */
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.menu-card:hover .card-image {
+    transform: scale(1.15) translateY(-10px);
+    /* Zoom and shift up slightly */
+}
+
+/* --- Reveal Overlay --- */
+.card-overlay {
+    position: absolute;
+    bottom: -100%;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(5px);
+    padding: 1rem;
+    transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 5;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.menu-card:hover .card-overlay {
+    bottom: 0;
+}
+
+.overlay-title {
+    font-weight: 700;
+    color: var(--color-saffron);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overlay-tags {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tag-badge {
+    background: white;
+    border: 1px solid var(--color-border);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+}
+
+/* --- 3D Motion Emojis --- */
+.motion-emoji {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2.5rem;
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+    transition: opacity 0.3s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 20;
+    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
+    /* 3D Shadow */
+    pointer-events: none;
+}
+
+.menu-card:hover .motion-emoji {
+    opacity: 1;
+    transform: scale(1.2) rotate(0deg);
+    animation: float3D 2s ease-in-out infinite alternate;
+}
+
+@keyframes float3D {
+    0% {
+        transform: scale(1.2) translateY(0) rotate(0deg);
+    }
+
+    100% {
+        transform: scale(1.3) translateY(-10px) rotate(5deg);
+    }
+}
+
+.category-btn:hover {
+    /* Existing style maintained */
+    background: var(--color-green-leaf);
+    color: white;
+    border-color: var(--color-green-leaf);
+    transform: translateY(-3px);
+}
+
+.card-content {
+    padding: 1.5rem;
+    transition: transform 0.4s ease;
+}
+
+.menu-card:hover .card-content {
+    transform: translateY(-5px);
+    /* Make room for overlay content visual */
+}
+
+/* Keep existing footer/buttons */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.card-price {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-sambar);
+    font-size: 1.2rem;
+}
+
+.card-description {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-primary);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    z-index: 10;
+    /* Above overlay */
+    position: relative;
+}
+
+.add-btn:hover {
+    background: var(--color-sambar);
+    color: white;
+    border-color: var(--color-sambar);
+    transform: rotate(90deg);
+}
