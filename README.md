@@ -24,15 +24,6 @@ Welcome to **Dosa House**, a premium web experience bringing the taste of tradit
 -   **"Steaming Hot" Effects**: Hover over menu cards to see realistic steam animations.
 -   **Zoom Interactions**: Smooth transitions and hover effects for a premium feel.
 
-## 🚀 How to Deploy (Netlify)
-
-This project is optimized for static hosting.
-
-1.  Locate the **`dist`** folder in this project directory.
-2.  Go to [Netlify Drop](https://app.netlify.com/drop).
-3.  **Drag and drop the `dist` folder** onto the page.
-4.  Your site will be live in seconds! 🟢
-
 ## 📂 Project Structure
 
 -   `index.html` - Home Page (Hero, Reviews, CTA)
