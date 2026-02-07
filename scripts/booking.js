@@ -11,12 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeInput = document.getElementById('time');
     const tableMapContainer = document.getElementById('table-map-container');
 
-    // Configuration: 10 Tables
-    const tables = Array.from({ length: 10 }, (_, i) => ({
-        id: `T${i + 1}`,
-        label: `Table ${i + 1}`,
-        seats: i < 4 ? 2 : (i < 8 ? 4 : 6) // T1-T4: 2 seats, T5-T8: 4 seats, T9-T10: 6 seats
-    }));
+    // Configuration: 10 Tables with Zones and Shapes
+    const tables = [
+        // Window Seats (Left Col) - Round, 2 Seater
+        { id: 'T1', label: '1', seats: 2, type: 'round', zone: 'window' },
+        { id: 'T2', label: '2', seats: 2, type: 'round', zone: 'window' },
+        { id: 'T3', label: '3', seats: 2, type: 'round', zone: 'window' },
+
+        // Center Family Tables (Middle Col) - Rect, 4 Seater
+        { id: 'T4', label: '4', seats: 4, type: 'rect-4', zone: 'center' },
+        { id: 'T5', label: '5', seats: 4, type: 'rect-4', zone: 'center' },
+        { id: 'T6', label: '6', seats: 4, type: 'rect-4', zone: 'center' },
+        { id: 'T7', label: '7', seats: 6, type: 'rect-6', zone: 'center' }, // Large family
+
+        // Quiet Corner (Right Col) - Rect, 4 Seater
+        { id: 'T8', label: '8', seats: 4, type: 'rect-4', zone: 'quiet' },
+        { id: 'T9', label: '9', seats: 4, type: 'rect-4', zone: 'quiet' },
+        { id: 'T10', label: '10', seats: 2, type: 'round', zone: 'quiet' },
+    ];
 
     if (bookingForm) {
         // Set Default Date
@@ -91,18 +103,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const bookedTables = getBookedTables(selectedDate, selectedTime);
         const currentSelection = selectedTableInput.value;
 
-        // Clear Grid
-        tableGrid.innerHTML = '';
+        // Reset Grid layout helpers
+        tableGrid.innerHTML = `
+            <div class="floor-col" id="col-window"></div>
+            <div class="floor-col" id="col-center"></div>
+            <div class="floor-col" id="col-quiet"></div>
+        `;
+
+        const colWindow = document.getElementById('col-window');
+        const colCenter = document.getElementById('col-center');
+        const colQuiet = document.getElementById('col-quiet');
 
         tables.forEach(table => {
             const isBooked = bookedTables.includes(table.id);
             const isSelected = table.id === currentSelection;
 
             const el = document.createElement('div');
-            el.className = `table-slot ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''}`;
+            // Add shape class: table-round, table-rect-4, etc.
+            el.className = `table-slot table-${table.type} ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''}`;
+            el.title = `Table ${table.label} (${table.seats} Seats)`;
             el.innerHTML = `
-                <span>${table.id}</span>
-                <small>${table.seats} Seats</small>
+                <span>${table.label}</span>
+                <small style="font-size:0.7rem">${table.seats}</small>
             `;
 
             if (!isBooked) {
@@ -115,7 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
-            tableGrid.appendChild(el);
+            // Distribute to columns based on zone
+            if (table.zone === 'window') colWindow.appendChild(el);
+            else if (table.zone === 'center') colCenter.appendChild(el);
+            else colQuiet.appendChild(el);
         });
     }
 

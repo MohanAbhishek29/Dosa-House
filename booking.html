@@ -13,77 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="styles/booking.css">
     <link rel="stylesheet" href="styles/music.css">
-    <style>
-        .booking-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: var(--shadow-clay);
-        }
 
-        .booking-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--color-charcoal);
-        }
-
-        .form-group input,
-        .form-group select {
-            padding: 1.2rem;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 1rem;
-            line-height: 1.5;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--color-saffron);
-            outline: none;
-        }
-
-        .btn-confirm {
-            background: linear-gradient(135deg, var(--color-saffron), var(--color-turmeric));
-            color: white;
-            padding: 1rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 153, 51, 0.4);
-        }
-
-        .success-message {
-            display: none;
-            text-align: center;
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-top: 1rem;
-        }
-    </style>
 </head>
 
 <body>
@@ -165,6 +95,11 @@
 
             <!-- Table Map Section -->
             <div class="table-map-container" id="table-map-container">
+                <!-- Zones Text -->
+                <div class="floor-zone zone-kitchen">Kitchen ♨️</div>
+                <div class="floor-zone zone-window">Window View 🪟</div>
+                <div class="floor-zone zone-entrance">Entrance 🚪</div>
+
                 <div class="table-map-header">
                     <h3>Select Your Table</h3>
                     <div class="table-legend">
@@ -173,8 +108,9 @@
                         <div class="legend-item"><span class="legend-color legend-selected"></span> Selected</div>
                     </div>
                 </div>
-                <div class="table-grid" id="table-grid">
-                    <!-- Tables injected via JS -->
+
+                <div class="restaurant-floor" id="table-grid">
+                    <!-- Tables injected via JS into 3 columns -->
                 </div>
                 <!-- Hidden Input to store selection -->
                 <input type="hidden" id="selected-table-id" required>
@@ -206,6 +142,7 @@
                         <li><a href="booking.html">Book Table</a></li>
                         <li><a href="orders.html">Orders</a></li>
                         <li><a href="about.html">About Us</a></li>
+                        <li><a href="kitchen.html" target="_blank">Kitchen Display</a></li>
                         <li><a href="about.html#contact">Contact</a></li>
                     </ul>
                 </div>

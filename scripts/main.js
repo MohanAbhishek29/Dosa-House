@@ -149,18 +149,47 @@ function getSteamEffect() {
     `;
 }
 
+
+function getMotionEmoji(item) {
+    // Determine Emoji based on title/category
+    const title = item.title.toLowerCase();
+
+    if (title.includes('masala') || title.includes('chilli') || title.includes('spicy') || title.includes('555')) return '🥵'; // Hot/Spicy
+    if (title.includes('sweet') || title.includes('mysore pak') || title.includes('payasam') || title.includes('badam')) return '🤤'; // Drooling/Sweet
+    if (title.includes('coffee') || title.includes('tea')) return '😵'; // Buzz/Strong
+    if (title.includes('ghee') || title.includes('butter') || title.includes('paneer')) return '😋'; // Yummy/Rich
+
+    return '😋'; // Default tasty
+}
+
+// function renderMenu(items) {
 function renderMenu(items) {
     if (!menuGrid) return;
 
     // Staggered Animation Delay Logic
     menuGrid.innerHTML = items.map((item, index) => {
         const delay = (index % 10) * 0.1; // Stagger first 10 items
+        const emoji = getMotionEmoji(item);
+
         return `
         <article class="menu-card" data-id="${item.id}" onclick="openModal('${item.id}')" style="animation-delay: ${delay}s">
             ${getSteamEffect()}
+            <div class="motion-emoji">${emoji}</div>
+            
             <div class="card-image-container">
                 <img src="${item.image}" alt="${item.title}" class="card-image ${item.customClass || ''}">
+                
+                <!-- Reveal Overlay -->
+                <div class="card-overlay">
+                    <div class="overlay-title">Taste Profile</div>
+                    <div class="overlay-tags">
+                        <span class="tag-badge">Fresh</span>
+                        <span class="tag-badge">Vegetarian</span>
+                        <span class="tag-badge">Hot</span>
+                    </div>
+                </div>
             </div>
+            
             <div class="card-content">
                 <div class="card-header">
                     <h3 class="card-title">${item.title}</h3>
@@ -244,26 +273,26 @@ function updateCartUI() {
 
     if (cart.length === 0) {
         cartItemsEl.innerHTML = `
-            <div class="cart-empty-state">
-                <p>Your plate is empty! <br> Add some delicious tiffins.</p>
-            </div>`;
+    < div class="cart-empty-state" >
+        <p>Your plate is empty! <br> Add some delicious tiffins.</p>
+            </div > `;
     } else {
         cartItemsEl.innerHTML = cart.map(cartItem => {
             const product = menuItems.find(i => i.id === cartItem.itemId);
             return `
-                <div class="cart-item">
-                    <img src="${product.image}" class="cart-item-img ${product.customClass || ''}" alt="${product.title}">
-                    <div class="cart-item-details">
-                        <div class="cart-item-title">${product.title}</div>
-                        <div class="cart-item-price">₹${product.price * cartItem.quantity}</div>
-                        <div class="cart-item-controls">
-                            <button class="qty-btn-sm" onclick="updateCartItemQty('${product.id}', -1)">-</button>
-                            <span>${cartItem.quantity}</span>
-                            <button class="qty-btn-sm" onclick="updateCartItemQty('${product.id}', 1)">+</button>
-                        </div>
-                    </div>
+    < div class="cart-item" >
+        <img src="${product.image}" class="cart-item-img ${product.customClass || ''}" alt="${product.title}">
+            <div class="cart-item-details">
+                <div class="cart-item-title">${product.title}</div>
+                <div class="cart-item-price">₹${product.price * cartItem.quantity}</div>
+                <div class="cart-item-controls">
+                    <button class="qty-btn-sm" onclick="updateCartItemQty('${product.id}', -1)">-</button>
+                    <span>${cartItem.quantity}</span>
+                    <button class="qty-btn-sm" onclick="updateCartItemQty('${product.id}', 1)">+</button>
                 </div>
-            `;
+            </div>
+        </div>
+`;
         }).join('');
     }
 
@@ -298,7 +327,7 @@ function calculateBill() {
     if (isTakeaway) {
         packingCharge = totalQty * PACKING_COST_PER_ITEM;
         if (sidebarPackingRow) sidebarPackingRow.style.display = 'flex';
-        if (sidebarPackingEl) sidebarPackingEl.textContent = `₹${packingCharge}`;
+        if (sidebarPackingEl) sidebarPackingEl.textContent = `₹${packingCharge} `;
     } else {
         if (sidebarPackingRow) sidebarPackingRow.style.display = 'none';
         packingCharge = 0;
@@ -310,9 +339,9 @@ function calculateBill() {
     const billTax = document.getElementById('bill-tax');
     const billTotal = document.getElementById('bill-total');
 
-    if (billSubtotal) billSubtotal.textContent = `₹${subtotal}`;
-    if (billTax) billTax.textContent = `₹${tax}`;
-    if (billTotal) billTotal.textContent = `₹${total}`;
+    if (billSubtotal) billSubtotal.textContent = `₹${subtotal} `;
+    if (billTax) billTax.textContent = `₹${tax} `;
+    if (billTotal) billTotal.textContent = `₹${total} `;
 
     return { subtotal, tax, packingCharge, total };
 }
@@ -325,7 +354,7 @@ function generateReceipt() {
     const now = new Date();
     const dateStr = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
     const randomPart = Math.floor(1000 + Math.random() * 9000); // Always 4 digits
-    const orderId = `#ORD-${dateStr}-${randomPart}`;
+    const orderId = `#ORD - ${dateStr} -${randomPart} `;
 
     // Header Info
     receiptDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -336,21 +365,21 @@ function generateReceipt() {
     receiptBody.innerHTML = cart.map(cartItem => {
         const product = menuItems.find(i => i.id === cartItem.itemId);
         return `
-            <div class="receipt-item">
+    < div class="receipt-item" >
                 <span>${product.title} x${cartItem.quantity}</span>
                 <span>₹${product.price * cartItem.quantity}</span>
-            </div>
-        `;
+            </div >
+    `;
     }).join('');
 
     // Summary
-    receiptSubtotal.textContent = `₹${subtotal}`;
-    receiptTax.textContent = `₹${tax}`;
-    receiptTotal.textContent = `₹${total}`;
+    receiptSubtotal.textContent = `₹${subtotal} `;
+    receiptTax.textContent = `₹${tax} `;
+    receiptTotal.textContent = `₹${total} `;
 
     if (isTakeaway) {
         receiptPackingRow.style.display = 'flex';
-        receiptPacking.textContent = `₹${packingCharge}`;
+        receiptPacking.textContent = `₹${packingCharge} `;
     } else {
         receiptPackingRow.style.display = 'none';
     }

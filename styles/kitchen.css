@@ -1,0 +1,263 @@
+/* Kitchen Display System Styles */
+
+:root {
+    --kds-bg: #1a1a1a;
+    --kds-header: #2d2d2d;
+    --kds-text: #e0e0e0;
+
+    --status-pending-bg: #fff3c4;
+    /* Pale Yellow */
+    --status-pending-border: #fbc02d;
+    --status-preparing-bg: #ffe0b2;
+    /* Pale Orange */
+    --status-preparing-border: #f57c00;
+    --status-ready-bg: #c8e6c9;
+    /* Pale Green */
+    --status-ready-border: #388e3c;
+
+    --font-mono: 'Roboto Mono', monospace;
+}
+
+body {
+    background-color: var(--kds-bg);
+    color: var(--kds-text);
+    overflow: hidden;
+    /* Prevent body scroll, grid handles it */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+.kitchen-header {
+    background: var(--kds-header);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid #444;
+    height: 80px;
+}
+
+.kitchen-brand h1 {
+    font-family: var(--font-heading);
+    color: #fff;
+    margin: 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.live-indicator {
+    color: #ff5252;
+    font-size: 0.8rem;
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.kitchen-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-box {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #aaa;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.exit-btn {
+    color: #aaa;
+    font-size: 0.9rem;
+    border: 1px solid #555;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.exit-btn:hover {
+    color: #fff;
+    border-color: #fff;
+}
+
+/* Board & Grid */
+.kitchen-board {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: var(--kds-bg);
+    /* Dark background for contrast */
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.empty-kitchen {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding-top: 5rem;
+    color: #555;
+}
+
+/* Ticket Styles */
+.ticket {
+    background: #fff;
+    color: #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    position: relative;
+    transition: transform 0.2s;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.ticket-header {
+    padding: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.1);
+}
+
+.ticket-type {
+    background: #333;
+    color: white;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ticket[data-mode="Takeaway"] .ticket-type {
+    background: #d32f2f;
+    /* Red for takeaway priority */
+}
+
+.ticket-items {
+    padding: 1rem;
+    list-style: none;
+    margin: 0;
+}
+
+.ticket-items li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1rem;
+    /* Large font for easy reading */
+}
+
+.ticket-items li:last-child {
+    border-bottom: none;
+}
+
+.ticket-actions {
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    background: #f5f5f5;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: filter 0.2s;
+}
+
+.btn-action:hover {
+    filter: brightness(0.9);
+}
+
+/* Status Variants */
+
+/* Pending */
+.ticket-pending {
+    background-color: var(--status-pending-bg);
+    border-top: 5px solid var(--status-pending-border);
+}
+
+.ticket-pending .btn-cancel {
+    background: #ef9a9a;
+    color: #c62828;
+}
+
+.ticket-pending .btn-accept {
+    background: var(--status-preparing-border);
+    /* Orange */
+    color: white;
+}
+
+/* Preparing */
+.ticket-preparing {
+    background-color: var(--status-preparing-bg);
+    border-top: 5px solid var(--status-preparing-border);
+}
+
+.ticket-preparing .btn-ready {
+    background: var(--status-ready-border);
+    /* Green */
+    color: white;
+}
+
+/* Ready */
+.ticket-ready {
+    background-color: var(--status-ready-bg);
+    border-top: 5px solid var(--status-ready-border);
+    opacity: 0.8;
+}
+
+.ticket-ready .ticket-type {
+    background: var(--status-ready-border);
+}
+
+.ticket-ready .btn-clear {
+    background: #90a4ae;
+    color: white;
+}

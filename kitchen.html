@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Display System | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css"> <!-- Base styles -->
+    <link rel="stylesheet" href="styles/kitchen.css"> <!-- KDS specific -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="kitchen-header">
+        <div class="kitchen-brand">
+            <h1>👨‍🍳 KITCHEN VIEW</h1>
+            <span class="live-indicator">● LIVE</span>
+        </div>
+        <div class="kitchen-stats">
+            <div class="stat-box">
+                <span class="stat-label">PENDING</span>
+                <span class="stat-value" id="count-pending">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">PREPARING</span>
+                <span class="stat-value" id="count-preparing">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">COMPLETED</span>
+                <span class="stat-value" id="count-completed">0</span>
+            </div>
+        </div>
+        <a href="index.html" class="exit-btn">Exit KDS</a>
+    </header>
+
+    <main class="kitchen-board">
+        <!-- Order Tickets will be injected here by JS -->
+        <div id="orders-grid" class="orders-grid">
+            <!-- Example Ticket Structure for Reference -->
+            <!-- 
+            <div class="ticket ticket-pending">
+                <div class="ticket-header">
+                    <span class="ticket-id">#ORD-1234</span>
+                    <span class="ticket-time">12:30 PM</span>
+                </div>
+                <div class="ticket-type">Dine-in</div>
+                <ul class="ticket-items">
+                    <li>2x Masala Dosa</li>
+                    <li>1x Idli Sambar</li>
+                </ul>
+                <div class="ticket-actions">
+                    <button class="btn-action btn-accept">Accept</button>
+                    <button class="btn-action btn-ready">Ready</button>
+                </div>
+            </div> 
+            -->
+            <div class="empty-kitchen">
+                <h2>No Active Orders</h2>
+                <p>Waiting for new tickets...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Audio for new order alert -->
+    <audio id="alert-sound" src="assets/audio/bell.mp3"></audio>
+
+    <script src="scripts/kitchen.js"></script>
+</body>
+
+</html>
