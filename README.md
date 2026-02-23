@@ -1,28 +1,28 @@
 # 🥥 Dosa House - Authentic South Indian Cuisine
 
-Welcome to **Dosa House**, a premium web experience bringing the taste of tradition to your screen. This project is a fully functional, responsive frontend prototype designed for a modern restaurant experience.
+Hey there! 👋 Welcome to **Dosa House**. I built this project to prototype a complete, responsive frontend for a South Indian restaurant. I wanted to practice creating a smooth, modern user experience using plain HTML, CSS, and JavaScript without relying on heavy frameworks. It's a fun way to showcase my frontend development skills and my love for authentic food!
 
 ![Dosa House Hero](assets/images/hero-bg.png)
 
 ## 🌟 Features
 
 ### 🍛 Core Experience
--   **Dynamic Menu**: Browse through Dosas, Idlis, Vadas, and more with real-time category filtering.
--   **Smart Search**: Instantly find your favorite dishes (e.g., "Masala", "Paneer") with the integrated search bar.
--   **Interactive Cart**: Add items, adjust quantities, and see your bill update live.
--   **Order System**: Place orders and track their status from **Pending** → **Preparing** → **Delivered** in real-time.
+-   **Dynamic Menu**: Browse through Dosas, Idlis, Vadas, and more. I added real-time category filtering to make navigation easy.
+-   **Simple Search**: A search bar lets you quickly find specific dishes (like typing "Masala" or "Paneer").
+-   **Interactive Cart**: You can add items to your cart, change quantities, and watch the total bill update instantly.
+-   **Order Tracking**: Place an order and watch its simulated status change from **Pending** → **Preparing** → **Delivered**.
 
 ### 📅 Advanced Functionality
--   **Table Booking**: Reserve your spot with a custom booking form (saves to local storage).
--   **User Reviews**: Read glowing testimonials or **write your own review**!
-    -   *Try it:* Click "Write a Review" on the home page to test the interactive modal and star rating system.
--   **Order History**: Your orders persist even if you close the browser (simulated backend using `localStorage`).
-    -   *Testing:* Use the "Clear History" button on the Orders page to reset.
+-   **Table Booking**: I built a custom booking form that actually works locally by saving your reservation to `localStorage`.
+-   **User Reviews**: You can read existing feedback or even write your own test review!
+    -   *Try it:* Click "Write a Review" on the home page to test the modal and star rating logic I wrote.
+-   **Order History**: Check your past orders. They stick around even after you close the browser, mimicking a real backend using browser storage.
+    -   *Testing:* There's a "Clear History" button on the Orders page if you want to start fresh.
 
 ### 🎨 Visual Polish
--   **Glassmorphism design** with authentic colors (Saffron, Banana Leaf Green, Clay Pot Brown).
--   **"Steaming Hot" Effects**: Hover over menu cards to see realistic steam animations.
--   **Zoom Interactions**: Smooth transitions and hover effects for a premium feel.
+-   **Glassmorphism UI**: I experimented with a modern glass effect using colors inspired by South Indian culture (Saffron, Banana Leaf Green, Clay Pot Brown).
+-   **Fun CSS Effects**: I added a "steaming hot" animation when you hover over menu items just to give it some life.
+-   **Smooth Interactions**: Button hovers and page transitions are mapped out to feel natural and responsive.
 
 ## 📂 Project Structure
 
@@ -39,7 +39,7 @@ Welcome to **Dosa House**, a premium web experience bringing the taste of tradit
 -   **HTML5 & CSS3** (Variables, Flexbox, Grid)
 -   **Vanilla JavaScript** (ES6+)
 -   **Local Storage** (For data persistence)
--   **No External Frameworks** (Pure, lightweight code)
+-   **No External Frameworks** (Just pure, lightweight code to show I understand the fundamentals)
 
 ---
-*Made with ❤️ and Ghee by Dosa House Team.*
+*Built with ❤️ and a lot of coffee by a passionate Cloud Computing student.*
