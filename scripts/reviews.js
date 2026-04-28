@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('active');
             reviewForm.reset();
             updateStars(5);
-            alert("Thanks for your review! 🥥");
+            showToast("Thanks for your review! 🥥", "success");
         };
     }
 });

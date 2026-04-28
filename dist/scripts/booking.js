@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tableId = selectedTableInput.value;
             if (!tableId) {
-                alert("Please select a table from the map! 🪑");
+                showToast("Please select a table from the map! 🪑", "error");
                 tableMapContainer.classList.add('error');
                 setTimeout(() => tableMapContainer.classList.remove('error'), 500);
                 return;
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = 'orders.html';
                 }, 3000);
             } else {
-                alert("Sorry! This table was just booked. Please select another.");
+                showToast("Sorry! This table was just booked. Please select another.", "error");
                 renderTables();
             }
         });

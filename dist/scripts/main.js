@@ -540,7 +540,7 @@ const checkoutBtn = document.querySelector('.btn-checkout');
 if (checkoutBtn) {
     checkoutBtn.onclick = () => {
         if (cart.length === 0) {
-            alert("Your plate is empty! Add some delicious items first. 🍛");
+            showToast("Your plate is empty! Add some delicious items first. 🍛", "error");
             return;
         }
 
