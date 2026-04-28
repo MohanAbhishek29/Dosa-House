@@ -279,6 +279,10 @@ function addToCart(itemId, qty) {
         closeModal();
     }
 
+    if (window.showToast) {
+        window.showToast(`Added ${item.title} to Plate! 😋`, 'success');
+    }
+
     // Animate cart toggle
     cartToggle.style.transform = 'scale(1.2)';
     setTimeout(() => cartToggle.style.transform = 'scale(1)', 200);

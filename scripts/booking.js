@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 3. Success
                 bookingForm.style.display = 'none';
                 successMsg.style.display = 'block';
+                if (window.showToast) window.showToast("Table Booked Successfully! 🎉", "success");
 
                 // 4. Redirect
                 setTimeout(() => {
