@@ -301,14 +301,14 @@ function updateCartUI() {
 
     if (cart.length === 0) {
         cartItemsEl.innerHTML = `
-    < div class="cart-empty-state" >
+    <div class="cart-empty-state">
         <p>Your plate is empty! <br> Add some delicious tiffins.</p>
-            </div > `;
+    </div>`;
     } else {
         cartItemsEl.innerHTML = cart.map(cartItem => {
             const product = menuItems.find(i => i.id === cartItem.itemId);
             return `
-    < div class="cart-item" >
+    <div class="cart-item">
         <img src="${product.image}" class="cart-item-img ${product.customClass || ''}" alt="${product.title}">
             <div class="cart-item-details">
                 <div class="cart-item-title">${product.title}</div>
@@ -382,7 +382,7 @@ function generateReceipt() {
     const now = new Date();
     const dateStr = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
     const randomPart = Math.floor(1000 + Math.random() * 9000); // Always 4 digits
-    const orderId = `#ORD - ${dateStr} -${randomPart} `;
+    const orderId = `#ORD-${dateStr}-${randomPart}`;
 
     // Header Info
     receiptDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -393,10 +393,10 @@ function generateReceipt() {
     receiptBody.innerHTML = cart.map(cartItem => {
         const product = menuItems.find(i => i.id === cartItem.itemId);
         return `
-    < div class="receipt-item" >
+    <div class="receipt-item">
                 <span>${product.title} x${cartItem.quantity}</span>
                 <span>₹${product.price * cartItem.quantity}</span>
-            </div >
+    </div>
     `;
     }).join('');
 
