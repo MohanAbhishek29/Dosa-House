@@ -1,8 +1,7 @@
 // Global UI Script (Toast, WhatsApp, Transitions, PWA)
 
-document.addEventListener('DOMContentLoaded', () => {
+(function initUI() {
     // 1. Page Transition (Fade-in)
-    // Body starts with opacity 0 in CSS. We fade it in.
     setTimeout(() => {
         document.body.classList.add('page-loaded');
     }, 50);
@@ -12,13 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             const target = link.getAttribute('href');
-            // Only intercept local HTML links, not external links, hashes, or blank targets
             if (target && target.endsWith('.html') && link.target !== '_blank') {
                 e.preventDefault();
                 document.body.classList.remove('page-loaded');
                 setTimeout(() => {
                     window.location.href = target;
-                }, 400); // Matches CSS transition duration
+                }, 400); 
             }
         });
     });
@@ -38,10 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         toastContainer.appendChild(toast);
         
-        // Trigger animation
         setTimeout(() => toast.classList.add('show'), 10);
         
-        // Remove after 3 seconds
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
@@ -49,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 3. Floating WhatsApp Button
-    // Do not add on KDS page
     if (!window.location.pathname.includes('kitchen.html')) {
         const waBtn = document.createElement('a');
         waBtn.href = "https://wa.me/919392421941?text=Hi%20Dosa%20House,%20I%20need%20help%20with...";
@@ -70,4 +65,4 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(reg => console.log('Service Worker registered', reg))
             .catch(err => console.error('Service Worker registration failed', err));
     }
-});
+})();

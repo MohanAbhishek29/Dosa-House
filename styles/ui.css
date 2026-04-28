@@ -51,7 +51,7 @@ body.page-loaded {
 .whatsapp-float {
     position: fixed;
     bottom: 30px;
-    right: 30px;
+    left: 30px;
     background-color: #25d366;
     color: #FFF;
     border-radius: 50px;
@@ -79,6 +79,6 @@ body.page-loaded {
         height: 50px;
         font-size: 25px;
         bottom: 20px;
-        right: 20px;
+        left: 20px;
     }
 }
