@@ -295,6 +295,12 @@ function updateCartItemQty(itemId, delta) {
         if (cart[itemIndex].quantity <= 0) {
             cart.splice(itemIndex, 1);
         }
+        
+        // Show toast if delta is negative
+        if (delta < 0 && window.showToast) {
+            const item = menuItems.find(i => i.id === itemId);
+            window.showToast(`Removed ${item ? item.title : 'item'} from Plate! 🍽️`, 'success');
+        }
     }
     updateCartUI();
 }

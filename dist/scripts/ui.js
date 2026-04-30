@@ -16,7 +16,7 @@
                 document.body.classList.remove('page-loaded');
                 setTimeout(() => {
                     window.location.href = target;
-                }, 400); 
+                }, 150); 
             }
         });
     });
@@ -65,4 +65,40 @@
             .then(reg => console.log('Service Worker registered', reg))
             .catch(err => console.error('Service Worker registration failed', err));
     }
+
+    // 5. PWA Install Button Logic
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Find navbar to inject install button
+        const navContainer = document.querySelector('.nav-content > div:last-child');
+        if (navContainer && !document.getElementById('install-btn')) {
+            const installBtn = document.createElement('button');
+            installBtn.id = 'install-btn';
+            installBtn.className = 'btn';
+            installBtn.style.padding = '0.4rem 1rem';
+            installBtn.style.fontSize = '0.9rem';
+            installBtn.style.border = '2px solid var(--color-sambar)';
+            installBtn.style.color = 'var(--color-sambar)';
+            installBtn.style.background = 'transparent';
+            installBtn.style.marginLeft = '1rem';
+            installBtn.innerHTML = '📱 Install App';
+            
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBtn.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            navContainer.appendChild(installBtn);
+        }
+    });
 })();

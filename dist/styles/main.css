@@ -98,6 +98,20 @@ img {
     color: var(--color-bg-primary);
 }
 
+.back-btn {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--color-sambar, #D84315);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+}
+
+.back-btn:hover {
+    transform: translateX(-5px);
+}
+
 /* Navigation */
 .navbar {
     position: fixed;
