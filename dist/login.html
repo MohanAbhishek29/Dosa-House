@@ -212,16 +212,26 @@
             }
         });
 
-        // Google Login
+        // Handle redirect result first (comes back after Google redirect)
+        auth.getRedirectResult().then(result => {
+            if (result && result.user) {
+                getCurrentUser().then(user => {
+                    if (user) {
+                        const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
+                        window.location.href = redirectMap[user.role] || 'index.html';
+                    }
+                });
+            }
+        }).catch(e => console.error('Redirect result error:', e));
+
+        // Google Login — use redirect (more reliable than popup on mobile)
         document.getElementById('google-login-btn').addEventListener('click', async () => {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                await auth.signInWithPopup(provider);
-                const user = await getCurrentUser();
-                const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
-                window.location.href = redirectMap[user.role] || 'index.html';
+                await auth.signInWithRedirect(provider);
             } catch (e) {
                 console.error(e);
+                showToast('Login failed. Try again.', 'error');
             }
         });
 
