@@ -68,37 +68,32 @@
 
     // 5. PWA Install Button Logic
     let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
     window.addEventListener('beforeinstallprompt', (e) => {
         // Prevent the mini-infobar from appearing on mobile
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Find navbar to inject install button
-        const navContainer = document.querySelector('.nav-content > div:last-child');
-        if (navContainer && !document.getElementById('install-btn')) {
-            const installBtn = document.createElement('button');
-            installBtn.id = 'install-btn';
-            installBtn.className = 'btn';
-            installBtn.style.padding = '0.4rem 1rem';
-            installBtn.style.fontSize = '0.9rem';
-            installBtn.style.border = '2px solid var(--color-sambar)';
-            installBtn.style.color = 'var(--color-sambar)';
-            installBtn.style.background = 'transparent';
-            installBtn.style.marginLeft = '1rem';
-            installBtn.innerHTML = '📱 Install App';
-            
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        installBtn.style.display = 'none';
-                    }
-                    deferredPrompt = null;
-                }
-            });
-            
-            navContainer.appendChild(installBtn);
-        }
     });
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            } else {
+                // If it's already installed or on iOS where prompt doesn't work
+                if (window.showToast) {
+                    window.showToast("To install, tap the Share icon ⍗ and select 'Add to Home Screen'", "success");
+                } else {
+                    alert("To install, tap the Share icon and select 'Add to Home Screen'");
+                }
+            }
+        });
+    }
 })();
