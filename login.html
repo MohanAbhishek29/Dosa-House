@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
+    <script>
+        /* Login page — remove auth loader immediately */
+        document.addEventListener('DOMContentLoaded', () => {
+            const l = document.getElementById('__auth_loader');
+            if (l) l.remove();
+        });
+    </script>
     <style>
         /* Force page visible — login page doesn't need transition */
         body {
