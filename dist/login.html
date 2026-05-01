@@ -184,11 +184,31 @@
     <script src="scripts/firebase-config.js"></script>
     <script src="scripts/auth.js"></script>
     <script>
-        // If already logged in, redirect based on role
+        // If already logged in — show who is logged in, don't auto redirect
         getCurrentUser().then(user => {
             if (user) {
                 const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
-                window.location.href = redirectMap[user.role] || 'index.html';
+                const roleLabel = { admin: '👑 Admin', kitchen: '👨‍🍳 Kitchen Staff', delivery: '🛵 Delivery', customer: '👤 Customer' };
+
+                // Show "already logged in" banner at top of card
+                const card = document.querySelector('.login-card');
+                const banner = document.createElement('div');
+                banner.style.cssText = `background:#FFF3E0;border:1px solid #FFB74D;border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:0.9rem;`;
+                banner.innerHTML = `
+                    <strong style="color:#E65100;">Already logged in as:</strong><br>
+                    <span style="font-size:1rem;font-weight:700;">${roleLabel[user.role] || user.role} — ${user.email}</span><br>
+                    <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
+                        <button onclick="window.location.href='${redirectMap[user.role] || 'index.html'}'"
+                            style="flex:1;padding:0.6rem;background:#F57F17;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
+                            Continue →
+                        </button>
+                        <button onclick="firebase.auth().signOut().then(()=>location.reload())"
+                            style="flex:1;padding:0.6rem;background:white;color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;font-weight:700;cursor:pointer;">
+                            Switch Account
+                        </button>
+                    </div>
+                `;
+                card.insertBefore(banner, card.firstChild);
             }
         });
 
