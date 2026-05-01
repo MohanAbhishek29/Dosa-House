@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Dashboard | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f1a0f; color: #f0f0f0; font-family: 'Outfit', sans-serif; min-height: 100vh; }
+
+        .top-nav {
+            background: #1a2a1a;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a3a2a;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .top-nav h1 { font-size: 1.2rem; color: #4CAF50; font-weight: 800; }
+        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer; }
+
+        .delivery-card {
+            background: #1a2a1a;
+            border-radius: 16px;
+            border: 1px solid #2a3a2a;
+            margin: 1rem;
+            overflow: hidden;
+        }
+        .delivery-card-header {
+            padding: 1rem 1.2rem;
+            background: #0d1f0d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .order-id { color: #4CAF50; font-weight: 800; font-size: 1rem; }
+        .order-time { color: #888; font-size: 0.8rem; }
+
+        .delivery-body { padding: 1.2rem; }
+        .customer-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .address { color: #aaa; font-size: 0.9rem; margin-bottom: 1rem; }
+
+        .items-summary { background: #0d1f0d; border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem; }
+        .item-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: #ccc; padding: 0.2rem 0; }
+
+        .total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem; }
+        .total-amount { color: #4CAF50; }
+
+        .payment-badge { padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+        .payment-cash { background: #2E7D32; color: #C8E6C9; }
+        .payment-upi { background: #7B1FA2; color: #E1BEE7; }
+
+        /* OTP Confirm */
+        .otp-section { margin-top: 1rem; }
+        .otp-label { font-size: 0.85rem; color: #aaa; margin-bottom: 0.5rem; }
+        .otp-input-row { display: flex; gap: 0.5rem; }
+        .otp-input {
+            flex: 1; padding: 0.8rem; background: #0d1f0d; border: 2px solid #2a3a2a;
+            border-radius: 10px; color: white; font-size: 1.2rem; font-weight: 800;
+            text-align: center; letter-spacing: 0.2em; outline: none;
+        }
+        .otp-input:focus { border-color: #4CAF50; }
+        .btn-confirm {
+            padding: 0.8rem 1.5rem; background: #2E7D32; color: white;
+            border: none; border-radius: 10px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: background 0.2s; white-space: nowrap;
+        }
+        .btn-confirm:hover { background: #1B5E20; }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #555; }
+        .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        #delivery-greeting { font-size: 0.8rem; color: #888; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <div>
+            <h1>🛵 Delivery Dashboard</h1>
+            <span id="delivery-greeting">Loading...</span>
+        </div>
+        <button class="btn-logout" onclick="logoutUser()">Logout</button>
+    </nav>
+
+    <div id="delivery-list">
+        <div class="empty-state">
+            <span class="emoji">⏳</span>
+            <p>Waiting for deliveries...</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="scripts/firebase-config.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script>
+        requireAuth(['delivery']).then(user => {
+            if (!user) return;
+            document.getElementById('delivery-greeting').textContent = `Logged in as ${user.email}`;
+            listenToDeliveries();
+        });
+
+        function listenToDeliveries() {
+            db.collection('orders')
+                .where('status', '==', 'out_for_delivery')
+                .onSnapshot(snapshot => {
+                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderDeliveries(orders);
+                });
+        }
+
+        function renderDeliveries(orders) {
+            const list = document.getElementById('delivery-list');
+            if (orders.length === 0) {
+                list.innerHTML = `<div class="empty-state"><span class="emoji">😴</span><p>No deliveries right now. Rest up!</p></div>`;
+                return;
+            }
+            list.innerHTML = orders.map(order => createDeliveryCard(order)).join('');
+        }
+
+        function createDeliveryCard(order) {
+            const time = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--';
+            const items = (order.items || []).map(i => `<div class="item-row"><span>${i.quantity}x ${i.title}</span><span>₹${i.price * i.quantity}</span></div>`).join('');
+            const payClass = order.paymentMethod === 'upi' ? 'payment-upi' : 'payment-cash';
+            const payLabel = order.paymentMethod === 'upi' ? '💸 UPI Paid' : '💵 Collect Cash';
+
+            return `
+            <div class="delivery-card">
+                <div class="delivery-card-header">
+                    <div class="order-id">${order.orderId || order.id}</div>
+                    <div class="order-time">${time}</div>
+                </div>
+                <div class="delivery-body">
+                    <div class="customer-name">👤 ${order.customerName || 'Customer'}</div>
+                    <div class="address">📍 ${order.deliveryAddress || 'No address provided'}</div>
+                    <div style="margin-bottom:0.5rem">📞 ${order.customerPhone || 'No phone'}</div>
+
+                    <div class="items-summary">${items}</div>
+
+                    <div class="total-row">
+                        <span>Total <span class="payment-badge ${payClass}">${payLabel}</span></span>
+                        <span class="total-amount">₹${order.total}</span>
+                    </div>
+
+                    <div class="otp-section">
+                        <div class="otp-label">🔐 Ask customer for OTP to confirm delivery:</div>
+                        <div class="otp-input-row">
+                            <input class="otp-input" type="number" placeholder="OTP" maxlength="4" id="otp-${order.id}">
+                            <button class="btn-confirm" onclick="confirmDelivery('${order.id}', '${order.deliveryOTP}')">Confirm ✅</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function confirmDelivery(orderId, correctOTP) {
+            const inputOTP = document.getElementById(`otp-${orderId}`).value.trim();
+            if (inputOTP !== correctOTP) {
+                showToast('❌ Wrong OTP! Ask customer again.', 'error');
+                return;
+            }
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    status: 'delivered',
+                    deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('✅ Delivery confirmed! Great job!', 'success');
+            } catch (e) {
+                showToast('Error. Try again.', 'error');
+                console.error(e);
+            }
+        }
+    </script>
+    <script src="scripts/ui.js"></script>
+</body>
+</html>

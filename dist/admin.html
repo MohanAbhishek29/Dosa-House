@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0f0f0f; color: #f0f0f0; font-family: 'Outfit', sans-serif; min-height: 100vh; }
+
+        /* Top Navbar */
+        .admin-nav {
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .admin-nav h1 { font-size: 1.4rem; color: #F57F17; font-weight: 800; }
+        .admin-nav span { font-size: 0.85rem; color: #888; }
+        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-logout:hover { border-color: #d32f2f; color: #d32f2f; }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+        }
+        .stat-card { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #F57F17; }
+        .stat-label { font-size: 0.8rem; color: #888; margin-top: 0.2rem; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; padding: 1rem 2rem 0; border-bottom: 1px solid #333; overflow-x: auto; }
+        .tab-btn { background: none; border: none; color: #888; padding: 0.8rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+        .tab-btn.active { color: #F57F17; border-bottom-color: #F57F17; }
+        .tab-btn:hover { color: #ddd; }
+
+        /* Orders Grid */
+        .orders-grid { padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.2rem; }
+
+        /* Order Card */
+        .order-card {
+            background: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid #333;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .order-card:hover { transform: translateY(-2px); border-color: #555; }
+        .order-card.new-order { border-color: #F57F17; animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0%,100% { border-color: #F57F17; } 50% { border-color: #ff9800; } }
+
+        .card-header {
+            padding: 1rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .order-id { font-weight: 800; font-size: 0.95rem; color: #F57F17; }
+        .order-time { font-size: 0.78rem; color: #888; }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #3E2723; color: #FF8F00; }
+        .status-accepted { background: #1A237E; color: #64B5F6; }
+        .status-preparing { background: #1B5E20; color: #81C784; }
+        .status-out_for_delivery { background: #4A148C; color: #CE93D8; }
+        .status-delivered { background: #1B5E20; color: #A5D6A7; }
+        .status-cancelled { background: #B71C1C; color: #EF9A9A; }
+
+        .card-body { padding: 1rem 1.2rem; }
+
+        .customer-info { margin-bottom: 0.8rem; }
+        .customer-name { font-weight: 700; font-size: 1rem; }
+        .customer-email { font-size: 0.8rem; color: #888; }
+        .delivery-address { font-size: 0.82rem; color: #aaa; margin-top: 0.3rem; }
+
+        .items-list { margin-bottom: 1rem; }
+        .item-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: #ccc; padding: 0.2rem 0; }
+
+        .card-footer { padding: 1rem 1.2rem; border-top: 1px solid #333; }
+        .order-total { display: flex; justify-content: space-between; margin-bottom: 0.8rem; }
+        .total-label { color: #888; font-size: 0.9rem; }
+        .total-amount { font-weight: 800; font-size: 1.1rem; color: #F57F17; }
+
+        .payment-badge { font-size: 0.78rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 6px; }
+        .payment-cash { background: #2E7D32; color: #C8E6C9; }
+        .payment-upi { background: #7B1FA2; color: #E1BEE7; }
+
+        .action-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+        .action-btn { flex: 1; min-width: 80px; padding: 0.6rem; border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
+        .btn-accept { background: #2E7D32; color: white; }
+        .btn-accept:hover { background: #1B5E20; }
+        .btn-preparing { background: #1565C0; color: white; }
+        .btn-preparing:hover { background: #0D47A1; }
+        .btn-delivery { background: #6A1B9A; color: white; }
+        .btn-delivery:hover { background: #4A148C; }
+        .btn-delivered { background: #F57F17; color: white; }
+        .btn-delivered:hover { background: #E65100; }
+        .btn-cancel { background: #c62828; color: white; }
+        .btn-cancel:hover { background: #B71C1C; }
+
+        .otp-display { background: #2c2c2c; border-radius: 8px; padding: 0.6rem 1rem; margin-top: 0.6rem; font-size: 0.85rem; color: #ccc; }
+        .otp-code { font-weight: 800; font-size: 1.3rem; letter-spacing: 0.2em; color: #F57F17; }
+
+        .rating-display { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .stars { color: #FFD600; }
+
+        .empty-state { text-align: center; padding: 4rem 2rem; color: #555; grid-column: 1/-1; }
+        .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        /* Notification Bell */
+        .notif-dot { width: 10px; height: 10px; background: #d32f2f; border-radius: 50%; display: inline-block; animation: blink 1s infinite; }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .orders-grid { padding: 1rem; grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Admin Navbar -->
+    <nav class="admin-nav">
+        <div>
+            <h1>🍛 Dosa House — Owner Dashboard</h1>
+            <span id="admin-greeting">Loading...</span>
+        </div>
+        <div style="display:flex; gap:1rem; align-items:center;">
+            <span id="live-indicator" style="font-size:0.8rem; color:#4CAF50;">● LIVE</span>
+            <button class="btn-logout" onclick="logoutUser()">Logout</button>
+        </div>
+    </nav>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-revenue">₹0</div>
+            <div class="stat-label">Today's Revenue</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-orders">0</div>
+            <div class="stat-label">Today's Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-label">Pending Now</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-rating">⭐ —</div>
+            <div class="stat-label">Avg Rating</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="filterOrders('all', this)">All Orders</button>
+        <button class="tab-btn" onclick="filterOrders('pending', this)">🔔 Pending</button>
+        <button class="tab-btn" onclick="filterOrders('accepted', this)">✅ Accepted</button>
+        <button class="tab-btn" onclick="filterOrders('preparing', this)">👨‍🍳 Preparing</button>
+        <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛵 Out for Delivery</button>
+        <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
+    </div>
+
+    <!-- Orders Grid -->
+    <div class="orders-grid" id="orders-grid">
+        <div class="empty-state">
+            <span class="emoji">⏳</span>
+            <p>Loading orders...</p>
+        </div>
+    </div>
+
+    <!-- Notification Sound -->
+    <audio id="notif-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2Q5AjJ1mczZrHE+Ai91nMnVqGo3ATB5oMfTp2Y2AC19o8TRpGQzAC2BpMHTomMzAC6CpL/RoWIyAC+Epb/QoGEyADGFpsHPoGIzADSIqMLPoGI1ADmMq8TQoWM3AD6PrcXRomU6AEOTs8fSpGc9AEmXuMnTpmo/AE+cvcvVqG1CAFahn87Xqm9EAFumnNHZrHJGAFuqoNTbrnVIAF+up9ffsnhLAGSyrtrgt3tMAGm2tuHhvH9OAG67vOXjwoNRAHPAw+rkx4ZTAHjFy+/myopVAH3K0/Pp0I5YAIPPm9fs1pFbAIjUs9Xu3JZeAI7Zw9rx4ppgAJPexOHy5p5jAJnjzO" type="audio/wav">
+    </audio>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="scripts/firebase-config.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script>
+        let allOrders = [];
+        let currentFilter = 'all';
+        let isFirstLoad = true;
+
+        // Auth check
+        requireAuth(['admin']).then(user => {
+            if (!user) return;
+            document.getElementById('admin-greeting').textContent = `Welcome back, ${user.name || 'Admin'}!`;
+            listenToOrders();
+        });
+
+        // Real-time listener
+        function listenToOrders() {
+            db.collection('orders')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    const prevCount = allOrders.length;
+                    allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Play sound for new orders (after initial load)
+                    if (!isFirstLoad && allOrders.length > prevCount) {
+                        document.getElementById('notif-sound').play().catch(() => {});
+                        showToast('🔔 New order received!', 'success');
+                    }
+                    isFirstLoad = false;
+
+                    updateStats();
+                    renderOrders();
+                });
+        }
+
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayOrders = allOrders.filter(o => {
+                const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+                return d.toDateString() === today;
+            });
+
+            const revenue = todayOrders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const ratings = allOrders.filter(o => o.rating).map(o => o.rating);
+            const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '—';
+
+            document.getElementById('stat-revenue').textContent = `₹${revenue.toLocaleString('en-IN')}`;
+            document.getElementById('stat-orders').textContent = todayOrders.length;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-rating').textContent = `⭐ ${avgRating}`;
+        }
+
+        function filterOrders(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const grid = document.getElementById('orders-grid');
+            const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="empty-state"><span class="emoji">🍽️</span><p>No orders here yet!</p></div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(order => createOrderCard(order)).join('');
+        }
+
+        function createOrderCard(order) {
+            const isNew = order.status === 'pending';
+            const time = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+            const items = (order.items || []).map(i => `<div class="item-row"><span>${i.quantity}x ${i.title}</span><span>₹${i.price * i.quantity}</span></div>`).join('');
+            const paymentClass = order.paymentMethod === 'upi' ? 'payment-upi' : 'payment-cash';
+            const paymentLabel = order.paymentMethod === 'upi' ? '💸 UPI' : '💵 Cash';
+
+            let actions = '';
+            if (order.status === 'pending') {
+                actions = `<button class="action-btn btn-accept" onclick="updateStatus('${order.id}', 'accepted')">✅ Accept</button>
+                           <button class="action-btn btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')">❌ Cancel</button>`;
+            } else if (order.status === 'accepted') {
+                actions = `<button class="action-btn btn-preparing" onclick="updateStatus('${order.id}', 'preparing')">👨‍🍳 Mark Preparing</button>`;
+            } else if (order.status === 'preparing') {
+                actions = `<button class="action-btn btn-delivery" onclick="updateStatus('${order.id}', 'out_for_delivery')">🛵 Out for Delivery</button>`;
+            } else if (order.status === 'out_for_delivery') {
+                actions = `<div class="otp-display">OTP for Customer: <span class="otp-code">${order.deliveryOTP || '----'}</span></div>
+                           <button class="action-btn btn-delivered" onclick="updateStatus('${order.id}', 'delivered')" style="margin-top:0.5rem">✔️ Mark Delivered</button>`;
+            }
+
+            const ratingHtml = order.rating ? `<div class="rating-display"><span class="stars">${'⭐'.repeat(order.rating)}</span><span style="color:#888;font-size:0.8rem">${order.review || ''}</span></div>` : '';
+
+            return `
+            <div class="order-card ${isNew ? 'new-order' : ''}">
+                <div class="card-header">
+                    <div>
+                        <div class="order-id">${order.orderId || order.id}</div>
+                        <div class="order-time">${time}</div>
+                    </div>
+                    <span class="status-badge status-${order.status}">${order.status?.replace('_', ' ')}</span>
+                </div>
+                <div class="card-body">
+                    <div class="customer-info">
+                        <div class="customer-name">👤 ${order.customerName || 'Customer'}</div>
+                        <div class="customer-email">${order.customerEmail || ''}</div>
+                        ${order.deliveryAddress ? `<div class="delivery-address">📍 ${order.deliveryAddress}</div>` : ''}
+                    </div>
+                    <div class="items-list">${items}</div>
+                    ${ratingHtml}
+                </div>
+                <div class="card-footer">
+                    <div class="order-total">
+                        <span class="total-label">Total <span class="payment-badge ${paymentClass}">${paymentLabel}</span></span>
+                        <span class="total-amount">₹${order.total}</span>
+                    </div>
+                    <div class="action-btns">${actions}</div>
+                </div>
+            </div>`;
+        }
+
+        async function updateStatus(orderId, newStatus) {
+            try {
+                const update = {
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                // Generate OTP when sending out for delivery
+                if (newStatus === 'out_for_delivery') {
+                    update.deliveryOTP = Math.floor(1000 + Math.random() * 9000).toString();
+                }
+                await db.collection('orders').doc(orderId).update(update);
+                showToast(`Order ${newStatus.replace('_', ' ')}! ✅`, 'success');
+            } catch (e) {
+                showToast('Error updating order. Try again.', 'error');
+                console.error(e);
+            }
+        }
+    </script>
+    <script src="scripts/ui.js"></script>
+</body>
+</html>

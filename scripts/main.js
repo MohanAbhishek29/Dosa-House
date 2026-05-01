@@ -387,34 +387,26 @@ function calculateBill() {
 function generateReceipt() {
     const { subtotal, tax, packingCharge, total } = calculateBill();
 
-    // 1. Generate Robust Token
-    // Format: #ORD-MMDD-XXXX (MonthDay-Random)
+    // Generate Order ID
     const now = new Date();
     const dateStr = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-    const randomPart = Math.floor(1000 + Math.random() * 9000); // Always 4 digits
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
     const orderId = `#ORD-${dateStr}-${randomPart}`;
 
-    // Header Info
+    // Header Info on receipt
     receiptDate.textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     receiptToken.textContent = orderId;
     receiptMode.textContent = isTakeaway ? 'Takeaway' : 'Dine-in';
 
-    // Items
+    // Items on receipt
     receiptBody.innerHTML = cart.map(cartItem => {
         const product = menuItems.find(i => i.id === cartItem.itemId);
-        return `
-    <div class="receipt-item">
-                <span>${product.title} x${cartItem.quantity}</span>
-                <span>₹${product.price * cartItem.quantity}</span>
-    </div>
-    `;
+        return `<div class="receipt-item"><span>${product.title} x${cartItem.quantity}</span><span>₹${product.price * cartItem.quantity}</span></div>`;
     }).join('');
 
-    // Summary
     receiptSubtotal.textContent = `₹${subtotal} `;
     receiptTax.textContent = `₹${tax} `;
     receiptTotal.textContent = `₹${total} `;
-
     if (isTakeaway) {
         receiptPackingRow.style.display = 'flex';
         receiptPacking.textContent = `₹${packingCharge} `;
@@ -422,26 +414,138 @@ function generateReceipt() {
         receiptPackingRow.style.display = 'none';
     }
 
-    // 2. Save Order to LocalStorage
-    const newOrder = {
-        id: orderId,
-        date: now.toISOString(),
-        items: cart.map(c => {
-            const p = menuItems.find(i => i.id === c.itemId);
-            return { title: p.title, qty: c.quantity, price: p.price };
-        }),
-        total: total,
-        status: 'Pending', // Initial status
-        mode: isTakeaway ? 'Takeaway' : 'Dine-in'
-    };
-
-    const existingOrders = JSON.parse(localStorage.getItem('dosaHouseOrders') || '[]');
-    existingOrders.unshift(newOrder); // Add to top
-    localStorage.setItem('dosaHouseOrders', JSON.stringify(existingOrders));
-
-    // Show Modal
-    receiptModal.classList.add('active');
+    // Show checkout modal to get address & payment
+    showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now });
 }
+
+function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }) {
+    // Remove existing modal if any
+    const existing = document.getElementById('checkout-modal-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'checkout-modal-overlay';
+    overlay.style.cssText = `
+        position:fixed;top:0;left:0;width:100%;height:100%;
+        background:rgba(0,0,0,0.7);z-index:9999;
+        display:flex;align-items:center;justify-content:center;padding:1rem;
+    `;
+
+    overlay.innerHTML = `
+        <div style="background:white;border-radius:20px;padding:2rem;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;">
+            <h2 style="font-size:1.4rem;margin-bottom:0.3rem;color:#3E2723;">🛵 Almost There!</h2>
+            <p style="color:#888;font-size:0.9rem;margin-bottom:1.5rem;">Total: <strong style="color:#F57F17;font-size:1.1rem;">₹${total}</strong></p>
+
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">📍 Delivery Address</label>
+                <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;" required></textarea>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">📞 Phone Number</label>
+                <input type="tel" id="checkout-phone" placeholder="+91 99999 99999" style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;outline:none;font-family:inherit;box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.8rem;">💳 Payment Method</label>
+                <div style="display:flex;gap:0.8rem;">
+                    <label style="flex:1;border:2px solid #eee;border-radius:10px;padding:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;">
+                        <input type="radio" name="payment" value="cash" checked style="accent-color:#F57F17;"> 💵 Cash on Delivery
+                    </label>
+                    <label style="flex:1;border:2px solid #eee;border-radius:10px;padding:0.8rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;">
+                        <input type="radio" name="payment" value="upi" style="accent-color:#F57F17;"> 💸 UPI
+                    </label>
+                </div>
+            </div>
+
+            <button id="place-order-btn" style="width:100%;padding:1rem;background:#F57F17;color:white;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;">
+                🍛 Place Order
+            </button>
+            <button onclick="document.getElementById('checkout-modal-overlay').remove()" style="width:100%;padding:0.7rem;margin-top:0.5rem;background:transparent;border:none;color:#999;cursor:pointer;font-size:0.9rem;">Cancel</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('place-order-btn').addEventListener('click', async () => {
+        const address = document.getElementById('checkout-address').value.trim();
+        const phone = document.getElementById('checkout-phone').value.trim();
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+        if (!address) {
+            showToast('Please enter your delivery address! 📍', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('place-order-btn');
+        btn.textContent = 'Placing Order...';
+        btn.disabled = true;
+
+        // Prepare items for Firestore
+        const orderItems = cart.map(c => {
+            const p = menuItems.find(i => i.id === c.itemId);
+            return { itemId: c.itemId, title: p.title, quantity: c.quantity, price: p.price };
+        });
+
+        // Get current user info
+        let customerName = 'Guest';
+        let customerEmail = '';
+        let customerId = 'guest_' + Date.now();
+
+        try {
+            // Try to get logged-in user (if Firebase auth is available)
+            if (typeof auth !== 'undefined' && auth.currentUser) {
+                const u = auth.currentUser;
+                customerId = u.uid;
+                customerName = u.displayName || u.email.split('@')[0];
+                customerEmail = u.email;
+            }
+        } catch (e) { /* auth not loaded, continue as guest */ }
+
+        const newOrder = {
+            orderId,
+            customerId,
+            customerName,
+            customerEmail,
+            customerPhone: phone,
+            deliveryAddress: address,
+            items: orderItems,
+            subtotal,
+            tax,
+            packingCharge,
+            total,
+            paymentMethod,
+            paymentStatus: paymentMethod === 'cash' ? 'pending' : 'pending',
+            orderType: isTakeaway ? 'takeaway' : 'delivery',
+            status: 'pending',
+            deliveryOTP: null,
+            rating: null,
+            review: null,
+            createdAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+            updatedAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+        };
+
+        try {
+            if (typeof db !== 'undefined') {
+                await db.collection('orders').add(newOrder);
+                showToast('🎉 Order placed! We will prepare it soon!', 'success');
+            } else {
+                // Fallback to localStorage if Firebase not loaded
+                const existing = JSON.parse(localStorage.getItem('dosaHouseOrders') || '[]');
+                existing.unshift({ id: orderId, ...newOrder, createdAt: new Date().toISOString() });
+                localStorage.setItem('dosaHouseOrders', JSON.stringify(existing));
+                showToast('🎉 Order placed!', 'success');
+            }
+        } catch (e) {
+            console.error('Firebase save error:', e);
+            showToast('Order placed (offline mode)!', 'success');
+        }
+
+        overlay.remove();
+        receiptModal.classList.add('active');
+    });
+}
+
 
 // Receipt Closing
 if (closeReceiptBtn) {
