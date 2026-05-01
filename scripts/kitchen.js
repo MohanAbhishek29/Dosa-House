@@ -1,167 +1,124 @@
-// Kitchen Display System Logic
+// Kitchen Display System — Firebase Real-time
+// Flow: Admin accepts (status=accepted) → Kitchen sees → Kitchen marks ready (status=ready)
 
-// DOM Elements
-const ordersGrid = document.getElementById('orders-grid');
-const countPending = document.getElementById('count-pending');
-const countPreparing = document.getElementById('count-preparing');
-const countCompleted = document.getElementById('count-completed');
-const alertSound = document.getElementById('alert-sound');
+let unsubscribe = null;
 
-// State
-let orders = [];
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    loadOrders();
-    renderBoard();
-    updateStats();
+// Auth check
+document.addEventListener('DOMContentLoaded', async () => {
+    // Quick auth check — kitchen only
+    const user = await requireAuth(['kitchen']);
+    if (!user) return;
+    startKitchenListener();
 });
 
-// Listen for updates from other tabs (Customer View)
-window.addEventListener('storage', (e) => {
-    if (e.key === 'dosaHouseOrders') {
-        const oldLen = orders.length; // Approximate check
-        loadOrders();
-        renderBoard();
-        updateStats();
+function startKitchenListener() {
+    const ordersGrid = document.getElementById('orders-grid');
 
-        // Simple check for new orders (length increased)
-        if (orders.length > oldLen) {
-            playAlert();
-        }
-    }
-});
-
-function loadOrders() {
-    const stored = localStorage.getItem('dosaHouseOrders');
-    orders = stored ? JSON.parse(stored) : [];
+    // Listen for orders with status: accepted OR preparing
+    unsubscribe = db.collection('orders')
+        .where('status', 'in', ['accepted', 'preparing'])
+        .orderBy('createdAt', 'asc')
+        .onSnapshot(snapshot => {
+            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderKitchenBoard(orders);
+            updateKitchenStats(snapshot);
+        }, err => {
+            console.error('Kitchen listener error:', err);
+        });
 }
 
-function saveOrders() {
-    localStorage.setItem('dosaHouseOrders', JSON.stringify(orders));
-    // Trigger storage event for other tabs to pick up status changes
-    // (Note: storage event doesn't fire on the same window, which is fine)
-}
+function renderKitchenBoard(orders) {
+    const grid = document.getElementById('orders-grid');
 
-function playAlert() {
-    if (alertSound) {
-        alertSound.currentTime = 0;
-        alertSound.play().catch(e => console.log('Audio play blocked:', e));
-    }
-}
-
-function updateStatus(orderId, newStatus) {
-    const orderIndex = orders.findIndex(o => o.id === orderId);
-    if (orderIndex !== -1) {
-        orders[orderIndex].status = newStatus;
-        saveOrders();
-        renderBoard();
-        updateStats();
-    }
-}
-
-function archiveOrder(orderId) {
-    // For KDS, "Clear" might mean setting to 'Delivered/Completed' and hiding, 
-    // or removing from the details list but keeping in stats.
-    // Let's set to 'Delivered' (if not already) and keep in array for history,
-    // but maybe filter them out visually or move to separate list?
-    // Current plan: Just update status to 'Delivered' which removes it from active board views typically,
-    // OR just visually remove it.
-    // Let's mark as 'Delivered' in data.
-
-    updateStatus(orderId, 'Delivered');
-}
-
-function renderBoard() {
-    ordersGrid.innerHTML = '';
-
-    // Filter active orders (Pending, Preparing, Ready)
-    // We hide 'Delivered' from the main board to keep it clean, or maybe show 'Ready' until cleared.
-    const activeOrders = orders.filter(o =>
-        ['Pending', 'Preparing', 'Ready'].includes(o.status)
-    );
-
-    if (activeOrders.length === 0) {
-        ordersGrid.innerHTML = `
+    if (orders.length === 0) {
+        grid.innerHTML = `
             <div class="empty-kitchen">
-                <h2>No Active Orders</h2>
+                <h2>😴 No Active Orders</h2>
                 <p>Waiting for new tickets...</p>
-            </div>
-        `;
+            </div>`;
+        document.getElementById('count-pending').textContent = '0';
+        document.getElementById('count-preparing').textContent = '0';
         return;
     }
 
-    // Sort: Pending first, then Preparing, then Ready. Within that, Oldest first.
-    // Map status to priority value
-    const priority = { 'Pending': 1, 'Preparing': 2, 'Ready': 3 };
+    const accepted = orders.filter(o => o.status === 'accepted');
+    const preparing = orders.filter(o => o.status === 'preparing');
 
-    activeOrders.sort((a, b) => {
-        // First by Status Priority
-        if (priority[a.status] !== priority[b.status]) {
-            return priority[a.status] - priority[b.status];
-        }
-        // Then by Date (Oldest first)
-        return new Date(a.date) - new Date(b.date);
-    });
+    document.getElementById('count-pending').textContent = accepted.length;
+    document.getElementById('count-preparing').textContent = preparing.length;
 
-    activeOrders.forEach(order => {
-        const ticket = createTicketElement(order);
-        ordersGrid.appendChild(ticket);
-    });
+    grid.innerHTML = orders.map(order => createTicketHTML(order)).join('');
 }
 
-function createTicketElement(order) {
-    const div = document.createElement('div');
-    div.className = `ticket ticket-${order.status.toLowerCase()}`;
-    div.dataset.id = order.id;
-    if (order.mode) div.dataset.mode = order.mode;
+function createTicketHTML(order) {
+    const time = order.createdAt?.toDate
+        ? order.createdAt.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+        : '--:--';
 
-    // Time Formatting
-    const time = new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const items = (order.items || []).map(i =>
+        `<li>${i.quantity}x ${i.title}</li>`
+    ).join('');
 
-    // Items List
-    const itemsHtml = order.items.map(item => `<li>${item.qty}x ${item.title}</li>`).join('');
-
-    // Action Buttons based on Status
-    let actionsHtml = '';
-    if (order.status === 'Pending') {
-        actionsHtml = `
-            <button class="btn-action btn-accept" onclick="updateStatus('${order.id}', 'Preparing')">Accept</button>
-        `;
-    } else if (order.status === 'Preparing') {
-        actionsHtml = `
-            <button class="btn-action btn-ready" onclick="updateStatus('${order.id}', 'Ready')">Mark Ready</button>
-        `;
-    } else if (order.status === 'Ready') {
-        actionsHtml = `
-            <button class="btn-action btn-clear" onclick="archiveOrder('${order.id}')">Clear</button>
-        `;
+    let actionBtn = '';
+    if (order.status === 'accepted') {
+        actionBtn = `<button class="btn-action btn-accept" onclick="startPreparing('${order.id}')">🍳 Start Preparing</button>`;
+    } else if (order.status === 'preparing') {
+        actionBtn = `<button class="btn-action btn-ready" onclick="markReady('${order.id}')">✅ Mark Ready</button>`;
     }
 
-    div.innerHTML = `
-        <div class="ticket-header">
-            <span class="ticket-id">${order.id}</span>
-            <span class="ticket-time">${time}</span>
-        </div>
-        <div class="ticket-type">${order.mode || 'Dine-in'}</div>
-        <ul class="ticket-items">
-            ${itemsHtml}
-        </ul>
-        <div class="ticket-actions">
-            ${actionsHtml}
+    const statusBadge = order.status === 'accepted'
+        ? `<span style="background:#E65100;color:white;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:700;">NEW</span>`
+        : `<span style="background:#1565C0;color:white;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:700;">COOKING</span>`;
+
+    return `
+        <div class="ticket ticket-${order.status}">
+            <div class="ticket-header">
+                <span class="ticket-id">${order.orderId || order.id}</span>
+                <span class="ticket-time">${time}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                <div class="ticket-type">${order.orderType === 'takeaway' ? '🛍️ Takeaway' : '🛵 Delivery'}</div>
+                ${statusBadge}
+            </div>
+            <div style="font-size:0.85rem;color:#aaa;margin-bottom:0.5rem;">👤 ${order.customerName || 'Customer'}</div>
+            <ul class="ticket-items">${items}</ul>
+            <div class="ticket-actions">${actionBtn}</div>
         </div>
     `;
-
-    return div;
 }
 
-function updateStats() {
-    const pending = orders.filter(o => o.status === 'Pending').length;
-    const preparing = orders.filter(o => o.status === 'Preparing').length;
-    // Completed today includes Ready + Delivered
-    const completed = orders.filter(o => ['Ready', 'Delivered'].includes(o.status)).length;
+async function startPreparing(orderId) {
+    try {
+        await db.collection('orders').doc(orderId).update({
+            status: 'preparing',
+            preparingAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (e) {
+        console.error('Error updating status:', e);
+        alert('Error! Try again.');
+    }
+}
 
-    countPending.textContent = pending;
-    countPreparing.textContent = preparing;
-    countCompleted.textContent = completed;
+async function markReady(orderId) {
+    try {
+        await db.collection('orders').doc(orderId).update({
+            status: 'ready',
+            readyAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (e) {
+        console.error('Error updating status:', e);
+        alert('Error! Try again.');
+    }
+}
+
+function updateKitchenStats(snapshot) {
+    // Count completed today (delivered orders — shown separately)
+    db.collection('orders')
+        .where('status', '==', 'delivered')
+        .get()
+        .then(snap => {
+            document.getElementById('count-completed').textContent = snap.size;
+        });
 }

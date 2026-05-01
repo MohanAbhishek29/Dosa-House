@@ -1,225 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Orders | Dosa House</title>
+    <title>My Orders | Dosa House</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/music.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
     <style>
-        .orders-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            padding-top: 120px;
-            min-height: 60vh;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #FFF8E1;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 5rem;
         }
 
-        .orders-tabs {
+        /* Top Nav */
+        .top-bar {
+            background: white;
+            padding: 1rem 1.2rem;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #ddd;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            position: sticky; top: 0; z-index: 100;
         }
+        .back-btn {
+            background: none; border: none; font-size: 1.4rem; cursor: pointer;
+            color: #3E2723; padding: 0.2rem 0.5rem;
+        }
+        .top-bar h1 { font-size: 1.2rem; font-weight: 800; color: #3E2723; }
 
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 1rem 2rem;
-            font-family: inherit;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .tab-btn.active {
-            color: var(--color-sambar);
-        }
-
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--color-sambar);
-        }
+        /* Order Cards */
+        .orders-list { padding: 1rem; }
 
         .order-card {
             background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eee;
-            transition: transform 0.2s;
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
         }
 
         .order-header {
+            padding: 1rem 1.2rem;
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px dashed #eee;
         }
+        .order-id { font-weight: 800; color: #3E2723; font-size: 0.95rem; }
+        .order-date { color: #888; font-size: 0.78rem; }
 
-        .order-id {
-            font-weight: 800;
-            color: var(--color-text-primary);
-            font-size: 1.1rem;
-        }
-
-        .order-status {
-            padding: 0.4rem 1rem;
+        .status-pill {
+            padding: 0.3rem 0.9rem;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.78rem;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
+        .status-pending    { background: #FFF9C4; color: #F57F17; }
+        .status-accepted   { background: #E3F2FD; color: #1565C0; }
+        .status-preparing  { background: #FFF3E0; color: #E65100; }
+        .status-ready      { background: #F3E5F5; color: #6A1B9A; }
+        .status-out_for_delivery { background: #E8F5E9; color: #1B5E20; }
+        .status-delivered  { background: #E8F5E9; color: #2E7D32; }
 
-        .status-pending {
-            background: #FFF3E0;
-            color: #EF6C00;
-        }
+        .order-body { padding: 1.2rem; }
 
-        .status-preparing {
-            background: #E3F2FD;
-            color: #1565C0;
-        }
-
-        .status-delivered {
-            background: #E8F5E9;
-            color: #2E7D32;
-        }
-
-        .order-items {
-            margin-bottom: 1rem;
-            padding-top: 1rem;
-        }
-
-        .order-item-row {
+        .order-items { margin-bottom: 1rem; }
+        .item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
-            color: var(--color-text-secondary);
+            font-size: 0.88rem;
+            color: #555;
+            padding: 0.25rem 0;
+            border-bottom: 1px dashed #f0e0c0;
         }
+        .item-row:last-child { border-bottom: none; }
 
-        .order-footer {
+        .order-total {
             display: flex;
             justify-content: space-between;
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #3E2723;
+            padding-top: 0.5rem;
+        }
+        .total-amount { color: #F57F17; }
+
+        /* Progress Steps */
+        .progress-bar {
+            display: flex;
             align-items: center;
-            padding-top: 1rem;
-            border-top: 1px dashed #eee;
+            justify-content: space-between;
+            padding: 1rem 1.2rem 0;
+            position: relative;
+        }
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 1.8rem;
+            right: 1.8rem;
+            height: 2px;
+            background: #f0e0c0;
+            z-index: 0;
+            transform: translateY(-60%);
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            z-index: 1;
+        }
+        .step-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0e0c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
             font-weight: 700;
+            color: #aaa;
+            border: 2px solid #f0e0c0;
         }
-
-        .empty-orders {
+        .step.done .step-dot {
+            background: #F57F17;
+            color: white;
+            border-color: #F57F17;
+        }
+        .step.active .step-dot {
+            background: white;
+            color: #F57F17;
+            border-color: #F57F17;
+            box-shadow: 0 0 0 4px rgba(245,127,23,0.15);
+        }
+        .step-label {
+            font-size: 0.6rem;
+            color: #bbb;
+            font-weight: 600;
+            text-transform: uppercase;
             text-align: center;
-            padding: 3rem;
-            color: var(--color-text-secondary);
+            max-width: 50px;
+            line-height: 1.2;
         }
+        .step.done .step-label, .step.active .step-label { color: #F57F17; }
+
+        /* OTP Box */
+        .otp-box {
+            margin: 1rem 1.2rem;
+            background: linear-gradient(135deg, #1B5E20, #2E7D32);
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-align: center;
+            color: white;
+        }
+        .otp-box h3 { font-size: 0.9rem; margin-bottom: 0.5rem; opacity: 0.9; }
+        .otp-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 0.4em;
+            font-family: 'Courier New', monospace;
+        }
+        .otp-box p { font-size: 0.78rem; opacity: 0.8; margin-top: 0.3rem; }
+
+        /* UPI QR Box */
+        .upi-box {
+            margin: 1rem 1.2rem;
+            background: linear-gradient(135deg, #4A148C, #7B1FA2);
+            border-radius: 14px;
+            padding: 1.2rem;
+            text-align: center;
+            color: white;
+        }
+        .upi-box h3 { font-size: 0.9rem; margin-bottom: 0.8rem; }
+        .upi-box img { border-radius: 10px; background: white; padding: 8px; }
+        .upi-box p { font-size: 0.78rem; opacity: 0.8; margin-top: 0.5rem; }
+
+        /* Rating */
+        .rating-section {
+            padding: 0.8rem 1.2rem 1.2rem;
+            text-align: center;
+        }
+        .stars { font-size: 1.8rem; cursor: pointer; letter-spacing: 0.1em; }
+        .rate-label { font-size: 0.85rem; color: #888; margin-bottom: 0.5rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: #bbb;
+        }
+        .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid #f0e0c0;
+            z-index: 200;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.6rem 0.3rem;
+            text-decoration: none;
+            color: #bbb;
+            font-size: 0.65rem;
+            font-weight: 600;
+            gap: 0.2rem;
+            transition: color 0.2s;
+        }
+        .nav-item .icon { font-size: 1.4rem; }
+        .nav-item.active { color: #F57F17; }
     </style>
 </head>
-
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container nav-content">
-            <a href="index.html" class="logo">
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 50C10 25 30 10 50 10C70 10 90 25 90 50C90 75 70 90 50 90C30 90 10 75 10 50Z"
-                        fill="#F57F17" />
-                    <path d="M20 50C20 30 50 30 50 30C50 30 80 30 80 50C80 70 50 80 50 80C50 80 20 70 20 50Z"
-                        fill="#FFF8E1" />
-                    <path d="M50 80C50 80 30 60 50 40C70 60 50 80 50 80Z" fill="#2E7D32" />
-                </svg>
-                <span style="color:var(--color-text-primary); margin-left:10px;">DOSA HOUSE</span>
-            </a>
-            <div style="display: flex; gap: 2rem;">
-                <a href="menu.html"
-                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">MENU</a>
-                <a href="booking.html"
-                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">BOOK
-                    TABLE</a>
-                <a href="orders.html"
-                    style="font-weight: 700; color: var(--color-sambar); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
-                <a href="about.html"
-                    style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
-                <a href="#" id="install-btn"
-                    style="font-weight: 700; color: var(--color-banana-leaf, #2E7D32); text-decoration: none; font-size: 1.1rem; border: 2px solid var(--color-banana-leaf, #2E7D32); padding: 0.2rem 0.8rem; border-radius: 20px;">📱 INSTALL</a>
-            </div>
-        </div>
-    </nav>
+    <div class="top-bar">
+        <button class="back-btn" onclick="history.back()">←</button>
+        <h1>🧾 My Orders</h1>
+    </div>
 
-    <!-- Orders Section -->
-    <div class="orders-container">
-        <a href="index.html" class="back-btn">← Back to Home</a>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1>Your Orders</h1>
-            <button id="clear-history-btn"
-                style="background: none; border: 1px solid #ff9999; color: #d32f2f; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">Clear
-                History</button>
-        </div>
-
-        <div class="orders-tabs">
-            <button class="tab-btn active" data-tab="active">Active Orders</button>
-            <button class="tab-btn" data-tab="reservations">Reservations</button>
-            <button class="tab-btn" data-tab="history">History</button>
-        </div>
-
-        <div id="orders-list">
-            <!-- Orders injected here -->
+    <div class="orders-list" id="orders-list">
+        <div class="empty-state">
+            <span class="emoji">⏳</span>
+            <p>Loading your orders...</p>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>DOSA HOUSE</h3>
-                    <p>Authentic South Indian vegetarian cuisine made with love and tradition.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="menu.html">Menu</a></li>
-                        <li><a href="booking.html">Book Table</a></li>
-                        <li><a href="orders.html">Orders</a></li>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="kitchen.html" target="_blank">Kitchen Display</a></li>
-                        <li><a href="about.html#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-contact">
-                    <h4>Visit Us</h4>
-                    <p>Railway Station Road</p>
-                    <p>Bhimavaram, 534201</p>
-                    <p>+91 9392421941</p>
-                    <p>mohanabhishek098@gmail.com</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                &copy; 2024 Dosa House. All rights reserved.
-            </div>
-        </div>
-        <script src="scripts/orders.js"></script>
-        <script src="scripts/music.js"></script>
-        <script src="scripts/ui.js"></script>
-</body>
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="icon">🏠</span>Home
+        </a>
+        <a href="menu.html" class="nav-item">
+            <span class="icon">🍛</span>Menu
+        </a>
+        <a href="orders.html" class="nav-item active">
+            <span class="icon">📋</span>Orders
+        </a>
+        <a href="#" class="nav-item" onclick="logoutUser(); return false;">
+            <span class="icon">👤</span>Logout
+        </a>
+    </nav>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="scripts/firebase-config.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script>
+        const STATUS_STEPS = ['pending','accepted','preparing','ready','out_for_delivery','delivered'];
+        const STATUS_LABELS = {
+            pending: 'Placed',
+            accepted: 'Accepted',
+            preparing: 'Cooking',
+            ready: 'Ready',
+            out_for_delivery: 'On Way',
+            delivered: 'Delivered'
+        };
+        const STATUS_ICONS = {
+            pending: '📋',
+            accepted: '✅',
+            preparing: '👨‍🍳',
+            ready: '🔔',
+            out_for_delivery: '🛵',
+            delivered: '✅'
+        };
+
+        requireAuth(['customer']).then(user => {
+            if (!user) return;
+            listenToMyOrders(user.uid);
+        });
+
+        function listenToMyOrders(uid) {
+            db.collection('orders')
+                .where('customerId', '==', uid)
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snap => {
+                    const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderOrders(orders);
+                });
+        }
+
+        function renderOrders(orders) {
+            const list = document.getElementById('orders-list');
+            if (orders.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <span class="emoji">🍛</span>
+                        <p>No orders yet!</p>
+                        <a href="menu.html" style="display:inline-block;margin-top:1rem;background:#F57F17;color:white;padding:0.8rem 2rem;border-radius:12px;font-weight:700;text-decoration:none;">Browse Menu</a>
+                    </div>`;
+                return;
+            }
+            list.innerHTML = orders.map(order => buildOrderCard(order)).join('');
+        }
+
+        function buildOrderCard(order) {
+            const date = order.createdAt?.toDate
+                ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                : 'Just now';
+
+            const items = (order.items || []).map(i =>
+                `<div class="item-row"><span>${i.quantity}x ${i.title}</span><span>₹${i.price * i.quantity}</span></div>`
+            ).join('');
+
+            const currentStepIdx = STATUS_STEPS.indexOf(order.status);
+            const steps = STATUS_STEPS.slice(0, 6).map((s, i) => {
+                const cls = i < currentStepIdx ? 'done' : i === currentStepIdx ? 'active' : '';
+                return `<div class="step ${cls}">
+                    <div class="step-dot">${STATUS_ICONS[s]}</div>
+                    <div class="step-label">${STATUS_LABELS[s]}</div>
+                </div>`;
+            }).join('');
+
+            // OTP section for out_for_delivery
+            let otpSection = '';
+            if (order.status === 'out_for_delivery' && order.deliveryOTP) {
+                otpSection = `
+                    <div class="otp-box">
+                        <h3>🔐 Your Delivery OTP</h3>
+                        <div class="otp-number">${order.deliveryOTP}</div>
+                        <p>Give this code to the delivery partner</p>
+                    </div>`;
+            }
+
+            // UPI QR for pending UPI orders
+            let upiSection = '';
+            if (order.paymentMethod === 'upi' && order.paymentStatus !== 'paid') {
+                const upiLink = `upi://pay?pa=dosahouse@upi&pn=Dosa+House&am=${order.total}&cu=INR&tn=${order.orderId}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiLink)}`;
+                upiSection = `
+                    <div class="upi-box">
+                        <h3>💸 Scan to Pay ₹${order.total}</h3>
+                        <img src="${qrUrl}" width="180" height="180" alt="UPI QR Code">
+                        <p>UPI ID: dosahouse@upi</p>
+                        <button onclick="confirmPayment('${order.id}')"
+                            style="margin-top:0.8rem;background:white;color:#7B1FA2;border:none;padding:0.6rem 1.5rem;border-radius:10px;font-weight:700;cursor:pointer;">
+                            ✅ I've Paid
+                        </button>
+                    </div>`;
+            }
+
+            // Rating section for delivered orders
+            let ratingSection = '';
+            if (order.status === 'delivered' && !order.rating) {
+                ratingSection = `
+                    <div class="rating-section">
+                        <p class="rate-label">Rate your experience:</p>
+                        <div class="stars" id="stars-${order.id}">
+                            ${[1,2,3,4,5].map(n =>
+                                `<span onclick="rateOrder('${order.id}', ${n})">⭐</span>`
+                            ).join('')}
+                        </div>
+                    </div>`;
+            } else if (order.rating) {
+                ratingSection = `<div style="text-align:center;padding:0.8rem;color:#F57F17;font-size:0.9rem;">
+                    ${'⭐'.repeat(order.rating)} Rated!
+                </div>`;
+            }
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">${order.orderId || order.id}</div>
+                            <div class="order-date">${date}</div>
+                        </div>
+                        <span class="status-pill status-${order.status}">${STATUS_LABELS[order.status] || order.status}</span>
+                    </div>
+
+                    <div class="progress-bar">${steps}</div>
+
+                    ${otpSection}
+                    ${upiSection}
+
+                    <div class="order-body">
+                        <div class="order-items">${items}</div>
+                        <div class="order-total">
+                            <span>Total</span>
+                            <span class="total-amount">₹${order.total}</span>
+                        </div>
+                    </div>
+
+                    ${ratingSection}
+                </div>`;
+        }
+
+        async function confirmPayment(orderId) {
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    paymentStatus: 'paid',
+                    paidAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('✅ Payment confirmed! Admin has been notified.');
+            } catch(e) {
+                alert('Error. Try again.');
+            }
+        }
+
+        async function rateOrder(orderId, stars) {
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    rating: stars,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch(e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
 </html>
