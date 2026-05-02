@@ -15,11 +15,21 @@ function getCurrentUser() {
             unsubscribe();
             if (!user) { resolve(null); return; }
             try {
+                // Always check STAFF_ROLES first — overrides any Firestore value
+                const staffRole = STAFF_ROLES[user.email];
+
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
-                    resolve({ uid: user.uid, email: user.email, name: user.displayName || userDoc.data().name, ...userDoc.data() });
+                    const data = userDoc.data();
+                    // If staff email, always use correct role (fix old 'customer' role)
+                    const role = staffRole || data.role || 'customer';
+                    if (staffRole && data.role !== staffRole) {
+                        // Update wrong role in Firestore silently
+                        db.collection('users').doc(user.uid).update({ role: staffRole });
+                    }
+                    resolve({ uid: user.uid, email: user.email, name: user.displayName || data.name, ...data, role });
                 } else {
-                    const role = STAFF_ROLES[user.email] || 'customer';
+                    const role = staffRole || 'customer';
                     const userData = {
                         name: user.displayName || user.email.split('@')[0],
                         email: user.email,
