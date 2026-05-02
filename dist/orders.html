@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
+    <script>!function(){var e=document.createElement('div');e.id='__auth_loader';e.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s';e.innerHTML='<div style="font-size:3rem">🍛</div><div style="font-weight:800;color:#3E2723;margin-top:0.5rem;font-size:1.1rem">Dosa House</div><div style="width:40px;height:4px;background:#F57F17;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>';document.documentElement.appendChild(e)}()</script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -287,12 +288,22 @@
         });
 
         function listenToMyOrders(uid) {
+            // No orderBy — avoids composite index requirement. Sort client-side.
             db.collection('orders')
                 .where('customerId', '==', uid)
-                .orderBy('createdAt', 'desc')
                 .onSnapshot(snap => {
-                    const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const orders = snap.docs
+                        .map(doc => ({ id: doc.id, ...doc.data() }))
+                        .sort((a, b) => {
+                            const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+                            const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+                            return tb - ta; // newest first
+                        });
                     renderOrders(orders);
+                }, err => {
+                    console.error('Orders query error:', err);
+                    document.getElementById('orders-list').innerHTML =
+                        '<div style="text-align:center;padding:3rem;color:#888">⚠️ Could not load orders. Please refresh.</div>';
                 });
         }
 
