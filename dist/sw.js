@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v1';
+const CACHE_NAME = 'dosa-house-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -18,14 +18,23 @@ self.addEventListener('install', event => {
       .then(cache => cache.addAll(ASSETS))
       .catch(err => console.log('Cache install error', err))
   );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(keys
+        .filter(key => key !== CACHE_NAME)
+        .map(key => caches.delete(key))
+      );
+    })
+  );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
