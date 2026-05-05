@@ -253,12 +253,13 @@
                       const order = doc.data();
                       const time = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : '';
                       
+                      const orderIdStr = order.orderId || order.id || 'N/A';
                       if (order.status === 'accepted') {
-                          notifs.push({ icon: '✅', title: 'Order Accepted', desc: `Your order #${order.token} has been accepted and is being prepared!`, time, rawTime: order.createdAt });
+                          notifs.push({ icon: '✅', title: 'Order Accepted', desc: `Your order #${orderIdStr} has been accepted and is being prepared!`, time, rawTime: order.createdAt });
                       } else if (order.status === 'out_for_delivery') {
-                          notifs.push({ icon: '🛵', title: 'Out For Delivery!', desc: `Order #${order.token} is on its way. Please provide OTP: <strong>${order.deliveryOtp || 'N/A'}</strong> to the delivery partner.`, time, rawTime: order.createdAt, unread: true });
+                          notifs.push({ icon: '🛵', title: 'Out For Delivery!', desc: `Order #${orderIdStr} is on its way. Please provide OTP: <strong>${order.deliveryOTP || 'N/A'}</strong> to the delivery partner.`, time, rawTime: order.createdAt, unread: true });
                       } else if (order.status === 'delivered') {
-                          notifs.push({ icon: '🎉', title: 'Delivered', desc: `Order #${order.token} was successfully delivered. Enjoy your meal!`, time, rawTime: order.createdAt });
+                          notifs.push({ icon: '🎉', title: 'Delivered', desc: `Order #${orderIdStr} was successfully delivered. Enjoy your meal!`, time, rawTime: order.createdAt });
                       }
                   });
 
