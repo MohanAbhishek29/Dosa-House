@@ -1,13 +1,6 @@
 /* UI Styles: Toast, WhatsApp, Page Transitions */
 
-/* Page Transitions */
-body {
-    opacity: 0;
-    transition: opacity 0.15s ease-in-out;
-}
-body.page-loaded {
-    opacity: 1;
-}
+/* Page Transitions Removed for stability */
 
 /* Toast Notification */
 .toast-container {
