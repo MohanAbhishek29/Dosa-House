@@ -16,7 +16,7 @@ function getCurrentUser() {
             if (!user) { resolve(null); return; }
             try {
                 // Always check STAFF_ROLES first — overrides any Firestore value
-                const staffRole = STAFF_ROLES[user.email];
+                const staffRole = user.email ? STAFF_ROLES[user.email] : null;
 
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
@@ -27,12 +27,15 @@ function getCurrentUser() {
                         // Update wrong role in Firestore silently
                         db.collection('users').doc(user.uid).update({ role: staffRole });
                     }
-                    resolve({ uid: user.uid, email: user.email, name: user.displayName || data.name, ...data, role });
+                    resolve({ uid: user.uid, email: user.email || data.email || null, phone: user.phoneNumber || data.phone || null, name: user.displayName || data.name || 'Customer', ...data, role });
                 } else {
                     const role = staffRole || 'customer';
+                    // Generate a name from email, or phone, or default to Customer
+                    const defaultName = user.displayName || (user.email ? user.email.split('@')[0] : (user.phoneNumber ? user.phoneNumber : 'Customer'));
                     const userData = {
-                        name: user.displayName || user.email.split('@')[0],
-                        email: user.email,
+                        name: defaultName,
+                        email: user.email || null,
+                        phone: user.phoneNumber || null,
                         role,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     };

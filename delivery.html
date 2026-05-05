@@ -109,9 +109,15 @@
 
         function listenToDeliveries() {
             db.collection('orders')
-                .where('status', '==', 'out_for_delivery')
+                .where('status', 'in', ['sent_to_delivery', 'out_for_delivery'])
                 .onSnapshot(snapshot => {
-                    const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sort locally
+                    orders.sort((a, b) => {
+                        const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+                        const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+                        return ta - tb;
+                    });
                     renderDeliveries(orders);
                 });
         }
@@ -131,6 +137,25 @@
             const payClass = order.paymentMethod === 'upi' ? 'payment-upi' : 'payment-cash';
             const payLabel = order.paymentMethod === 'upi' ? '💸 UPI Paid' : '💵 Collect Cash';
 
+            let actionArea = '';
+            if (order.status === 'sent_to_delivery') {
+                actionArea = `
+                    <div style="margin-top:1.5rem;text-align:center;">
+                        <button onclick="startDelivery('${order.id}')" style="padding:1rem 2rem;background:#F57F17;color:white;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;width:100%;cursor:pointer;">🛵 Accept & Start Delivery</button>
+                    </div>
+                `;
+            } else if (order.status === 'out_for_delivery') {
+                actionArea = `
+                    <div class="otp-section">
+                        <div class="otp-label">🔐 Ask customer for OTP to confirm delivery:</div>
+                        <div class="otp-input-row">
+                            <input class="otp-input" type="number" placeholder="OTP" maxlength="4" id="otp-${order.id}">
+                            <button class="btn-confirm" onclick="confirmDelivery('${order.id}', '${order.deliveryOTP}')">Confirm ✅</button>
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
             <div class="delivery-card">
                 <div class="delivery-card-header">
@@ -149,15 +174,21 @@
                         <span class="total-amount">₹${order.total}</span>
                     </div>
 
-                    <div class="otp-section">
-                        <div class="otp-label">🔐 Ask customer for OTP to confirm delivery:</div>
-                        <div class="otp-input-row">
-                            <input class="otp-input" type="number" placeholder="OTP" maxlength="4" id="otp-${order.id}">
-                            <button class="btn-confirm" onclick="confirmDelivery('${order.id}', '${order.deliveryOTP}')">Confirm ✅</button>
-                        </div>
-                    </div>
+                    ${actionArea}
                 </div>
             </div>`;
+        }
+
+        async function startDelivery(orderId) {
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    status: 'out_for_delivery',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('🚀 Delivery started!', 'success');
+            } catch (e) {
+                showToast('Error accepting delivery', 'error');
+            }
         }
 
         async function confirmDelivery(orderId, correctOTP) {
