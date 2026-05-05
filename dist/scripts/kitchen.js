@@ -15,11 +15,17 @@ function startKitchenListener() {
     const ordersGrid = document.getElementById('orders-grid');
 
     // Listen for orders with status: accepted OR preparing
+    // Removed orderBy to avoid composite index requirement
     unsubscribe = db.collection('orders')
         .where('status', 'in', ['accepted', 'preparing'])
-        .orderBy('createdAt', 'asc')
         .onSnapshot(snapshot => {
-            const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Sort client-side by createdAt (asc = oldest first)
+            orders.sort((a, b) => {
+                const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+                const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+                return ta - tb;
+            });
             renderKitchenBoard(orders);
             updateKitchenStats(snapshot);
         }, err => {
