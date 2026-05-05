@@ -252,8 +252,8 @@
         <a href="orders.html" class="nav-item active">
             <span class="icon">📋</span>Orders
         </a>
-        <a href="#" class="nav-item" onclick="logoutUser(); return false;">
-            <span class="icon">👤</span>Logout
+        <a href="account.html" class="nav-item">
+            <span class="icon">⚙️</span>Account
         </a>
     </nav>
 
@@ -264,12 +264,13 @@
     <script src="scripts/firebase-config.js"></script>
     <script src="scripts/auth.js"></script>
     <script>
-        const STATUS_STEPS = ['pending','accepted','preparing','ready','out_for_delivery','delivered'];
+        const STATUS_STEPS = ['pending','accepted','preparing','packaging','sent_to_delivery','out_for_delivery','delivered'];
         const STATUS_LABELS = {
             pending: 'Placed',
             accepted: 'Accepted',
             preparing: 'Cooking',
-            ready: 'Ready',
+            packaging: 'Packaging',
+            sent_to_delivery: 'Assigned',
             out_for_delivery: 'On Way',
             delivered: 'Delivered'
         };
@@ -277,9 +278,10 @@
             pending: '📋',
             accepted: '✅',
             preparing: '👨‍🍳',
-            ready: '🔔',
-            out_for_delivery: '🛵',
-            delivered: '✅'
+            packaging: '📦',
+            sent_to_delivery: '🛵',
+            out_for_delivery: '🛣️',
+            delivered: '🎉'
         };
 
         requireAuth(['customer']).then(user => {
@@ -331,7 +333,7 @@
             ).join('');
 
             const currentStepIdx = STATUS_STEPS.indexOf(order.status);
-            const steps = STATUS_STEPS.slice(0, 6).map((s, i) => {
+            const steps = STATUS_STEPS.slice(0, 7).map((s, i) => {
                 const cls = i < currentStepIdx ? 'done' : i === currentStepIdx ? 'active' : '';
                 return `<div class="step ${cls}">
                     <div class="step-dot">${STATUS_ICONS[s]}</div>

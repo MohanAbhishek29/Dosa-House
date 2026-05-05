@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Dosa House</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/ui.css">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const l = document.getElementById('__auth_loader');
+            if (l) l.style.display = 'flex';
+        });
+    </script>
+    <style>
+        .account-header {
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
+            padding: 120px 0 3rem;
+            text-align: center;
+        }
+        .account-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-btn.active {
+            color: #E65100;
+            border-bottom-color: #E65100;
+        }
+        .tab-content {
+            display: none;
+            padding: 3rem 0;
+            min-height: 40vh;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .notification-card {
+            background: white;
+            border-left: 4px solid #F57F17;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .notification-card.unread {
+            background: #FFF8E1;
+        }
+        .notif-icon {
+            font-size: 1.5rem;
+            background: #FFE0B2;
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .notif-content h4 { margin: 0 0 0.5rem; color: #3E2723; }
+        .notif-content p { margin: 0; color: #666; font-size: 0.95rem; }
+        .notif-time { font-size: 0.8rem; color: #999; margin-top: 0.5rem; display: block; }
+    </style>
+</head>
+<body>
+    <!-- Full Screen Loader (Protected Page) -->
+    <div id="__auth_loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.2s;">
+        <div style="font-size:4rem;animation:pulse 1.5s infinite;">🍛</div>
+        <h2 style="color:#E65100;font-family:'Outfit',sans-serif;margin-top:1rem;">Dosa House</h2>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 50C10 25 30 10 50 10C70 10 90 25 90 50C90 75 70 90 50 90C30 90 10 75 10 50Z" fill="#F57F17" />
+                    <path d="M20 50C20 30 50 30 50 30C50 30 80 30 80 50C80 70 50 80 50 80C50 80 20 70 20 50Z" fill="#FFF8E1" />
+                    <path d="M50 80C50 80 30 60 50 40C70 60 50 80 50 80Z" fill="#2E7D32" />
+                </svg>
+                <span style="color:var(--color-text-primary); margin-left:10px;">DOSA HOUSE</span>
+            </a>
+            <div style="display: flex; gap: 2rem; align-items:center;">
+                <a href="index.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">HOME</a>
+                <a href="menu.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">MENU</a>
+                <a href="booking.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">BOOK TABLE</a>
+                <a href="orders.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
+                <a href="about.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
+                
+                <!-- User Profile Dropdown -->
+                <div id="user-profile-wrap" style="position:relative;display:none;">
+                    <button id="user-profile-btn" onclick="toggleProfileMenu()" style="
+                        display:flex;align-items:center;gap:0.5rem;
+                        background:#F57F17;color:white;border:none;
+                        padding:0.4rem 1rem;border-radius:20px;
+                        font-weight:700;font-size:0.9rem;cursor:pointer;
+                        font-family:inherit;
+                    ">
+                        <span id="user-avatar" style="font-size:1rem;">👤</span>
+                        <span id="user-name-nav">Me</span>
+                        <span>▾</span>
+                    </button>
+                    <div id="profile-dropdown" style="
+                        display:none;position:absolute;top:calc(100% + 8px);right:0;
+                        background:white;border-radius:14px;min-width:180px;
+                        box-shadow:0 8px 30px rgba(0,0,0,0.15);overflow:hidden;z-index:999;
+                    ">
+                        <div id="profile-email" style="padding:0.8rem 1rem;font-size:0.78rem;color:#888;border-bottom:1px solid #f5f5f5;"></div>
+                        <a href="account.html" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">⚙️ My Account</a>
+                        <a href="account.html#notifications" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">🔔 Notifications</a>
+                        <div style="border-top:1px solid #f5f5f5;">
+                            <button onclick="logoutUser()" style="
+                                width:100%;padding:0.8rem 1rem;background:none;border:none;
+                                color:#d32f2f;font-weight:700;cursor:pointer;text-align:left;
+                                font-size:0.9rem;font-family:inherit;
+                            ">🚪 Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <script>
+        function toggleProfileMenu() {
+            const d = document.getElementById('profile-dropdown');
+            d.style.display = d.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(e) {
+            const wrap = document.getElementById('user-profile-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('profile-dropdown').style.display = 'none';
+            }
+        });
+    </script>
+
+    <header class="account-header">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; color: #3E2723;">My Account</h1>
+            <div class="account-tabs">
+                <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
+                <button class="tab-btn" onclick="switchTab('notifications')">Notifications</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Profile Tab -->
+        <div id="tab-profile" class="tab-content active">
+            <div class="profile-card">
+                <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;">
+                    <div id="acc-avatar" style="width:80px;height:80px;border-radius:50%;background:#FFE0B2;display:flex;align-items:center;justify-content:center;font-size:2.5rem;">👤</div>
+                    <div>
+                        <h2 id="acc-name" style="margin:0;color:#3E2723;">Loading...</h2>
+                        <p id="acc-email" style="margin:0.2rem 0 0;color:#666;">loading@email.com</p>
+                    </div>
+                </div>
+                <div style="border-top:1px solid #eee;padding-top:1.5rem;">
+                    <p><strong>Member Since:</strong> <span id="acc-joined">Loading...</span></p>
+                    <p><strong>Role:</strong> Customer</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="tab-notifications" class="tab-content">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                    <h3 style="margin:0;">Recent Updates</h3>
+                </div>
+                
+                <div id="notifications-list">
+                    <!-- Injected by JS -->
+                    <p style="text-align:center;color:#888;">Loading notifications...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="scripts/firebase-config.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        requireAuth(['customer']).then(user => {
+            if (!user) return;
+            
+            // Populate Navbar
+            document.getElementById('user-profile-wrap').style.display = 'block';
+            document.getElementById('user-name-nav').textContent = user.name?.split(' ')[0] || 'Me';
+            document.getElementById('profile-email').textContent = user.email;
+            if (user.photoURL) {
+                document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
+            }
+
+            // Populate Account Details
+            document.getElementById('acc-name').textContent = user.name || 'Dosa Lover';
+            document.getElementById('acc-email').textContent = user.email || user.phoneNumber || 'No email provided';
+            if (user.createdAt) {
+                document.getElementById('acc-joined').textContent = user.createdAt.toDate ? user.createdAt.toDate().toLocaleDateString() : 'Recently';
+            }
+
+            // Load Notifications (Derived from Orders)
+            loadNotifications(user.uid);
+
+            // Handle URL hash
+            if(window.location.hash === '#notifications') {
+                switchTab('notifications');
+            }
+        });
+
+        function loadNotifications(uid) {
+            db.collection('orders')
+              .where('customerId', '==', uid)
+              .onSnapshot(snap => {
+                  const list = document.getElementById('notifications-list');
+                  list.innerHTML = '';
+                  let notifs = [];
+
+                  snap.docs.forEach(doc => {
+                      const order = doc.data();
+                      const time = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : '';
+                      
+                      if (order.status === 'accepted') {
+                          notifs.push({ icon: '✅', title: 'Order Accepted', desc: `Your order #${order.token} has been accepted and is being prepared!`, time, rawTime: order.createdAt });
+                      } else if (order.status === 'out_for_delivery') {
+                          notifs.push({ icon: '🛵', title: 'Out For Delivery!', desc: `Order #${order.token} is on its way. Please provide OTP: <strong>${order.deliveryOtp || 'N/A'}</strong> to the delivery partner.`, time, rawTime: order.createdAt, unread: true });
+                      } else if (order.status === 'delivered') {
+                          notifs.push({ icon: '🎉', title: 'Delivered', desc: `Order #${order.token} was successfully delivered. Enjoy your meal!`, time, rawTime: order.createdAt });
+                      }
+                  });
+
+                  if (notifs.length === 0) {
+                      list.innerHTML = `<p style="text-align:center;color:#888;">No notifications yet.</p>`;
+                      return;
+                  }
+
+                  // Sort by time
+                  notifs.sort((a,b) => (b.rawTime?.toMillis?.() || 0) - (a.rawTime?.toMillis?.() || 0));
+
+                  notifs.forEach(n => {
+                      list.innerHTML += `
+                          <div class="notification-card ${n.unread ? 'unread' : ''}">
+                              <div class="notif-icon">${n.icon}</div>
+                              <div class="notif-content">
+                                  <h4>${n.title}</h4>
+                                  <p>${n.desc}</p>
+                                  <span class="notif-time">${n.time}</span>
+                              </div>
+                          </div>
+                      `;
+                  });
+              });
+        }
+    </script>
+</body>
+</html>

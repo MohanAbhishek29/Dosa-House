@@ -175,7 +175,9 @@
         <button class="tab-btn" onclick="filterOrders('pending', this)">🔔 Pending</button>
         <button class="tab-btn" onclick="filterOrders('accepted', this)">✅ Accepted</button>
         <button class="tab-btn" onclick="filterOrders('preparing', this)">👨‍🍳 Preparing</button>
-        <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛵 Out for Delivery</button>
+        <button class="tab-btn" onclick="filterOrders('packaging', this)">📦 Packaging</button>
+        <button class="tab-btn" onclick="filterOrders('sent_to_delivery', this)">🛵 Assigned</button>
+        <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛣️ On Way</button>
         <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
     </div>
 
@@ -281,7 +283,11 @@
             } else if (order.status === 'accepted') {
                 actions = `<button class="action-btn btn-preparing" onclick="updateStatus('${order.id}', 'preparing')">👨‍🍳 Mark Preparing</button>`;
             } else if (order.status === 'preparing') {
-                actions = `<button class="action-btn btn-delivery" onclick="updateStatus('${order.id}', 'out_for_delivery')">🛵 Out for Delivery</button>`;
+                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">👨‍🍳 Cooking in Kitchen...</span>`;
+            } else if (order.status === 'packaging') {
+                actions = `<button class="action-btn btn-delivery" onclick="updateStatus('${order.id}', 'sent_to_delivery')">🛵 Assign to Delivery</button>`;
+            } else if (order.status === 'sent_to_delivery') {
+                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">🛵 Waiting for delivery pickup...</span>`;
             } else if (order.status === 'out_for_delivery') {
                 actions = `<div class="otp-display">OTP for Customer: <span class="otp-code">${order.deliveryOTP || '----'}</span></div>
                            <button class="action-btn btn-delivered" onclick="updateStatus('${order.id}', 'delivered')" style="margin-top:0.5rem">✔️ Mark Delivered</button>`;
@@ -296,7 +302,7 @@
                         <div class="order-id">${order.orderId || order.id}</div>
                         <div class="order-time">${time}</div>
                     </div>
-                    <span class="status-badge status-${order.status}">${order.status?.replace('_', ' ')}</span>
+                    <span class="status-badge status-${order.status}">${order.status?.replace(/_/g, ' ')}</span>
                 </div>
                 <div class="card-body">
                     <div class="customer-info">
@@ -323,8 +329,8 @@
                     status: newStatus,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
-                // Generate OTP when sending out for delivery
-                if (newStatus === 'out_for_delivery') {
+                // Generate OTP when sending out for delivery (or assigning)
+                if (newStatus === 'sent_to_delivery' || newStatus === 'out_for_delivery') {
                     update.deliveryOTP = Math.floor(1000 + Math.random() * 9000).toString();
                 }
                 await db.collection('orders').doc(orderId).update(update);

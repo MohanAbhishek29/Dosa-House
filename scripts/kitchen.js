@@ -103,7 +103,7 @@ async function startPreparing(orderId) {
 async function markReady(orderId) {
     try {
         await db.collection('orders').doc(orderId).update({
-            status: 'ready',
+            status: 'packaging',
             readyAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });

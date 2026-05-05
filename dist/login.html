@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
     <script>
         /* Login page — remove auth loader immediately if it exists */
         document.addEventListener('DOMContentLoaded', () => {
@@ -68,9 +70,8 @@
         <h1 class="login-title">Dosa House</h1>
         <p class="login-subtitle">Sign in to order authentic South Indian food</p>
 
-        <!-- Customer Google Login via Google Identity Services -->
-        <div id="google-btn-container" style="display:flex;justify-content:center;margin-bottom:0.5rem;"></div>
-        <p id="google-status" style="text-align:center;color:#888;font-size:0.85rem;min-height:1.2rem;"></p>
+        <!-- Customer Login Options (Google, Email, Phone) -->
+        <div id="firebaseui-auth-container" style="margin-bottom:1rem;"></div>
 
         <div class="divider">Staff Login</div>
 
@@ -99,31 +100,19 @@
     <script src="scripts/firebase-config.js"></script>
     <script src="scripts/auth.js"></script>
     <script>
-        // ── Google Identity Services button ──
-        window.onGoogleLibraryLoad = function() {
-            google.accounts.id.initialize({
-                client_id: '54232177389-p41cngsqiv7u0pgucg7gur2niqu0amh7.apps.googleusercontent.com',
-                callback: handleGoogleSignIn
-            });
-            google.accounts.id.renderButton(
-                document.getElementById('google-btn-container'),
-                { theme: 'outline', size: 'large', width: 340, text: 'continue_with' }
-            );
+        // ── Firebase UI for Customers ──
+        const uiConfig = {
+            signInSuccessUrl: 'index.html',
+            signInOptions: [
+                firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID
+            ],
+            tosUrl: 'about.html',
+            privacyPolicyUrl: 'about.html'
         };
-
-        async function handleGoogleSignIn(response) {
-            document.getElementById('google-status').textContent = '⏳ Signing in...';
-            try {
-                const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-                await auth.signInWithCredential(credential);
-                const user = await getCurrentUser();
-                const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
-                window.location.replace(redirectMap[user.role] || 'index.html');
-            } catch (e) {
-                console.error('Google sign-in error:', e);
-                document.getElementById('google-status').textContent = '❌ ' + e.message;
-            }
-        }
+        const ui = new firebaseui.auth.AuthUI(auth);
+        ui.start('#firebaseui-auth-container', uiConfig);
 
         // ── Already logged in? Show banner ──
         getCurrentUser().then(user => {
