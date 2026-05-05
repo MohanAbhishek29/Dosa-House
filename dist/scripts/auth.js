@@ -43,7 +43,8 @@ function getCurrentUser() {
                     resolve({ uid: user.uid, ...userData });
                 }
             } catch (e) {
-                console.error('Auth error:', e);
+                console.error('Auth error in getCurrentUser:', e);
+                alert('Database Error: ' + e.message + '\n\nPlease check your Firebase Firestore Security Rules (Test Mode might have expired).');
                 resolve(null);
             }
         });
