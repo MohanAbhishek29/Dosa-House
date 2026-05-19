@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="styles/animation.css">
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
-    <script>!function(){var e=document.createElement('div');e.id='__auth_loader';e.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s';e.innerHTML='<div style="font-size:3rem">🍛</div><div style="font-weight:800;color:#3E2723;margin-top:0.5rem;font-size:1.1rem">Dosa House</div><div style="width:40px;height:4px;background:#F57F17;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>';document.documentElement.appendChild(e)}()</script>
+    <script>!function () { var e = document.createElement('div'); e.id = '__auth_loader'; e.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s'; e.innerHTML = '<div style="font-size:3rem">🍛</div><div style="font-weight:800;color:#3E2723;margin-top:0.5rem;font-size:1.1rem">Dosa House</div><div style="width:40px;height:4px;background:#F57F17;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>'; document.documentElement.appendChild(e) }()</script>
 </head>
 
 <body>
@@ -42,9 +42,15 @@
                 <a href="about.html"
                     style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
                 <a href="#" id="install-btn"
-                    style="font-weight: 700; color: var(--color-banana-leaf, #2E7D32); text-decoration: none; font-size: 1.1rem; border: 2px solid var(--color-banana-leaf, #2E7D32); padding: 0.2rem 0.8rem; border-radius: 20px;">📱 INSTALL</a>
-                
-                <!-- User Profile Dropdown -->
+                    style="font-weight: 700; color: var(--color-banana-leaf, #2E7D32); text-decoration: none; font-size: 1.1rem; border: 2px solid var(--color-banana-leaf, #2E7D32); padding: 0.2rem 0.8rem; border-radius: 20px;">📱
+                    INSTALL</a>
+
+                <!-- Guest Login Button (shown when not logged in) -->
+                <a id="nav-login-wrap" href="login.html"
+                    style="display:none;font-weight:700;background:#F57F17;color:white;text-decoration:none;padding:0.4rem 1.2rem;border-radius:20px;font-size:0.9rem;">Login
+                    / Sign Up</a>
+
+                <!-- User Profile Dropdown (shown when logged in) -->
                 <div id="user-profile-wrap" style="position:relative;display:none;">
                     <button id="user-profile-btn" onclick="toggleProfileMenu()" style="
                         display:flex;align-items:center;gap:0.5rem;
@@ -62,9 +68,15 @@
                         background:white;border-radius:14px;min-width:180px;
                         box-shadow:0 8px 30px rgba(0,0,0,0.15);overflow:hidden;z-index:999;
                     ">
-                        <div id="profile-email" style="padding:0.8rem 1rem;font-size:0.78rem;color:#888;border-bottom:1px solid #f5f5f5;"></div>
-                        <a href="account.html" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">⚙️ My Account</a>
-                        <a href="account.html#notifications" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">🔔 Notifications</a>
+                        <div id="profile-email"
+                            style="padding:0.8rem 1rem;font-size:0.78rem;color:#888;border-bottom:1px solid #f5f5f5;">
+                        </div>
+                        <a href="account.html"
+                            style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">⚙️
+                            My Account</a>
+                        <a href="account.html#notifications"
+                            style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">🔔
+                            Notifications</a>
                         <div style="border-top:1px solid #f5f5f5;">
                             <button onclick="logoutUser()" style="
                                 width:100%;padding:0.8rem 1rem;background:none;border:none;
@@ -78,14 +90,16 @@
         </div>
     </nav>
     <style>
-        #profile-dropdown a:hover { background:#FFF8E1; }
+        #profile-dropdown a:hover {
+            background: #FFF8E1;
+        }
     </style>
     <script>
         function toggleProfileMenu() {
             const d = document.getElementById('profile-dropdown');
             d.style.display = d.style.display === 'none' ? 'block' : 'none';
         }
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!document.getElementById('user-profile-wrap').contains(e.target)) {
                 document.getElementById('profile-dropdown').style.display = 'none';
             }
@@ -253,7 +267,7 @@
                     <div class="receipt-header">
                         <span class="receipt-logo">DOSA HOUSE</span>
                         <div class="receipt-info">
-                            <p>Railway Station Road, Bhimavaram</p>
+                            <p>Railway Station Road, Lanjala Puram</p>
                             <p>Pin: 534201</p>
                             <p>Ph: 9392421941</p>
                             <p>Date: <span id="receipt-date"></span></p>
@@ -329,17 +343,10 @@
         <script src="scripts/music.js"></script>
         <script src="scripts/ui.js"></script>
         <script>
-            requireAuth(['customer']).then(user => {
-                if (!user) return;
-                // Show user profile in navbar
-                document.getElementById('user-profile-wrap').style.display = 'block';
-                document.getElementById('user-name-nav').textContent = user.name?.split(' ')[0] || 'Me';
-                document.getElementById('profile-email').textContent = user.email;
-                if (user.photoURL) {
-                    document.getElementById('user-avatar').innerHTML =
-                        `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
-                }
-            });
+            // Page is PUBLIC — use setupNavAuth (no redirect for guests)
+            let _currentUser = null;
+            setupNavAuth().then(user => { _currentUser = user; });
         </script>
 </body>
+
 </html>

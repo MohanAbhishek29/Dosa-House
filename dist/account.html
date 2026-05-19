@@ -109,6 +109,9 @@
                 <a href="orders.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
                 <a href="about.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
                 
+                <!-- Guest Login Button -->
+                <a id="nav-login-wrap" href="login.html" style="display:none;font-weight:700;background:#F57F17;color:white;text-decoration:none;padding:0.4rem 1.2rem;border-radius:20px;font-size:0.9rem;">Login / Sign Up</a>
+
                 <!-- User Profile Dropdown -->
                 <div id="user-profile-wrap" style="position:relative;display:none;">
                     <button id="user-profile-btn" onclick="toggleProfileMenu()" style="
@@ -213,30 +216,27 @@
             document.getElementById('tab-' + tab).classList.add('active');
         }
 
-        requireAuth(['customer']).then(user => {
-            if (!user) return;
-            
-            // Populate Navbar
-            document.getElementById('user-profile-wrap').style.display = 'block';
-            document.getElementById('user-name-nav').textContent = user.name?.split(' ')[0] || 'Me';
-            document.getElementById('profile-email').textContent = user.email;
-            if (user.photoURL) {
-                document.getElementById('user-avatar').innerHTML = `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
-                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
+        setupNavAuth().then(user => {
+            if (!user) {
+                window.location.replace('login.html');
+                return;
             }
 
             // Populate Account Details
             document.getElementById('acc-name').textContent = user.name || 'Dosa Lover';
-            document.getElementById('acc-email').textContent = user.email || user.phoneNumber || 'No email provided';
+            document.getElementById('acc-email').textContent = user.email || user.phone || 'No email provided';
             if (user.createdAt) {
                 document.getElementById('acc-joined').textContent = user.createdAt.toDate ? user.createdAt.toDate().toLocaleDateString() : 'Recently';
             }
+            if (user.photoURL) {
+                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
+            }
 
-            // Load Notifications (Derived from Orders)
+            // Load Notifications
             loadNotifications(user.uid);
 
             // Handle URL hash
-            if(window.location.hash === '#notifications') {
+            if (window.location.hash === '#notifications') {
                 switchTab('notifications');
             }
         });
@@ -252,8 +252,7 @@
                   snap.docs.forEach(doc => {
                       const order = doc.data();
                       const time = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : '';
-                      
-                      const orderIdStr = order.orderId || order.id || 'N/A';
+                      const orderIdStr = order.orderId || doc.id || 'N/A';
                       if (order.status === 'accepted') {
                           notifs.push({ icon: '✅', title: 'Order Accepted', desc: `Your order #${orderIdStr} has been accepted and is being prepared!`, time, rawTime: order.createdAt });
                       } else if (order.status === 'out_for_delivery') {
@@ -268,8 +267,7 @@
                       return;
                   }
 
-                  // Sort by time
-                  notifs.sort((a,b) => (b.rawTime?.toMillis?.() || 0) - (a.rawTime?.toMillis?.() || 0));
+                  notifs.sort((a, b) => (b.rawTime?.toMillis?.() || 0) - (a.rawTime?.toMillis?.() || 0));
 
                   notifs.forEach(n => {
                       list.innerHTML += `
@@ -280,8 +278,7 @@
                                   <p>${n.desc}</p>
                                   <span class="notif-time">${n.time}</span>
                               </div>
-                          </div>
-                      `;
+                          </div>`;
                   });
               });
         }

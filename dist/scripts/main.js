@@ -652,12 +652,17 @@ orderTypeBtns.forEach(btn => {
 // 5. Checkout Button Logic
 const checkoutBtn = document.querySelector('.btn-checkout');
 if (checkoutBtn) {
-    checkoutBtn.onclick = () => {
+    checkoutBtn.onclick = async () => {
         if (cart.length === 0) {
             showToast("Your plate is empty! Add some delicious items first. 🍛", "error");
             return;
         }
-
+        // Require login to place order
+        const user = await getCurrentUser();
+        if (!user) {
+            requireLogin('Please sign in to place your order. It only takes a second!');
+            return;
+        }
         generateReceipt();
     };
 }

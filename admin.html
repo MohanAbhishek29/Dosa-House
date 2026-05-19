@@ -290,10 +290,15 @@
                 actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">🛵 Waiting for delivery pickup...</span>`;
             } else if (order.status === 'out_for_delivery') {
                 actions = `<div class="otp-display">OTP for Customer: <span class="otp-code">${order.deliveryOTP || '----'}</span></div>
-                           <button class="action-btn btn-delivered" onclick="updateStatus('${order.id}', 'delivered')" style="margin-top:0.5rem">✔️ Mark Delivered</button>`;
+                           <p style="color:#888;font-size:0.82rem;margin-top:0.5rem;">⏳ Waiting for delivery partner to confirm OTP...</p>`;
             }
 
             const ratingHtml = order.rating ? `<div class="rating-display"><span class="stars">${'⭐'.repeat(order.rating)}</span><span style="color:#888;font-size:0.8rem">${order.review || ''}</span></div>` : '';
+
+            // Payment confirm for UPI orders not yet paid
+            const paymentConfirmHtml = (order.paymentMethod === 'upi' && order.paymentStatus !== 'paid')
+                ? `<button class="action-btn" onclick="confirmPaymentReceived('${order.id}')" style="background:#7B1FA2;color:white;margin-top:0.5rem;width:100%">💸 Confirm UPI Payment Received</button>`
+                : (order.paymentMethod === 'upi' && order.paymentStatus === 'paid' ? `<span style="color:#4CAF50;font-size:0.82rem;font-weight:700">✅ UPI Payment Verified</span>` : '');
 
             return `
             <div class="order-card ${isNew ? 'new-order' : ''}">
@@ -319,6 +324,7 @@
                         <span class="total-amount">₹${order.total}</span>
                     </div>
                     <div class="action-btns">${actions}</div>
+                    ${paymentConfirmHtml}
                 </div>
             </div>`;
         }
@@ -329,15 +335,29 @@
                     status: newStatus,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
-                // Generate OTP when sending out for delivery (or assigning)
-                if (newStatus === 'sent_to_delivery' || newStatus === 'out_for_delivery') {
+                // Generate OTP ONCE when admin sends to delivery — delivery.html just reads it
+                if (newStatus === 'sent_to_delivery') {
                     update.deliveryOTP = Math.floor(1000 + Math.random() * 9000).toString();
                 }
                 await db.collection('orders').doc(orderId).update(update);
-                showToast(`Order ${newStatus.replace('_', ' ')}! ✅`, 'success');
+                showToast(`Order ${newStatus.replace(/_/g, ' ')}! ✅`, 'success');
             } catch (e) {
                 showToast('Error updating order. Try again.', 'error');
                 console.error(e);
+            }
+        }
+
+        async function confirmPaymentReceived(orderId) {
+            if (!confirm('Confirm that payment has been received from customer?')) return;
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    paymentStatus: 'paid',
+                    paidAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('💰 Payment confirmed!', 'success');
+            } catch (e) {
+                showToast('Error. Try again.', 'error');
             }
         }
     </script>

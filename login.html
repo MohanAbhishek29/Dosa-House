@@ -4,174 +4,368 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Dosa House</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/ui.css">
     <link rel="manifest" href="manifest.json">
-    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
-    <script>
-        /* Login page — remove auth loader immediately if it exists */
-        document.addEventListener('DOMContentLoaded', () => {
-            const l = document.getElementById('__auth_loader');
-            if (l) l.remove();
-        });
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            opacity: 1 !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%);
-            font-family: var(--font-body, 'Outfit', sans-serif);
+            font-family: 'Outfit', sans-serif;
+            padding: 1rem;
         }
-        .login-card {
+        .card {
             background: white;
             border-radius: 24px;
-            padding: 3rem 2.5rem;
+            padding: 2.5rem 2rem;
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
             text-align: center;
         }
-        .login-logo { font-size: 3rem; margin-bottom: 0.5rem; }
-        .login-title { font-size: 2rem; font-weight: 800; color: #3E2723; margin-bottom: 0.3rem; }
-        .login-subtitle { color: #795548; font-size: 1rem; margin-bottom: 2.5rem; }
-        .divider {
-            display: flex; align-items: center; gap: 1rem;
-            margin: 1.5rem 0; color: #aaa; font-size: 0.9rem;
+        .logo { font-size: 3rem; margin-bottom: 0.5rem; }
+        h1 { font-size: 2rem; font-weight: 800; color: #3E2723; margin-bottom: 0.3rem; }
+        .subtitle { color: #795548; font-size: 0.95rem; margin-bottom: 2rem; }
+
+        /* Buttons */
+        .btn-google {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #3c4043;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 0.75rem;
         }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
-        .staff-section { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; }
-        .staff-title { font-size: 0.85rem; color: #999; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .form-group { margin-bottom: 1rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 0.4rem; }
+        .btn-google:hover { border-color: #F57F17; background: #FFF8E1; }
+        .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-google svg { flex-shrink: 0; }
+
+        .btn-phone {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #757575;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Email section */
+        .email-toggle {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: #F57F17;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: 'Outfit', sans-serif;
+            margin-bottom: 0.75rem;
+        }
+        .email-toggle:hover { background: #E65100; }
+
+        .email-form { display: none; text-align: left; margin-bottom: 0.75rem; }
+        .email-form.open { display: block; }
+        .form-group { margin-bottom: 0.75rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.3rem; }
         .form-group input {
-            width: 100%; padding: 0.8rem 1rem; border: 2px solid #eee;
-            border-radius: 10px; font-size: 1rem; outline: none;
-            transition: border-color 0.2s; box-sizing: border-box;
+            width: 100%; padding: 0.75rem 1rem; border: 2px solid #eee;
+            border-radius: 10px; font-size: 0.95rem; outline: none;
+            transition: border-color 0.2s; font-family: 'Outfit', sans-serif;
         }
         .form-group input:focus { border-color: #F57F17; }
-        .btn-staff-login {
-            width: 100%; padding: 1rem; background: #F57F17; color: white;
-            border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
-            cursor: pointer; transition: background 0.2s; font-family: inherit;
+        .tab-btns { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .tab-btn {
+            flex: 1; padding: 0.5rem; border: 2px solid #eee; border-radius: 8px;
+            background: white; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            font-family: 'Outfit', sans-serif; color: #555; transition: all 0.2s;
         }
-        .btn-staff-login:hover { background: #E65100; }
-        .btn-staff-login:disabled { opacity: 0.6; cursor: not-allowed; }
-        .error-msg { color: #d32f2f; font-size: 0.9rem; margin-top: 0.5rem; display: none; }
+        .tab-btn.active { border-color: #F57F17; color: #F57F17; background: #FFF8E1; }
+        .btn-submit {
+            width: 100%; padding: 0.85rem; background: #F57F17; color: white;
+            border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: background 0.2s;
+        }
+        .btn-submit:hover { background: #E65100; }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .divider {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin: 1.25rem 0; color: #bbb; font-size: 0.85rem;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
+
+        .error-box {
+            background: #ffeaea; border: 1px solid #ffcdd2; border-radius: 10px;
+            padding: 0.75rem 1rem; color: #c62828; font-size: 0.85rem;
+            margin-bottom: 0.75rem; display: none; text-align: left;
+        }
+        .success-box {
+            background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 10px;
+            padding: 0.75rem 1rem; color: #2e7d32; font-size: 0.85rem;
+            margin-bottom: 0.75rem; display: none; text-align: left;
+        }
+        .spinner {
+            display: inline-block; width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Staff section */
+        .staff-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee; }
+        .staff-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+        .btn-staff {
+            width: 100%; padding: 0.85rem; background: #3E2723; color: white;
+            border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: background 0.2s;
+        }
+        .btn-staff:hover { background: #5D4037; }
+        .btn-staff:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
+<div class="card">
+    <div class="logo">🍛</div>
+    <h1>Dosa House</h1>
+    <p class="subtitle">Sign in to order authentic South Indian food</p>
 
-    <div class="login-card">
-        <div class="login-logo">🍛</div>
-        <h1 class="login-title">Dosa House</h1>
-        <p class="login-subtitle">Sign in to order authentic South Indian food</p>
+    <div id="error-box" class="error-box"></div>
+    <div id="success-box" class="success-box"></div>
 
-        <!-- Customer Login Options (Google, Email, Phone) -->
-        <div id="firebaseui-auth-container" style="margin-bottom:0.5rem;"></div>
+    <!-- Google Login -->
+    <button class="btn-google" id="google-btn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.2 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.9 6.5 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.9 6.5 29.2 4 24 4c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.8-1.9 13.3-5l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.7-2.8-11.3-7l-6.5 5C9.6 39.5 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.8l6.2 5.2c3.6-3.4 5.7-8.4 5.7-14 0-1.3-.1-2.7-.1-4z"/></svg>
+        Sign in with Google
+    </button>
 
-        <!-- Coming soon Phone Login -->
-        <button onclick="alert('Phone login is currently unavailable on the free plan. We are upgrading soon! Please use Email or Google to sign in.')" 
-            style="width: 100%; max-width: 260px; background: white; color: #757575; border: none; padding: 12px; border-radius: 4px; font-weight: 500; font-family: Roboto, sans-serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 18px; margin: 0 auto 1.5rem; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.2), 0 1px 5px 0 rgba(0,0,0,0.12);">
-            <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; background: #0288D1; border-radius: 50%; color: white; font-size: 10px;">📞</div> 
-            Sign in with Phone
-        </button>
+    <!-- Email Login Toggle -->
+    <button class="email-toggle" id="email-toggle-btn">
+        ✉️ Sign in with Email
+    </button>
 
-        <div class="divider">Staff Login</div>
-
-        <!-- Staff Email/Password Login -->
-        <div class="staff-section">
-            <p class="staff-title">🔐 Admin / Kitchen / Delivery</p>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="staff-email" placeholder="admin@dosahouse.com">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="staff-password" placeholder="••••••••">
-            </div>
-            <p class="error-msg" id="error-msg">Invalid email or password. Try again.</p>
-            <button class="btn-staff-login" id="staff-login-btn">Staff Sign In 🔑</button>
+    <!-- Email Form -->
+    <div class="email-form" id="email-form">
+        <div class="tab-btns">
+            <button class="tab-btn active" id="tab-signin">Sign In</button>
+            <button class="tab-btn" id="tab-signup">Create Account</button>
         </div>
+        <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password-input" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-group" id="name-group" style="display:none;">
+            <label>Your Name</label>
+            <input type="text" id="name-input" placeholder="Your full name">
+        </div>
+        <button class="btn-submit" id="email-submit-btn">Sign In</button>
     </div>
 
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async></script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script src="scripts/firebase-config.js"></script>
-    <script src="scripts/auth.js"></script>
-    <script>
-        // ── Firebase UI for Customers ──
-        const uiConfig = {
-            signInSuccessUrl: 'index.html',
-            signInOptions: [
-                firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-                firebase.auth.EmailAuthProvider.PROVIDER_ID
-            ],
-            tosUrl: 'about.html',
-            privacyPolicyUrl: 'about.html'
-        };
-        const ui = new firebaseui.auth.AuthUI(auth);
-        ui.start('#firebaseui-auth-container', uiConfig);
+    <!-- Phone Coming Soon -->
+    <button class="btn-phone" onclick="showInfo('📞 Phone login coming soon! Please use Google or Email to sign in.')">
+        📞 Sign in with Phone
+    </button>
 
-        // ── Already logged in? Show banner ──
-        getCurrentUser().then(user => {
-            if (!user) return;
-            const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
-            const roleLabel = { admin: '👑 Admin', kitchen: '👨‍🍳 Kitchen Staff', delivery: '🛵 Delivery', customer: '👤 Customer' };
-            const card = document.querySelector('.login-card');
-            const banner = document.createElement('div');
-            banner.style.cssText = 'background:#FFF3E0;border:1px solid #FFB74D;border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:0.9rem;';
-            banner.innerHTML = `
-                <strong style="color:#E65100;">Already logged in as:</strong><br>
-                <span style="font-size:1rem;font-weight:700;">${roleLabel[user.role] || user.role} — ${user.email}</span><br>
-                <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
-                    <button onclick="window.location.replace('${redirectMap[user.role] || 'index.html'}')"
-                        style="flex:1;padding:0.6rem;background:#F57F17;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">
-                        Continue →
-                    </button>
-                    <button onclick="firebase.auth().signOut().then(()=>location.reload())"
-                        style="flex:1;padding:0.6rem;background:white;color:#d32f2f;border:1px solid #d32f2f;border-radius:8px;font-weight:700;cursor:pointer;">
-                        Switch Account
-                    </button>
-                </div>
-            `;
-            card.insertBefore(banner, card.firstChild);
-        });
+    <!-- Staff Login -->
+    <div class="staff-section">
+        <div class="staff-label">🔐 Staff Login (Admin / Kitchen / Delivery)</div>
+        <div class="form-group">
+            <label>Staff Email</label>
+            <input type="email" id="staff-email" placeholder="admin@dosahouse.com" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="staff-password" placeholder="••••••••" autocomplete="off">
+        </div>
+        <button class="btn-staff" id="staff-btn">Staff Sign In 🔑</button>
+    </div>
+</div>
 
-        // ── Staff Login ──
-        document.getElementById('staff-login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('staff-email').value.trim();
-            const password = document.getElementById('staff-password').value;
-            const errorMsg = document.getElementById('error-msg');
-            const btn = document.getElementById('staff-login-btn');
-            errorMsg.style.display = 'none';
-            btn.textContent = '⏳ Signing in...';
-            btn.disabled = true;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                const user = await getCurrentUser();
-                const redirectMap = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
-                window.location.replace(redirectMap[user.role] || 'index.html');
-            } catch (e) {
-                errorMsg.textContent = (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
-                    ? 'Invalid email or password.' : 'Error: ' + e.message;
-                errorMsg.style.display = 'block';
-                btn.textContent = 'Staff Sign In 🔑';
-                btn.disabled = false;
+<!-- Firebase SDKs ONLY — no FirebaseUI -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="scripts/firebase-config.js"></script>
+<script src="scripts/auth.js"></script>
+<script>
+    // ── Helpers ──
+    function showError(msg) {
+        const b = document.getElementById('error-box');
+        b.textContent = msg; b.style.display = 'block';
+        document.getElementById('success-box').style.display = 'none';
+    }
+    function showInfo(msg) {
+        const b = document.getElementById('success-box');
+        b.textContent = msg; b.style.display = 'block';
+        document.getElementById('error-box').style.display = 'none';
+    }
+    function clearMessages() {
+        document.getElementById('error-box').style.display = 'none';
+        document.getElementById('success-box').style.display = 'none';
+    }
+    function setLoading(btnId, loading, label) {
+        const btn = document.getElementById(btnId);
+        btn.disabled = loading;
+        btn.innerHTML = loading ? `<span class="spinner"></span> Please wait...` : label;
+    }
+
+    // ── Redirect after login ──
+    async function doRedirect() {
+        showInfo('✅ Login successful! Loading your account...');
+        const user = await getCurrentUser();
+        if (!user) { showError('Could not load your profile. Please try again.'); return; }
+        const map = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
+        window.location.replace(map[user.role] || 'index.html');
+    }
+
+    // ── Google Login ──
+    document.getElementById('google-btn').addEventListener('click', async () => {
+        clearMessages();
+        const label = document.getElementById('google-btn').innerHTML;
+        setLoading('google-btn', true, label);
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            await auth.signInWithPopup(provider);
+            await doRedirect();
+        } catch (e) {
+            console.error('Google login error:', e);
+            if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+                // User closed popup — no error needed
+            } else if (e.code === 'auth/account-exists-with-different-credential') {
+                showError('This email is already registered with a different sign-in method. Please use Email/Password to sign in, then link your Google account.');
+            } else {
+                showError('Google sign-in failed: ' + e.message);
             }
-        });
+            setLoading('google-btn', false, label);
+        }
+    });
 
-        // Enter key on password field
-        document.getElementById('staff-password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') document.getElementById('staff-login-btn').click();
-        });
-    </script>
+    // ── Email toggle ──
+    let emailOpen = false;
+    document.getElementById('email-toggle-btn').addEventListener('click', () => {
+        emailOpen = !emailOpen;
+        document.getElementById('email-form').classList.toggle('open', emailOpen);
+        document.getElementById('email-toggle-btn').textContent = emailOpen ? '▲ Hide Email Form' : '✉️ Sign in with Email';
+    });
+
+    // ── Tabs: Sign In / Sign Up ──
+    let isSignUp = false;
+    document.getElementById('tab-signin').addEventListener('click', () => {
+        isSignUp = false;
+        document.getElementById('tab-signin').classList.add('active');
+        document.getElementById('tab-signup').classList.remove('active');
+        document.getElementById('name-group').style.display = 'none';
+        document.getElementById('email-submit-btn').textContent = 'Sign In';
+        document.getElementById('password-input').autocomplete = 'current-password';
+    });
+    document.getElementById('tab-signup').addEventListener('click', () => {
+        isSignUp = true;
+        document.getElementById('tab-signup').classList.add('active');
+        document.getElementById('tab-signin').classList.remove('active');
+        document.getElementById('name-group').style.display = 'block';
+        document.getElementById('email-submit-btn').textContent = 'Create Account';
+        document.getElementById('password-input').autocomplete = 'new-password';
+    });
+
+    // ── Email Submit ──
+    document.getElementById('email-submit-btn').addEventListener('click', async () => {
+        clearMessages();
+        const email = document.getElementById('email-input').value.trim();
+        const password = document.getElementById('password-input').value;
+        const name = document.getElementById('name-input').value.trim();
+        if (!email || !password) { showError('Please enter your email and password.'); return; }
+        if (isSignUp && !name) { showError('Please enter your name.'); return; }
+
+        const label = document.getElementById('email-submit-btn').innerHTML;
+        setLoading('email-submit-btn', true, label);
+        try {
+            if (isSignUp) {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                await cred.user.updateProfile({ displayName: name });
+            } else {
+                await auth.signInWithEmailAndPassword(email, password);
+            }
+            await doRedirect();
+        } catch (e) {
+            console.error('Email auth error:', e);
+            const msgs = {
+                'auth/user-not-found': 'No account found with this email. Please create an account.',
+                'auth/wrong-password': 'Incorrect password. Please try again.',
+                'auth/invalid-credential': 'Invalid email or password.',
+                'auth/email-already-in-use': 'An account already exists with this email. Please sign in.',
+                'auth/weak-password': 'Password must be at least 6 characters.',
+                'auth/invalid-email': 'Please enter a valid email address.',
+            };
+            showError(msgs[e.code] || 'Error: ' + e.message);
+            setLoading('email-submit-btn', false, label);
+        }
+    });
+
+    // ── Staff Login ──
+    document.getElementById('staff-btn').addEventListener('click', async () => {
+        clearMessages();
+        const email = document.getElementById('staff-email').value.trim();
+        const password = document.getElementById('staff-password').value;
+        if (!email || !password) { showError('Please enter staff email and password.'); return; }
+        const label = document.getElementById('staff-btn').innerHTML;
+        setLoading('staff-btn', true, label);
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            await doRedirect();
+        } catch (e) {
+            showError('Invalid email or password.');
+            setLoading('staff-btn', false, label);
+        }
+    });
+
+    // ── Enter key support ──
+    document.getElementById('staff-password').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('staff-btn').click();
+    });
+    document.getElementById('password-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('email-submit-btn').click();
+    });
+
+    // ── Already logged in? Redirect immediately ──
+    getCurrentUser().then(user => {
+        if (!user) return;
+        const map = { admin: 'admin.html', kitchen: 'kitchen.html', delivery: 'delivery.html', customer: 'index.html' };
+        window.location.replace(map[user.role] || 'index.html');
+    });
+</script>
 </body>
 </html>

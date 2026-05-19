@@ -44,7 +44,6 @@ function getCurrentUser() {
                 }
             } catch (e) {
                 console.error('Auth error in getCurrentUser:', e);
-                alert('Database Error: ' + e.message + '\n\nPlease check your Firebase Firestore Security Rules (Test Mode might have expired).');
                 resolve(null);
             }
         });
@@ -71,4 +70,63 @@ async function requireAuth(allowedRoles) {
 async function logoutUser() {
     await auth.signOut();
     window.location.replace('login.html');
+}
+
+// ============================================================
+// setupNavAuth — call on any PUBLIC page.
+// Shows Login button for guests, profile dropdown for logged-in users.
+// Pass requireLoginFn if you want to guard specific actions.
+// ============================================================
+async function setupNavAuth() {
+    hideLoader();
+    const user = await getCurrentUser();
+    const profileWrap = document.getElementById('user-profile-wrap');
+    const loginWrap = document.getElementById('nav-login-wrap');
+
+    if (user) {
+        // Logged in — show profile button, hide login button
+        if (profileWrap) profileWrap.style.display = 'block';
+        if (loginWrap) loginWrap.style.display = 'none';
+        const nameEl = document.getElementById('user-name-nav');
+        const emailEl = document.getElementById('profile-email');
+        const avatarEl = document.getElementById('user-avatar');
+        if (nameEl) nameEl.textContent = user.name?.split(' ')[0] || 'Me';
+        if (emailEl) emailEl.textContent = user.email || user.phone || 'User';
+        if (avatarEl && user.photoURL) {
+            avatarEl.innerHTML = `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+        }
+    } else {
+        // Guest — hide profile, show login button
+        if (profileWrap) profileWrap.style.display = 'none';
+        if (loginWrap) loginWrap.style.display = 'block';
+    }
+    return user; // caller can check if user is null to guard actions
+}
+
+// requireLogin — show a friendly modal instead of hard redirect
+// Call this when guest tries to perform an action that needs login
+function requireLogin(message) {
+    message = message || 'Please sign in to continue.';
+    // Check if modal already exists
+    let modal = document.getElementById('__login-gate-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = '__login-gate-modal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:Outfit,sans-serif;';
+        modal.innerHTML = `
+            <div style="background:white;border-radius:20px;padding:2rem;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                <div style="font-size:2.5rem;margin-bottom:0.5rem;">🔐</div>
+                <h2 style="color:#3E2723;margin-bottom:0.5rem;font-size:1.4rem;">Sign In Required</h2>
+                <p style="color:#795548;margin-bottom:1.5rem;font-size:0.95rem;" id="__login-gate-msg">${message}</p>
+                <div style="display:flex;gap:0.75rem;">
+                    <button onclick="document.getElementById('__login-gate-modal').remove()" style="flex:1;padding:0.8rem;border:2px solid #eee;background:white;border-radius:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#555;">Cancel</button>
+                    <button onclick="window.location.href='login.html'" style="flex:1;padding:0.8rem;background:#F57F17;color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;">Sign In →</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    } else {
+        document.getElementById('__login-gate-msg').textContent = message;
+        modal.style.display = 'flex';
+    }
 }
