@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v3';
+const CACHE_NAME = 'dosa-house-v4';
 const ASSETS = [
   '/',
   '/index.html',
