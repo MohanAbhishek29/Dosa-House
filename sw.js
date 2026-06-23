@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v4';
+const CACHE_NAME = 'dosa-house-v5';
 const ASSETS = [
   '/',
   '/index.html',
@@ -9,7 +9,9 @@ const ASSETS = [
   '/styles/main.css',
   '/styles/ui.css',
   '/scripts/main.js',
-  '/scripts/ui.js'
+  '/scripts/ui.js',
+  '/scripts/auth.js',
+  '/scripts/firebase-config.js'
 ];
 
 self.addEventListener('install', event => {
