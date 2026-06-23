@@ -272,7 +272,8 @@
             packaging: 'Packaging',
             sent_to_delivery: 'Assigned',
             out_for_delivery: 'On Way',
-            delivered: 'Delivered'
+            delivered: 'Delivered',
+            served: 'Served'
         };
         const STATUS_ICONS = {
             pending: '📋',
@@ -281,7 +282,8 @@
             packaging: '📦',
             sent_to_delivery: '🛵',
             out_for_delivery: '🛣️',
-            delivered: '🎉'
+            delivered: '🎉',
+            served: '🍽️'
         };
 
         setupNavAuth().then(user => {
@@ -342,8 +344,13 @@
                 `<div class="item-row"><span>${i.quantity}x ${i.title}</span><span>₹${i.price * i.quantity}</span></div>`
             ).join('');
 
-            const currentStepIdx = STATUS_STEPS.indexOf(order.status);
-            const steps = STATUS_STEPS.slice(0, 7).map((s, i) => {
+            let currentSteps = STATUS_STEPS;
+            if (order.orderType === 'dine_in') {
+                currentSteps = ['pending', 'accepted', 'preparing', 'served'];
+            }
+
+            const currentStepIdx = currentSteps.indexOf(order.status);
+            const steps = currentSteps.map((s, i) => {
                 const cls = i < currentStepIdx ? 'done' : i === currentStepIdx ? 'active' : '';
                 return `<div class="step ${cls}">
                     <div class="step-dot">${STATUS_ICONS[s]}</div>

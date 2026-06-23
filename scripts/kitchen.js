@@ -69,12 +69,16 @@ function createTicketHTML(order) {
     if (order.status === 'accepted') {
         actionBtn = `<button class="btn-action btn-accept" onclick="startPreparing('${order.id}')">🍳 Start Preparing</button>`;
     } else if (order.status === 'preparing') {
-        actionBtn = `<button class="btn-action btn-ready" onclick="markReady('${order.id}')">✅ Mark Ready</button>`;
+        actionBtn = `<button class="btn-action btn-ready" onclick="markReady('${order.id}', '${order.orderType}')">✅ Mark Finished</button>`;
     }
 
     const statusBadge = order.status === 'accepted'
         ? `<span style="background:#E65100;color:white;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:700;">NEW</span>`
         : `<span style="background:#1565C0;color:white;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;font-weight:700;">COOKING</span>`;
+
+    let ticketTypeStr = '🛵 Delivery';
+    if (order.orderType === 'takeaway') ticketTypeStr = '🛍️ Takeaway';
+    if (order.orderType === 'dine_in') ticketTypeStr = `🪑 Dine In - Table ${order.tableNumber || ''}`;
 
     return `
         <div class="ticket ticket-${order.status}">
@@ -83,7 +87,7 @@ function createTicketHTML(order) {
                 <span class="ticket-time">${time}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-                <div class="ticket-type">${order.orderType === 'takeaway' ? '🛍️ Takeaway' : '🛵 Delivery'}</div>
+                <div class="ticket-type">${ticketTypeStr}</div>
                 ${statusBadge}
             </div>
             <div style="font-size:0.85rem;color:#aaa;margin-bottom:0.5rem;">👤 ${order.customerName || 'Customer'}</div>
@@ -106,10 +110,10 @@ async function startPreparing(orderId) {
     }
 }
 
-async function markReady(orderId) {
+async function markReady(orderId, orderType) {
     try {
         await db.collection('orders').doc(orderId).update({
-            status: 'packaging',
+            status: orderType === 'dine_in' ? 'served' : 'packaging',
             readyAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });

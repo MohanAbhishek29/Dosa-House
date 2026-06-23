@@ -313,7 +313,9 @@
                     <div class="customer-info">
                         <div class="customer-name">👤 ${order.customerName || 'Customer'}</div>
                         <div class="customer-email">${order.customerEmail || ''}</div>
-                        ${order.deliveryAddress ? `<div class="delivery-address">📍 ${order.deliveryAddress}</div>` : ''}
+                        ${order.orderType === 'dine_in' 
+                            ? `<div class="delivery-address" style="color:#1976D2;font-weight:700;">🪑 Table: ${order.tableNumber || 'N/A'}</div>` 
+                            : (order.deliveryAddress ? `<div class="delivery-address">📍 ${order.deliveryAddress}</div>` : '')}
                     </div>
                     <div class="items-list">${items}</div>
                     ${ratingHtml}

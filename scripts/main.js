@@ -436,9 +436,14 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
             <h2 style="font-size:1.4rem;margin-bottom:0.3rem;color:#3E2723;">🛵 Almost There!</h2>
             <p style="color:#888;font-size:0.9rem;margin-bottom:1.5rem;">Total: <strong style="color:#F57F17;font-size:1.1rem;">₹${total}</strong></p>
 
-            <div style="margin-bottom:1rem;">
+            <div id="takeaway-fields" style="display: ${isTakeaway ? 'block' : 'none'}; margin-bottom:1rem;">
                 <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">📍 Delivery Address</label>
-                <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;" required></textarea>
+                <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+            </div>
+
+            <div id="dinein-fields" style="display: ${!isTakeaway ? 'block' : 'none'}; margin-bottom:1rem;">
+                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">🪑 Table Number</label>
+                <input type="text" id="checkout-table" placeholder="e.g. Table 4" style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;outline:none;font-family:inherit;box-sizing:border-box;">
             </div>
 
             <div style="margin-bottom:1rem;">
@@ -469,11 +474,17 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
 
     document.getElementById('place-order-btn').addEventListener('click', async () => {
         const address = document.getElementById('checkout-address').value.trim();
+        const table = document.getElementById('checkout-table').value.trim();
         const phone = document.getElementById('checkout-phone').value.trim();
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-        if (!address) {
+        if (isTakeaway && !address) {
             showToast('Please enter your delivery address! 📍', 'error');
+            return;
+        }
+        
+        if (!isTakeaway && !table) {
+            showToast('Please enter your table number! 🪑', 'error');
             return;
         }
 
@@ -508,7 +519,8 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
             customerName,
             customerEmail,
             customerPhone: phone,
-            deliveryAddress: address,
+            deliveryAddress: isTakeaway ? address : null,
+            tableNumber: !isTakeaway ? table : null,
             items: orderItems,
             subtotal,
             tax,
@@ -516,7 +528,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
             total,
             paymentMethod,
             paymentStatus: paymentMethod === 'cash' ? 'pending' : 'pending',
-            orderType: isTakeaway ? 'takeaway' : 'delivery',
+            orderType: isTakeaway ? 'takeaway' : 'dine_in',
             status: 'pending',
             deliveryOTP: null,
             rating: null,
