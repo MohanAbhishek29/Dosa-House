@@ -1,6 +1,6 @@
 {
-  "name": "Dosa House",
-  "short_name": "Dosa House",
+  "name": "Dosa House App",
+  "short_name": "Dosa House App",
   "description": "Authentic South Indian Cuisine",
   "start_url": "/index.html",
   "display": "standalone",
