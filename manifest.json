@@ -8,12 +8,12 @@
   "theme_color": "#F57F17",
   "icons": [
     {
-      "src": "assets/images/masala_dosa.png",
+      "src": "assets/images/logo_dosa_house.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/images/masala_dosa.png",
+      "src": "assets/images/logo_dosa_house.png",
       "sizes": "512x512",
       "type": "image/png"
     }
