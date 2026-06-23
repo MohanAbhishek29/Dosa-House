@@ -229,6 +229,11 @@
 </head>
 <body>
 
+    <!-- Notification Sound -->
+    <audio id="status-update-sound" preload="auto">
+        <source src="assets/audio/bell.mp3" type="audio/mpeg">
+    </audio>
+
     <div class="top-bar">
         <button class="back-btn" onclick="history.back()">←</button>
         <h1>🧾 My Orders</h1>
@@ -301,6 +306,7 @@
             listenToMyOrders(user.uid);
         });
 
+        let isFirstLoad = true;
         function listenToMyOrders(uid) {
             // No orderBy — avoids composite index requirement. Sort client-side.
             db.collection('orders')
@@ -313,11 +319,23 @@
                             const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
                             return tb - ta; // newest first
                         });
+                    
+                    if (!isFirstLoad) {
+                        const hasModifications = snap.docChanges().some(change => change.type === 'modified');
+                        if (hasModifications) {
+                            const audio = document.getElementById('status-update-sound');
+                            if (audio) {
+                                audio.play().catch(e => console.log('Audio play blocked:', e));
+                            }
+                        }
+                    }
+                    isFirstLoad = false;
+                    
                     renderOrders(orders);
                 }, err => {
                     console.error('Orders query error:', err);
                     document.getElementById('orders-list').innerHTML =
-                        '<div style="text-align:center;padding:3rem;color:#888">⚠️ Could not load orders. Please refresh.</div>';
+                        '<div style="text-align:center;padding:3rem;color:#888">😞 Could not load orders. Please refresh.</div>';
                 });
         }
 

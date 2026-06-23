@@ -478,6 +478,11 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
         const phone = document.getElementById('checkout-phone').value.trim();
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
+        if (!/^\d{10}$/.test(phone.replace(/\D/g, ''))) {
+            showToast('Please enter a valid 10-digit phone number!', 'error');
+            return;
+        }
+
         if (isTakeaway && !address) {
             showToast('Please enter your delivery address! 📍', 'error');
             return;
