@@ -37,13 +37,14 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 
 ## 🚀 Features
 
-### 🧑‍💼 Customer Experience
-- 🌐 **Public browsing** — explore menu, booking & about without logging in
+### 🧑‍🍳 Customer Experience
+- 🕵️ **Public browsing** — explore menu, booking & about without logging in
 - 🛒 **Smart Cart** — add items, adjust quantities, auto-calculate bill
 - 💳 **Dual Payment** — Cash on Delivery or UPI with dynamic QR code
-- 📦 **Real-time Order Tracking** — live progress bar (Placed → Cooking → On Way → Delivered)
-- 🔐 **OTP Delivery Verification** — receive unique OTP, share with delivery partner
-- ⭐ **Post-Delivery Rating** — rate your experience after order delivered
+- 🚚 **Real-time Order Tracking** — live progress bar (Placed ➔ Cooking ➔ On Way ➔ Delivered)
+- 🔔 **Notification Sounds** — audio alerts on order status updates
+- 🔑 **OTP Delivery Verification** — receive unique OTP, share with delivery partner
+- 🌟 **Post-Delivery Rating** — rate your experience after order delivered
 - 📅 **Table Booking** — reserve a table with date, time & party size
 - 🔔 **Notifications** — track all order updates in your account
 
@@ -84,7 +85,8 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 
 - 📲 **Installable** on Android & iOS — works like a native app
 - ⚡ **Service Worker** caching for fast repeat visits
-- 📴 **Offline-friendly** — key assets cached locally
+- 📶 **Offline-friendly** — key assets cached locally
+- 🎨 **Custom Launch Screen** — premium branded loading experience with logo
 
 ---
 
