@@ -384,7 +384,7 @@ function calculateBill() {
     return { subtotal, tax, packingCharge, total };
 }
 
-function generateReceipt() {
+function generateReceipt(user) {
     const { subtotal, tax, packingCharge, total } = calculateBill();
 
     // Generate Order ID
@@ -415,10 +415,10 @@ function generateReceipt() {
     }
 
     // Show checkout modal to get address & payment
-    showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now });
+    showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, user });
 }
 
-function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }) {
+function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, user }) {
     // Remove existing modal if any
     const existing = document.getElementById('checkout-modal-overlay');
     if (existing) existing.remove();
@@ -437,8 +437,26 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
             <p style="color:#888;font-size:0.9rem;margin-bottom:1.5rem;">Total: <strong style="color:#F57F17;font-size:1.1rem;">₹${total}</strong></p>
 
             <div id="takeaway-fields" style="display: ${isTakeaway ? 'block' : 'none'}; margin-bottom:1rem;">
-                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">📍 Delivery Address</label>
-                <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+                <div id="saved-addresses-container"></div>
+                <div id="new-address-section">
+                    <label style="font-weight:700;font-size:0.9rem;color:#555;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                        <span>📍 Delivery Address</span>
+                        <button type="button" id="use-location-btn" style="background:#E3F2FD;color:#1976D2;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;">🧭 Use Current Location</button>
+                    </label>
+                    <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+                    
+                    <input type="hidden" id="checkout-lat" value="">
+                    <input type="hidden" id="checkout-lng" value="">
+
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+                        <input type="checkbox" id="save-address-checkbox" style="width:16px;height:16px;cursor:pointer;">
+                        <label for="save-address-checkbox" style="font-size:0.85rem;color:#666;cursor:pointer;">Save this address for later</label>
+                    </div>
+                    
+                    <div id="save-address-label-wrap" style="display:none;margin-top:0.5rem;">
+                        <input type="text" id="save-address-label" placeholder="e.g. Home, Work" style="width:100%;padding:0.6rem;border:2px solid #eee;border-radius:8px;font-size:0.85rem;outline:none;font-family:inherit;box-sizing:border-box;">
+                    </div>
+                </div>
             </div>
 
             <div id="dinein-fields" style="display: ${!isTakeaway ? 'block' : 'none'}; margin-bottom:1rem;">
@@ -472,19 +490,132 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
 
     document.body.appendChild(overlay);
 
+    // Setup Addresses UI
+    const savedAddressesContainer = document.getElementById('saved-addresses-container');
+    const newAddressSection = document.getElementById('new-address-section');
+    const hasSavedAddresses = user && user.addresses && user.addresses.length > 0;
+    
+    if (hasSavedAddresses) {
+        savedAddressesContainer.innerHTML = `
+            <div style="margin-bottom:0.8rem;">
+                <label style="font-weight:700;font-size:0.9rem;color:#555;display:block;margin-bottom:0.4rem;">Select Saved Address:</label>
+                <select id="checkout-saved-address" style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:0.5rem;">
+                    <option value="new">➕ Add New Address</option>
+                    ${user.addresses.map((addr, idx) => `<option value="${idx}" ${idx === 0 ? 'selected' : ''}>${addr.label} - ${addr.text.substring(0,30)}...</option>`).join('')}
+                </select>
+            </div>
+        `;
+        // Initially hide new address if they have saved ones
+        newAddressSection.style.display = 'none';
+
+        document.getElementById('checkout-saved-address').addEventListener('change', (e) => {
+            if (e.target.value === 'new') {
+                newAddressSection.style.display = 'block';
+            } else {
+                newAddressSection.style.display = 'none';
+            }
+        });
+    }
+
+    const saveAddressCb = document.getElementById('save-address-checkbox');
+    const saveAddressLabelWrap = document.getElementById('save-address-label-wrap');
+    if (saveAddressCb) {
+        saveAddressCb.addEventListener('change', (e) => {
+            saveAddressLabelWrap.style.display = e.target.checked ? 'block' : 'none';
+        });
+    }
+
+    const locBtn = document.getElementById('use-location-btn');
+    if (locBtn) {
+        locBtn.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                showToast("Geolocation is not supported by your browser.", "error");
+                return;
+            }
+            locBtn.textContent = '📍 Locating...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    document.getElementById('checkout-lat').value = lat;
+                    document.getElementById('checkout-lng').value = lng;
+                    
+                    // Simple reverse geocoding via Nominatim (Free)
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.display_name) {
+                                document.getElementById('checkout-address').value = data.display_name;
+                            }
+                        })
+                        .catch(err => { console.error(err); })
+                        .finally(() => {
+                            locBtn.textContent = '✅ Location Found';
+                            locBtn.style.background = '#E8F5E9';
+                            locBtn.style.color = '#2E7D32';
+                        });
+                },
+                (error) => {
+                    locBtn.textContent = '🧭 Use Current Location';
+                    showToast("Could not get location. Please allow location access.", "error");
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        });
+    }
+
     document.getElementById('place-order-btn').addEventListener('click', async () => {
-        const address = document.getElementById('checkout-address').value.trim();
+        let finalAddress = null;
+        let finalLat = null;
+        let finalLng = null;
+
+        if (isTakeaway) {
+            const savedSelect = document.getElementById('checkout-saved-address');
+            if (savedSelect && savedSelect.value !== 'new') {
+                const idx = parseInt(savedSelect.value);
+                const selectedAddr = user.addresses[idx];
+                finalAddress = selectedAddr.text;
+                finalLat = selectedAddr.lat;
+                finalLng = selectedAddr.lng;
+            } else {
+                finalAddress = document.getElementById('checkout-address').value.trim();
+                finalLat = document.getElementById('checkout-lat').value || null;
+                finalLng = document.getElementById('checkout-lng').value || null;
+                
+                if (!finalAddress) {
+                    showToast('Please enter your delivery address! 📍', 'error');
+                    return;
+                }
+
+                if (saveAddressCb && saveAddressCb.checked) {
+                    const label = document.getElementById('save-address-label').value.trim() || 'Saved Address';
+                    // Update user's addresses in Firestore
+                    if (user && user.uid) {
+                        try {
+                            await db.collection('users').doc(user.uid).update({
+                                addresses: firebase.firestore.FieldValue.arrayUnion({
+                                    id: Date.now().toString(),
+                                    label: label,
+                                    text: finalAddress,
+                                    lat: finalLat,
+                                    lng: finalLng
+                                })
+                            });
+                            showToast('Address saved successfully!', 'success');
+                        } catch(e) {
+                            console.error('Failed to save address:', e);
+                        }
+                    }
+                }
+            }
+        }
+
         const table = document.getElementById('checkout-table').value.trim();
         const phone = document.getElementById('checkout-phone').value.trim();
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
         if (!/^\d{10}$/.test(phone.replace(/\D/g, ''))) {
             showToast('Please enter a valid 10-digit phone number!', 'error');
-            return;
-        }
-
-        if (isTakeaway && !address) {
-            showToast('Please enter your delivery address! 📍', 'error');
             return;
         }
         
@@ -524,7 +655,8 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now }
             customerName,
             customerEmail,
             customerPhone: phone,
-            deliveryAddress: isTakeaway ? address : null,
+            deliveryAddress: finalAddress,
+            deliveryLocation: (finalLat && finalLng) ? { lat: parseFloat(finalLat), lng: parseFloat(finalLng) } : null,
             tableNumber: !isTakeaway ? table : null,
             items: orderItems,
             subtotal,
@@ -680,7 +812,7 @@ if (checkoutBtn) {
             requireLogin('Please sign in to place your order. It only takes a second!');
             return;
         }
-        generateReceipt();
+        generateReceipt(user);
     };
 }
 
