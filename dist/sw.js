@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v7';
+const CACHE_NAME = 'dosa-house-v8';
 const ASSETS = [
   '/',
   '/index.html',
@@ -38,9 +38,14 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
+      // Only cache GET requests from our own origin (exclude Firebase APIs, etc)
+      const url = new URL(event.request.url);
+      const isSameOrigin = url.origin === location.origin;
+      const isGET = event.request.method === 'GET';
+
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Cache the new response for next time
-        if (networkResponse && networkResponse.status === 200) {
+        // Cache the new response for next time if it's a local static asset
+        if (isGET && isSameOrigin && networkResponse && networkResponse.status === 200) {
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, networkResponse.clone());
           });
