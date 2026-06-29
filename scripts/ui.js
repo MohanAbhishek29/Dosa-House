@@ -59,11 +59,15 @@
         document.body.appendChild(waBtn);
     }
 
-    // 4. Register Service Worker for PWA
+    // 4. Force Unregister all Service Workers to fix caching issues
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker registered', reg))
-            .catch(err => console.error('Service Worker registration failed', err));
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister().then(bool => {
+                    console.log('Unregistered Service Worker:', bool);
+                });
+            }
+        });
     }
 
     // 5. PWA Install Button Logic
