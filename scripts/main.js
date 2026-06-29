@@ -441,7 +441,10 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
                 <div id="new-address-section">
                     <label style="font-weight:700;font-size:0.9rem;color:#555;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
                         <span>📍 Delivery Address</span>
-                        <button type="button" id="use-location-btn" style="background:#E3F2FD;color:#1976D2;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;">🧭 Use Current Location</button>
+                        <div>
+                            <button type="button" id="use-map-btn" style="background:#FFF3E0;color:#E65100;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;margin-right:0.4rem;">🗺️ Map</button>
+                            <button type="button" id="use-location-btn" style="background:#E3F2FD;color:#1976D2;border:none;padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;">🧭 Current</button>
+                        </div>
                     </label>
                     <textarea id="checkout-address" rows="3" placeholder="House No, Street, Area, City..." style="width:100%;padding:0.8rem;border:2px solid #eee;border-radius:10px;font-size:0.95rem;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
                     
@@ -485,6 +488,20 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
                 🍛 Place Order
             </button>
             <button onclick="document.getElementById('checkout-modal-overlay').remove()" style="width:100%;padding:0.7rem;margin-top:0.5rem;background:transparent;border:none;color:#999;cursor:pointer;font-size:0.9rem;">Cancel</button>
+            
+            <!-- Map Modal Overlay -->
+            <div id="checkout-map-overlay" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;align-items:center;justify-content:center;border-radius:20px;">
+                <div style="background:white;width:95%;max-width:400px;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+                    <div style="padding:0.8rem;background:#F57F17;color:white;display:flex;justify-content:space-between;align-items:center;">
+                        <h3 style="margin:0;font-size:1rem;">📍 Drag pin to location</h3>
+                        <button type="button" onclick="document.getElementById('checkout-map-overlay').style.display='none'" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">&times;</button>
+                    </div>
+                    <div id="checkout-map-container" style="height:300px;width:100%;"></div>
+                    <div style="padding:0.8rem;text-align:center;">
+                        <button type="button" id="confirm-map-btn" style="background:#2E7D32;color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-weight:bold;cursor:pointer;">✅ Confirm Location</button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -556,11 +573,74 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
                         });
                 },
                 (error) => {
-                    locBtn.textContent = '🧭 Use Current Location';
+                    locBtn.textContent = '🧭 Current';
                     showToast("Could not get location. Please allow location access.", "error");
                 },
                 { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
             );
+        });
+    }
+
+    // Map UI Logic
+    const mapOverlay = document.getElementById('checkout-map-overlay');
+    const useMapBtn = document.getElementById('use-map-btn');
+    let checkoutMap = null;
+    let checkoutMarker = null;
+
+    if (useMapBtn) {
+        useMapBtn.addEventListener('click', () => {
+            mapOverlay.style.display = 'flex';
+            
+            // Initialize map if not done yet
+            if (!checkoutMap) {
+                // Default center (Bhimavaram)
+                let center = [16.5448, 81.5212];
+                checkoutMap = L.map('checkout-map-container').setView(center, 15);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(checkoutMap);
+
+                checkoutMarker = L.marker(center, { draggable: true }).addTo(checkoutMap);
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((pos) => {
+                        const userCenter = [pos.coords.latitude, pos.coords.longitude];
+                        checkoutMap.setView(userCenter, 16);
+                        checkoutMarker.setLatLng(userCenter);
+                    });
+                }
+            }
+            
+            setTimeout(() => {
+                checkoutMap.invalidateSize();
+            }, 200);
+        });
+    }
+
+    const confirmMapBtn = document.getElementById('confirm-map-btn');
+    if (confirmMapBtn) {
+        confirmMapBtn.addEventListener('click', () => {
+            const pos = checkoutMarker.getLatLng();
+            const lat = pos.lat;
+            const lng = pos.lng;
+            
+            document.getElementById('checkout-lat').value = lat;
+            document.getElementById('checkout-lng').value = lng;
+            document.getElementById('checkout-address').value = 'Fetching map address...';
+            
+            mapOverlay.style.display = 'none';
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        document.getElementById('checkout-address').value = data.display_name;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('checkout-address').value = 'Address fetched. Please add Flat No/Landmark.';
+                });
         });
     }
 
