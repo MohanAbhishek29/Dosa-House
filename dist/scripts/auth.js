@@ -96,6 +96,39 @@ async function setupNavAuth() {
         if (avatarEl && photo) {
             avatarEl.innerHTML = `<img src="${photo}" alt="User Avatar" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;">`;
         }
+
+        // Global Push Notification Listener for Customer Orders
+        if (typeof db !== 'undefined' && typeof window.__notifListenerSet === 'undefined') {
+            window.__notifListenerSet = true;
+            
+            // Ask for permission if not already granted
+            if (typeof Notification !== 'undefined' && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
+            db.collection('orders').where('customerId', '==', user.uid).onSnapshot(snap => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'modified') {
+                        const data = change.doc.data();
+                        const status = data.status || 'pending';
+                        
+                        let msg = "Your order status updated to: " + status.replace('_', ' ');
+                        if (status === 'preparing') msg = "👨‍🍳 Kitchen is preparing your order!";
+                        if (status === 'out_for_delivery') msg = "🛵 Your order is out for delivery!";
+                        if (status === 'delivered') msg = "✅ Order Delivered! Enjoy your meal!";
+                        
+                        if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
+                            new Notification("Dosa House", {
+                                body: msg,
+                                icon: "assets/images/logo_dosa_house.png"
+                            });
+                        } else {
+                            if(window.showToast) window.showToast(msg, 'success');
+                        }
+                    }
+                });
+            });
+        }
     } else {
         // Guest — hide profile, show login button
         if (profileWrap) profileWrap.style.display = 'none';

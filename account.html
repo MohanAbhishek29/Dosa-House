@@ -193,7 +193,14 @@
                 </div>
                 <div style="border-top:1px solid #eee;padding-top:1.5rem;margin-bottom:1.5rem;">
                     <p><strong>Member Since:</strong> <span id="acc-joined">Loading...</span></p>
-                    <p><strong>Role:</strong> Customer</p>
+                    <p><strong>Role:</strong> <span id="acc-role">Customer</span></p>
+                    <div style="background:#FFF3E0; border:1px solid #FFE0B2; padding:1rem; border-radius:8px; margin-top:1rem; display:flex; align-items:center; gap:1rem;">
+                        <div style="font-size:2rem;">🪙</div>
+                        <div>
+                            <h4 style="margin:0; color:#E65100;">Dosa Coins Balance</h4>
+                            <p style="margin:0; font-size:1.2rem; font-weight:bold; color:#3E2723;"><span id="acc-coins">0</span> Coins</p>
+                        </div>
+                    </div>
                 </div>
                 <div style="border-top:1px solid #eee;padding-top:1.5rem;">
                     <h4 style="margin:0 0 1rem;color:#3E2723;">Update Profile</h4>
@@ -241,6 +248,30 @@
                     <!-- Injected by JS -->
                     <p style="text-align:center;color:#888;">Loading notifications...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:2rem; border-radius:12px; width:90%; max-width:400px; text-align:center;">
+            <h3 style="margin:0 0 1rem; color:#3E2723;">Rate Your Order</h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">How was the food and delivery experience?</p>
+            <div id="star-rating-container" style="font-size:2.5rem; color:#ccc; cursor:pointer; margin-bottom:1rem; user-select:none;">
+                <span data-value="1">★</span>
+                <span data-value="2">★</span>
+                <span data-value="3">★</span>
+                <span data-value="4">★</span>
+                <span data-value="5">★</span>
+            </div>
+            <textarea id="rating-review-text" rows="3" placeholder="Leave an optional review..." style="width:100%; padding:0.8rem; border:2px solid #eee; border-radius:8px; font-size:0.95rem; resize:none; outline:none; box-sizing:border-box; margin-bottom:1.5rem; font-family:inherit;"></textarea>
+            
+            <input type="hidden" id="rating-order-id" value="">
+            <input type="hidden" id="rating-value" value="0">
+            
+            <div style="display:flex; justify-content:center; gap:1rem;">
+                <button onclick="document.getElementById('rating-modal').style.display='none'" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid #ccc; background:white; cursor:pointer;">Cancel</button>
+                <button id="submit-rating-btn" onclick="submitRating()" style="padding:0.6rem 1.2rem; border-radius:8px; border:none; background:#F57F17; color:white; font-weight:bold; cursor:pointer;">Submit Rating</button>
             </div>
         </div>
     </div>
@@ -293,11 +324,14 @@
                 document.getElementById('acc-avatar-fallback').style.display = 'flex';
             }
 
+            document.getElementById('acc-role').textContent = (user.role || 'customer').toUpperCase();
+            document.getElementById('acc-coins').textContent = user.dosaCoins || 0;
+
             if (user.createdAt) {
                 const date = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
                 document.getElementById('acc-joined').textContent = date.toLocaleDateString();
             } else {
-                document.getElementById('acc-joined').textContent = 'Recently';
+                document.getElementById('acc-joined').textContent = 'Just now';
             }
 
             loadOrderHistory(user.uid);
@@ -443,7 +477,9 @@
                               </div>
                               <div style="text-align:right;">
                                   <div style="font-size:1.2rem;font-weight:800;color:#2E7D32;">₹${order.total || 0}</div>
-                                  <div style="font-size:0.85rem;color:#666;margin-top:0.2rem;">${order.type === 'dine-in' ? '🍽️ Dine-in' : '🛵 Takeaway'}</div>
+                                  <div style="font-size:0.85rem;color:#666;margin-top:0.2rem;margin-bottom:0.8rem;">${order.type === 'dine-in' ? '🍽️ Dine-in' : '🛵 Takeaway'}</div>
+                                  ${status === 'delivered' && !order.rating ? `<button onclick="openRatingModal('${doc.id}')" style="background:#F57F17;color:white;border:none;padding:0.4rem 0.8rem;border-radius:6px;font-size:0.8rem;font-weight:700;cursor:pointer;">⭐ Rate Order</button>` : ''}
+                                  ${order.rating ? `<div style="color:#F57F17;font-size:1rem;">${'★'.repeat(order.rating)}${'☆'.repeat(5 - order.rating)}</div>` : ''}
                               </div>
                           </div>
                       `;
@@ -532,6 +568,57 @@
                           </div>`;
                   });
               });
+        }
+
+        // --- Rating Logic ---
+        const stars = document.querySelectorAll('#star-rating-container span');
+        stars.forEach(star => {
+            star.addEventListener('click', (e) => {
+                const val = parseInt(e.target.getAttribute('data-value'));
+                document.getElementById('rating-value').value = val;
+                stars.forEach((s, i) => {
+                    s.style.color = i < val ? '#F57F17' : '#ccc';
+                });
+            });
+        });
+
+        function openRatingModal(docId) {
+            document.getElementById('rating-order-id').value = docId;
+            document.getElementById('rating-value').value = 0;
+            document.getElementById('rating-review-text').value = '';
+            stars.forEach(s => s.style.color = '#ccc');
+            document.getElementById('rating-modal').style.display = 'flex';
+        }
+
+        async function submitRating() {
+            const docId = document.getElementById('rating-order-id').value;
+            const rating = parseInt(document.getElementById('rating-value').value);
+            const review = document.getElementById('rating-review-text').value.trim();
+            
+            if (rating === 0) {
+                showToast('Please select a star rating.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('submit-rating-btn');
+            btn.textContent = 'Submitting...';
+            btn.disabled = true;
+
+            try {
+                await db.collection('orders').doc(docId).update({
+                    rating: rating,
+                    review: review || null,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast('Thank you for your feedback! ⭐', 'success');
+                document.getElementById('rating-modal').style.display = 'none';
+            } catch (err) {
+                showToast('Error submitting rating', 'error');
+                console.error(err);
+            } finally {
+                btn.textContent = 'Submit Rating';
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

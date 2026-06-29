@@ -434,7 +434,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
     overlay.innerHTML = `
         <div style="background:white;border-radius:20px;padding:2rem;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;">
             <h2 style="font-size:1.4rem;margin-bottom:0.3rem;color:#3E2723;">🛵 Almost There!</h2>
-            <p style="color:#888;font-size:0.9rem;margin-bottom:1.5rem;">Total: <strong style="color:#F57F17;font-size:1.1rem;">₹${total}</strong></p>
+            <p style="color:#888;font-size:0.9rem;margin-bottom:1.5rem;">Total: <strong style="color:#F57F17;font-size:1.1rem;">₹<span id="checkout-final-total">${total}</span></strong></p>
 
             <div id="takeaway-fields" style="display: ${isTakeaway ? 'block' : 'none'}; margin-bottom:1rem;">
                 <div id="saved-addresses-container"></div>
@@ -483,6 +483,18 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
                     </label>
                 </div>
             </div>
+
+            ${user && user.dosaCoins > 0 ? `
+            <div style="margin-bottom:1.5rem; background:#FFF3E0; padding:1rem; border-radius:10px; border:1px solid #FFE0B2;">
+                <label style="font-weight:700;font-size:0.9rem;color:#E65100;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <input type="checkbox" id="use-dosa-coins" style="width:18px;height:18px;accent-color:#F57F17;">
+                        <span>Use Dosa Coins (Bal: ${user.dosaCoins})</span>
+                    </div>
+                    <span style="color:#3E2723;font-weight:bold;">-₹<span id="dosa-coins-discount">0</span></span>
+                </label>
+            </div>
+            ` : ''}
 
             <button id="place-order-btn" style="width:100%;padding:1rem;background:#F57F17;color:white;border:none;border-radius:12px;font-size:1.1rem;font-weight:800;cursor:pointer;">
                 🍛 Place Order
@@ -690,6 +702,14 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             }
         }
 
+        let coinsUsed = 0;
+        let finalTotal = total;
+        const coinsCheckbox = document.getElementById('use-dosa-coins');
+        if (coinsCheckbox && coinsCheckbox.checked) {
+            coinsUsed = Math.min(total, user.dosaCoins || 0);
+            finalTotal = total - coinsUsed;
+        }
+
         const table = document.getElementById('checkout-table').value.trim();
         const phone = document.getElementById('checkout-phone').value.trim();
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
@@ -729,6 +749,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             }
         } catch (e) { /* auth not loaded, continue as guest */ }
 
+        const now = firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString();
         const newOrder = {
             orderId,
             customerId,
@@ -741,8 +762,10 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             items: orderItems,
             subtotal,
             tax,
-            packingCharge,
-            total,
+            packingCharge: !isTakeaway ? packingCharge : 0,
+            originalTotal: total,
+            coinsUsed: coinsUsed,
+            total: finalTotal,
             paymentMethod,
             paymentStatus: paymentMethod === 'cash' ? 'pending' : 'pending',
             orderType: isTakeaway ? 'takeaway' : 'dine_in',
@@ -750,20 +773,32 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             deliveryOTP: null,
             rating: null,
             review: null,
-            createdAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
             updatedAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
         };
+
+        const coinsEarned = Math.floor(finalTotal * 0.05);
+        newOrder.coinsEarned = coinsEarned;
+        newOrder.coinsUsed = coinsUsed;
 
         try {
             if (typeof db !== 'undefined') {
                 await db.collection('orders').add(newOrder);
-                showToast('🎉 Order placed! We will prepare it soon!', 'success');
+                
+                if (customerId && !customerId.startsWith('guest_')) {
+                    const coinDiff = coinsEarned - coinsUsed;
+                    if (coinDiff !== 0) {
+                        await db.collection('users').doc(customerId).update({
+                            dosaCoins: firebase.firestore.FieldValue.increment(coinDiff)
+                        }).catch(e => console.error("Coin update error:", e));
+                    }
+                }
+                showToast(`🎉 Order placed! You earned ${coinsEarned} Dosa Coins!`, 'success');
             } else {
                 // Fallback to localStorage if Firebase not loaded
                 const existing = JSON.parse(localStorage.getItem('dosaHouseOrders') || '[]');
                 existing.unshift({ id: orderId, ...newOrder, createdAt: new Date().toISOString() });
                 localStorage.setItem('dosaHouseOrders', JSON.stringify(existing));
-                showToast('🎉 Order placed!', 'success');
+                showToast(`🎉 Order placed! You earned ${coinsEarned} Coins!`, 'success');
             }
         } catch (e) {
             console.error('Firebase save error:', e);

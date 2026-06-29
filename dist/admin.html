@@ -180,6 +180,7 @@
         <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛣️ On Way</button>
         <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
         <button class="tab-btn" onclick="showAnalytics(this)" style="color:#2196F3">📈 Analytics</button>
+        <button class="tab-btn" onclick="showReviews(this)" style="color:#F57F17">⭐ Reviews</button>
     </div>
 
     <!-- Orders Grid -->
@@ -224,6 +225,16 @@
         </div>
     </div>
 
+    <!-- Reviews Panel -->
+    <div id="reviews-panel" style="display:none; padding:1.5rem 2rem;">
+        <div style="background:#1a1a1a;border-radius:16px;padding:1.5rem;border:1px solid #333;">
+            <h2 style="color:#F57F17;margin-bottom:1rem;">Customer Reviews</h2>
+            <div id="reviews-list" style="display:flex; flex-direction:column; gap:1rem;">
+                <p style="color:#888;">No reviews yet.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Sound -->
     <audio id="notif-sound" preload="auto">
         <source src="assets/audio/bell.mp3" type="audio/mpeg">
@@ -259,45 +270,103 @@
                     if (!isFirstLoad && allOrders.length > prevCount) {
                         document.getElementById('notif-sound').play().catch(() => {});
                         showToast('🔔 New order received!', 'success');
+                        updateDashboardStats();
                     }
                     isFirstLoad = false;
 
-                    updateStats();
+                    updateDashboardStats();
                     renderOrders();
                 });
         }
 
-        function updateStats() {
-            const today = new Date().toDateString();
-            const todayOrders = allOrders.filter(o => {
-                const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-                return d.toDateString() === today;
+        function updateDashboardStats() {
+            const today = new Date().toLocaleDateString();
+            
+            let todayRev = 0;
+            let todayCount = 0;
+            let pendingCount = 0;
+            let totalRating = 0;
+            let ratingCount = 0;
+            
+            allOrders.forEach(o => {
+                const dateStr = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString() : '';
+                if (dateStr === today && o.status === 'delivered') {
+                    todayRev += (o.total || 0);
+                    todayCount++;
+                }
+                if (o.status !== 'delivered' && o.status !== 'cancelled') {
+                    pendingCount++;
+                }
+                if (o.rating && o.rating > 0) {
+                    totalRating += o.rating;
+                    ratingCount++;
+                }
             });
 
-            const revenue = todayOrders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + (o.total || 0), 0);
-            const pending = allOrders.filter(o => o.status === 'pending').length;
-            const ratings = allOrders.filter(o => o.rating).map(o => o.rating);
-            const avgRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '—';
-
-            document.getElementById('stat-revenue').textContent = `₹${revenue.toLocaleString('en-IN')}`;
-            document.getElementById('stat-orders').textContent = todayOrders.length;
-            document.getElementById('stat-pending').textContent = pending;
-            document.getElementById('stat-rating').textContent = `⭐ ${avgRating}`;
+            document.getElementById('stat-revenue').textContent = `₹${todayRev}`;
+            document.getElementById('stat-orders').textContent = todayCount;
+            document.getElementById('stat-pending').textContent = pendingCount;
+            
+            if (ratingCount > 0) {
+                const avg = (totalRating / ratingCount).toFixed(1);
+                document.getElementById('stat-rating').textContent = `⭐ ${avg}`;
+            } else {
+                document.getElementById('stat-rating').textContent = '⭐ —';
+            }
         }
 
         function showAnalytics(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
+            
             document.getElementById('orders-grid').style.display = 'none';
+            document.getElementById('reviews-panel').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'block';
-            calcRevenue('today'); // Default load
+            calcRevenue('today');
         }
 
-        function filterOrders(filter, btn) {
-            currentFilter = filter;
+        function showReviews(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
+            
+            document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('reviews-panel').style.display = 'block';
+            
+            renderReviews();
+        }
+
+        function renderReviews() {
+            const list = document.getElementById('reviews-list');
+            const ratedOrders = allOrders.filter(o => o.rating && o.rating > 0);
+            
+            if (ratedOrders.length === 0) {
+                list.innerHTML = '<p style="color:#888;">No reviews yet.</p>';
+                return;
+            }
+            
+            list.innerHTML = ratedOrders.map(o => `
+                <div style="background:#0a0a0a; border-radius:12px; padding:1.5rem; border:1px solid #333;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                        <span style="font-weight:bold; color:#fff;">${o.customerName || 'Customer'}</span>
+                        <span style="color:#aaa; font-size:0.85rem;">${o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString() : ''}</span>
+                    </div>
+                    <div style="color:#F57F17; font-size:1.2rem; margin-bottom:0.5rem;">${'★'.repeat(o.rating)}${'☆'.repeat(5 - o.rating)}</div>
+                    <p style="color:#ccc; margin:0; line-height:1.5;">${o.review || '<em>No text review provided</em>'}</p>
+                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid #333; color:#888; font-size:0.85rem;">
+                        Order #${o.id.substring(0,8)} - ${o.type === 'dine-in' ? 'Dine-in' : 'Takeaway'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterOrders(status, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            currentFilter = status;
+            document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('reviews-panel').style.display = 'none';
             document.getElementById('orders-grid').style.display = 'grid';
             renderOrders();
         }
