@@ -315,7 +315,7 @@
 
                   orders.forEach(order => {
                       const dateStr = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : 'Recent';
-                      let itemsHtml = (order.cart && Array.isArray(order.cart)) ? order.cart.map(item => `${item.qty}x ${item.name}`).join(', ') : 'Unknown items';
+                      let itemsHtml = (order.items && Array.isArray(order.items)) ? order.items.map(item => `${item.quantity}x ${item.title}`).join(', ') : 'Unknown items';
                       
                       let status = order.status || 'pending';
                       let statusColor = status === 'delivered' ? '#2E7D32' : (status === 'cancelled' ? '#d32f2f' : '#E65100');
