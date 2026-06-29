@@ -18,6 +18,13 @@
 
 This isn't just a menu website. It's a **complete end-to-end restaurant ecosystem** with separate dashboards for every role — Customers, Admins, Kitchen Staff, and Delivery Partners — all syncing in real-time via Firebase.
 
+Built entirely in a single continuous session, the project evolved through 5 major phases:
+1. **Phase 1: Core E-Commerce & Admin** (Smart Cart, Dual Payments, Order Management)
+2. **Phase 2: Kitchen Display System (KDS)** (Real-time live tickets, prep tracking)
+3. **Phase 3: Delivery Management** (Partner dashboards, OTP verification)
+4. **Phase 4: Analytics & Staff Onboarding** (Revenue charts, secure invite codes, profile cropping)
+5. **Phase 5: Pro Features** (Dosa Coins Loyalty, 5-Star Ratings, Push Notifications)
+
 ---
 
 ## 🗺️ System Architecture
