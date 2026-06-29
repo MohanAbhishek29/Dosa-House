@@ -261,3 +261,8 @@ body {
     background: #90a4ae;
     color: white;
 }
+@media (max-width: 600px) {
+    .kitchen-board { padding: 1rem; }
+    .orders-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .kitchen-header { padding: 1rem; flex-direction: column; gap: 1rem; height: auto; }
+}

@@ -226,7 +226,7 @@
                 document.getElementById('acc-joined').textContent = user.createdAt.toDate ? user.createdAt.toDate().toLocaleDateString() : 'Recently';
             }
             if (user.photoURL) {
-                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
+                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" alt="User Avatar" style="width:100%;height:100%;border-radius:50%;">`;
             }
 
             // Load Notifications

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v5';
+const CACHE_NAME = 'dosa-house-v6';
 const ASSETS = [
   '/',
   '/index.html',
@@ -37,6 +37,21 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then(cachedResponse => {
+      const fetchPromise = fetch(event.request).then(networkResponse => {
+        // Cache the new response for next time
+        if (networkResponse && networkResponse.status === 200) {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Network failed, return cached response if available
+      });
+      
+      // Return cached response immediately if there is one, otherwise wait for network
+      return cachedResponse || fetchPromise;
+    })
   );
 });

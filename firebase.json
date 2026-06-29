@@ -29,5 +29,8 @@
       }
     ],
     "site": "dosa-house-7bd70"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

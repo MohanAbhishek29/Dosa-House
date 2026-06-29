@@ -221,7 +221,7 @@
             document.getElementById('profile-email').textContent = user.email || user.phone || 'User';
             if (user.photoURL) {
                 document.getElementById('user-avatar').innerHTML =
-                    `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+                    `<img src="${user.photoURL}" alt="User Avatar" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
             }
         }).catch(() => hideLoader());
     </script>
