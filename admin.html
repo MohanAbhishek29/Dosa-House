@@ -179,6 +179,7 @@
         <button class="tab-btn" onclick="filterOrders('sent_to_delivery', this)">🛵 Assigned</button>
         <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛣️ On Way</button>
         <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
+        <button class="tab-btn" onclick="showAnalytics(this)" style="color:#2196F3">📈 Analytics</button>
     </div>
 
     <!-- Orders Grid -->
@@ -186,6 +187,39 @@
         <div class="empty-state">
             <span class="emoji">⏳</span>
             <p>Loading orders...</p>
+        </div>
+    </div>
+
+    <!-- Analytics Panel -->
+    <div id="analytics-panel" style="display:none; padding:1.5rem 2rem;">
+        <div style="background:#1a1a1a;border-radius:16px;padding:1.5rem;border:1px solid #333;">
+            <h2 style="color:#F57F17;margin-bottom:1rem;">Revenue Dashboard</h2>
+            <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('today')">Today</button>
+                <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('week')">This Week</button>
+                <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('month')">This Month</button>
+                <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('year')">This Year</button>
+                
+                <div style="flex:1;text-align:right;min-width:150px;">
+                    <input type="date" id="calendar-picker" onchange="calcRevenue('custom')" style="padding:0.6rem;border-radius:8px;border:1px solid #555;background:#000;color:white;font-family:Outfit;width:100%;">
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;">
+                <div style="background:#0a0a0a;padding:1.5rem;border-radius:12px;text-align:center;">
+                    <div style="font-size:0.9rem;color:#888;" id="analytics-title">Selected Period Revenue</div>
+                    <div id="analytics-rev" style="font-size:2.5rem;font-weight:800;color:#4CAF50;">₹0</div>
+                </div>
+                <div style="background:#0a0a0a;padding:1.5rem;border-radius:12px;text-align:center;">
+                    <div style="font-size:0.9rem;color:#888;">Total Orders Completed</div>
+                    <div id="analytics-count" style="font-size:2.5rem;font-weight:800;color:#F57F17;">0</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top:2rem;margin-bottom:1rem;color:#aaa;">Delivery Staff Performance</h3>
+            <div id="delivery-stats" style="background:#0a0a0a;border-radius:12px;padding:1rem;">
+                <!-- Staff stats will go here -->
+            </div>
         </div>
     </div>
 
@@ -250,11 +284,97 @@
             document.getElementById('stat-rating').textContent = `⭐ ${avgRating}`;
         }
 
+        function showAnalytics(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('orders-grid').style.display = 'none';
+            document.getElementById('analytics-panel').style.display = 'block';
+            calcRevenue('today'); // Default load
+        }
+
         function filterOrders(filter, btn) {
             currentFilter = filter;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('orders-grid').style.display = 'grid';
             renderOrders();
+        }
+
+        function calcRevenue(period) {
+            let start = new Date();
+            let end = new Date();
+            start.setHours(0,0,0,0);
+            end.setHours(23,59,59,999);
+
+            let title = "Today's Revenue";
+
+            if (period === 'week') {
+                const day = start.getDay() || 7; // Get current day number, converting Sun. to 7
+                if (day !== 1) start.setHours(-24 * (day - 1)); 
+                title = "This Week's Revenue";
+            } else if (period === 'month') {
+                start.setDate(1);
+                title = "This Month's Revenue";
+            } else if (period === 'year') {
+                start.setMonth(0, 1);
+                title = "This Year's Revenue";
+            } else if (period === 'custom') {
+                const val = document.getElementById('calendar-picker').value;
+                if (val) {
+                    start = new Date(val);
+                    start.setHours(0,0,0,0);
+                    end = new Date(val);
+                    end.setHours(23,59,59,999);
+                    title = "Revenue for " + start.toLocaleDateString();
+                }
+            }
+
+            let periodRev = 0;
+            let periodCount = 0;
+            let deliveryStaff = {};
+
+            allOrders.forEach(o => {
+                if (o.status !== 'delivered') return;
+                const d = o.deliveredAt?.toDate ? o.deliveredAt.toDate() : (o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.createdAt));
+                
+                if (d >= start && d <= end) {
+                    periodRev += (o.total || 0);
+                    periodCount++;
+
+                    // Track delivery boys
+                    if (o.deliveryBoyId) {
+                        if (!deliveryStaff[o.deliveryBoyId]) {
+                            deliveryStaff[o.deliveryBoyId] = { name: o.deliveryBoyName || 'Unknown', count: 0 };
+                        }
+                        deliveryStaff[o.deliveryBoyId].count++;
+                    }
+                }
+            });
+
+            document.getElementById('analytics-title').textContent = title;
+            document.getElementById('analytics-rev').textContent = `₹${periodRev.toLocaleString('en-IN')}`;
+            document.getElementById('analytics-count').textContent = periodCount;
+
+            // Render delivery stats
+            const staffContainer = document.getElementById('delivery-stats');
+            if (Object.keys(deliveryStaff).length === 0) {
+                staffContainer.innerHTML = '<div style="color:#555;text-align:center;padding:1rem;">No deliveries found for this period.</div>';
+            } else {
+                let html = '<div style="display:flex;flex-direction:column;gap:0.5rem;">';
+                for (let key in deliveryStaff) {
+                    let st = deliveryStaff[key];
+                    let comm = st.count * 40; // ₹40 flat commission
+                    html += `
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:0.5rem 0;">
+                            <span style="font-weight:700;">${st.name}</span>
+                            <span style="color:#aaa;">${st.count} Deliveries <span style="color:#4CAF50;font-weight:800;margin-left:1rem;">₹${comm} Earned</span></span>
+                        </div>
+                    `;
+                }
+                html += '</div>';
+                staffContainer.innerHTML = html;
+            }
         }
 
         function renderOrders() {
