@@ -300,7 +300,6 @@
         function loadOrderHistory(uid) {
             db.collection('orders')
               .where('customerId', '==', uid)
-              .orderBy('createdAt', 'desc')
               .onSnapshot(snap => {
                   const list = document.getElementById('orders-list');
                   list.innerHTML = '';
@@ -309,8 +308,12 @@
                       return;
                   }
                   
-                  snap.forEach(doc => {
-                      const order = doc.data();
+                  let orders = [];
+                  snap.forEach(doc => orders.push(doc.data()));
+                  // Sort locally to avoid composite index requirement
+                  orders.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+
+                  orders.forEach(order => {
                       const dateStr = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : 'Recent';
                       let itemsHtml = order.cart.map(item => `${item.qty}x ${item.name}`).join(', ');
                       
