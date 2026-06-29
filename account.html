@@ -315,7 +315,15 @@
 
                   orders.forEach(order => {
                       const dateStr = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : 'Recent';
-                      let itemsHtml = (order.items && Array.isArray(order.items)) ? order.items.map(item => `${item.quantity}x ${item.title}`).join(', ') : 'Unknown items';
+                      let itemsArray = order.items || order.cart || [];
+                      let itemsHtml = 'Unknown items';
+                      if (Array.isArray(itemsArray) && itemsArray.length > 0) {
+                          itemsHtml = itemsArray.map(item => {
+                              let q = item.quantity || item.qty || 1;
+                              let t = item.title || item.name || 'Item';
+                              return `${q}x ${t}`;
+                          }).join(', ');
+                      }
                       
                       let status = order.status || 'pending';
                       let statusColor = status === 'delivered' ? '#2E7D32' : (status === 'cancelled' ? '#d32f2f' : '#E65100');
