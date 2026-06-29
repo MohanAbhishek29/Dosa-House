@@ -42,18 +42,21 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🛒 **Smart Cart** — add items, adjust quantities, auto-calculate bill
 - 💳 **Dual Payment** — Cash on Delivery or UPI with dynamic QR code
 - 🚚 **Real-time Order Tracking** — live progress bar (Placed ➔ Cooking ➔ On Way ➔ Delivered)
-- 🔔 **Notification Sounds** — audio alerts on order status updates
+- 🔔 **Notification Sounds & Push Alerts** — audio and browser push notifications on order status updates
 - 🔑 **OTP Delivery Verification** — receive unique OTP, share with delivery partner
-- 🌟 **Post-Delivery Rating** — rate your experience after order delivered
+- 🌟 **Post-Delivery Rating** — rate your experience and leave reviews after order delivery
 - 📅 **Table Booking** — reserve a table with date, time & party size
-- 🔔 **Notifications** — track all order updates in your account
+- 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
+- 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
 
 ### 🛡️ Admin Dashboard
-- 📊 **Live Stats** — Today's revenue, orders, pending count, avg rating
+- 📊 **Live Stats & Advanced Analytics** — Today's revenue, custom date ranges, pending count, avg rating
 - 🔄 **Full Order Lifecycle** — Accept → Preparing → Packaging → Dispatch
 - 💸 **UPI Payment Verification** — manually confirm received payments
 - 🔔 **New Order Sound Alert** — audio notification on new orders
 - 🗂️ **Filter by Status** — tab-based view for each order stage
+- ⭐ **Reviews Tab** — dedicated dashboard to read all customer ratings and feedback
+- 🎟️ **Staff Invites** — generate secure invite codes to onboard Kitchen and Delivery staff
 
 ### 👨‍🍳 Kitchen Display System (KDS)
 - 🎫 **Live Order Tickets** — appear instantly when admin accepts
