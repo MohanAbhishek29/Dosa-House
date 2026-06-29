@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dosa-house-v8';
+const CACHE_NAME = 'dosa-house-v9';
 const ASSETS = [
   '/',
   '/index.html',
@@ -36,27 +36,49 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Fix for Chrome DevTools bug
+  if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === location.origin;
+  const isGET = event.request.method === 'GET';
+
+  // Bypass service worker for non-GET or cross-origin requests (e.g. Firebase)
+  if (!isGET || !isSameOrigin) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      // Only cache GET requests from our own origin (exclude Firebase APIs, etc)
-      const url = new URL(event.request.url);
-      const isSameOrigin = url.origin === location.origin;
-      const isGET = event.request.method === 'GET';
+      if (cachedResponse) {
+        // Update cache in the background (Stale-While-Revalidate)
+        event.waitUntil(
+          fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, networkResponse.clone());
+              });
+            }
+          }).catch(err => console.log('Background fetch failed:', err))
+        );
+        return cachedResponse;
+      }
 
-      const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Cache the new response for next time if it's a local static asset
-        if (isGET && isSameOrigin && networkResponse && networkResponse.status === 200) {
+      // If not in cache, fetch from network
+      return fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
+            cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Network failed, return cached response if available
+      }).catch(err => {
+        console.error('Network fetch failed:', err);
+        throw err;
       });
-      
-      // Return cached response immediately if there is one, otherwise wait for network
-      return cachedResponse || fetchPromise;
     })
   );
 });
