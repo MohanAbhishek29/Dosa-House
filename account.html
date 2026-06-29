@@ -315,20 +315,21 @@
 
                   orders.forEach(order => {
                       const dateStr = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString() : 'Recent';
-                      let itemsHtml = order.cart.map(item => `${item.qty}x ${item.name}`).join(', ');
+                      let itemsHtml = (order.cart && Array.isArray(order.cart)) ? order.cart.map(item => `${item.qty}x ${item.name}`).join(', ') : 'Unknown items';
                       
-                      let statusColor = order.status === 'delivered' ? '#2E7D32' : (order.status === 'cancelled' ? '#d32f2f' : '#E65100');
-                      let statusBg = order.status === 'delivered' ? '#E8F5E9' : (order.status === 'cancelled' ? '#FFEBEE' : '#FFF8E1');
+                      let status = order.status || 'pending';
+                      let statusColor = status === 'delivered' ? '#2E7D32' : (status === 'cancelled' ? '#d32f2f' : '#E65100');
+                      let statusBg = status === 'delivered' ? '#E8F5E9' : (status === 'cancelled' ? '#FFEBEE' : '#FFF8E1');
 
                       list.innerHTML += `
                           <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;border-left:4px solid ${statusColor};">
                               <div style="flex:1;min-width:200px;">
                                   <div style="color:#888;font-size:0.85rem;margin-bottom:0.3rem;">Order #${order.orderId || doc.id.substring(0,8)} &bull; ${dateStr}</div>
                                   <div style="font-weight:600;color:#3E2723;margin-bottom:0.5rem;font-size:1.05rem;">${itemsHtml}</div>
-                                  <div style="display:inline-block;background:${statusBg};color:${statusColor};padding:0.2rem 0.6rem;border-radius:4px;font-size:0.8rem;font-weight:700;text-transform:uppercase;">${order.status.replace('_', ' ')}</div>
+                                  <div style="display:inline-block;background:${statusBg};color:${statusColor};padding:0.2rem 0.6rem;border-radius:4px;font-size:0.8rem;font-weight:700;text-transform:uppercase;">${status.replace('_', ' ')}</div>
                               </div>
                               <div style="text-align:right;">
-                                  <div style="font-size:1.2rem;font-weight:800;color:#2E7D32;">₹${order.total}</div>
+                                  <div style="font-size:1.2rem;font-weight:800;color:#2E7D32;">₹${order.total || 0}</div>
                                   <div style="font-size:0.85rem;color:#666;margin-top:0.2rem;">${order.type === 'dine-in' ? '🍽️ Dine-in' : '🛵 Takeaway'}</div>
                               </div>
                           </div>
