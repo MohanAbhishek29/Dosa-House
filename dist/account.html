@@ -172,7 +172,15 @@
         <div id="tab-profile" class="tab-content active">
             <div class="profile-card">
                 <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;">
-                    <div id="acc-avatar" style="width:80px;height:80px;border-radius:50%;background:#FFE0B2;display:flex;align-items:center;justify-content:center;font-size:2.5rem;overflow:hidden;">👤</div>
+                    <div style="position:relative;">
+                        <img id="acc-avatar" src="" style="width:100px;height:100px;border-radius:50%;background:#FFE0B2;object-fit:cover;display:block;box-shadow:0 4px 10px rgba(0,0,0,0.1); border: 2px solid white;" alt="Profile" onerror="this.style.display='none'; document.getElementById('acc-avatar-fallback').style.display='flex';">
+                        <div id="acc-avatar-fallback" style="width:100px;height:100px;border-radius:50%;background:#FFE0B2;display:none;align-items:center;justify-content:center;font-size:3rem;box-shadow:0 4px 10px rgba(0,0,0,0.1);border: 2px solid white;">👤</div>
+                        
+                        <label for="profile-upload" style="position:absolute;bottom:0;right:0;background:#F57F17;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,0.2);border:2px solid white;" title="Upload Photo">
+                            📷
+                        </label>
+                        <input type="file" id="profile-upload" accept="image/*" style="display:none" onchange="handleProfileUpload(event)">
+                    </div>
                     <div>
                         <h2 id="acc-name" style="margin:0;color:#3E2723;">Loading...</h2>
                         <p id="acc-email" style="margin:0.2rem 0 0;color:#666;">loading@email.com</p>
@@ -249,52 +257,101 @@
 
         setupNavAuth().then(user => {
             if (!user) {
-                window.location.replace('login.html');
+                window.location.href = 'login.html';
                 return;
             }
-
-            // Populate Account Details
-            document.getElementById('acc-name').textContent = user.name || 'Dosa Lover';
+            document.getElementById('acc-name').textContent = user.name || 'No Name Set';
             document.getElementById('edit-name').value = user.name || '';
-            document.getElementById('acc-email').textContent = user.email || user.phone || 'No email provided';
+            document.getElementById('acc-email').textContent = user.email;
+            
+            // Set Avatar
+            if (user.photoBase64) {
+                document.getElementById('acc-avatar').src = user.photoBase64;
+                document.getElementById('acc-avatar').style.display = 'block';
+                document.getElementById('acc-avatar-fallback').style.display = 'none';
+            } else {
+                document.getElementById('acc-avatar').style.display = 'none';
+                document.getElementById('acc-avatar-fallback').style.display = 'flex';
+            }
+
             if (user.createdAt) {
-                document.getElementById('acc-joined').textContent = user.createdAt.toDate ? user.createdAt.toDate().toLocaleDateString() : 'Recently';
-            }
-            if (user.photoURL) {
-                document.getElementById('acc-avatar').innerHTML = `<img src="${user.photoURL}" alt="User Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                const date = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
+                document.getElementById('acc-joined').textContent = date.toLocaleDateString();
+            } else {
+                document.getElementById('acc-joined').textContent = 'Recently';
             }
 
-            // Load all data
-            loadNotifications(user.uid);
             loadOrderHistory(user.uid);
-            loadAddresses(user);
-
-            // Handle URL hash
-            if (window.location.hash) {
-                const tab = window.location.hash.substring(1);
-                if (['profile', 'orders', 'addresses', 'notifications'].includes(tab)) {
-                    switchTab(tab);
-                }
-            }
+            loadAddresses(user.uid);
+            loadNotifications(user.uid);
         });
 
         async function updateProfile() {
             const btn = document.getElementById('save-profile-btn');
             btn.textContent = 'Saving...';
             btn.disabled = true;
+
             try {
                 const newName = document.getElementById('edit-name').value.trim();
-                const user = firebase.auth().currentUser;
+                const user = auth.currentUser;
                 await db.collection('users').doc(user.uid).update({ name: newName });
                 document.getElementById('acc-name').textContent = newName;
-                // update local storage or user object if needed, but not strictly necessary here
-                showToast('Profile updated successfully!', 'success');
-            } catch (err) {
-                console.error(err);
+                showToast('Profile updated!', 'success');
+            } catch (e) {
                 showToast('Error updating profile.', 'error');
+            } finally {
+                btn.textContent = 'Save Changes';
+                btn.disabled = false;
             }
-            btn.textContent = 'Save Changes';
-            btn.disabled = false;
+        }
+
+        async function handleProfileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Compress to 150x150 WebP Base64
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = async function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Maintain aspect ratio, cover 150x150
+                    const size = 150;
+                    canvas.width = size;
+                    canvas.height = size;
+
+                    const scale = Math.max(size / img.width, size / img.height);
+                    const x = (size / scale - img.width) / 2;
+                    const y = (size / scale - img.height) / 2;
+
+                    ctx.drawImage(img, x, y, img.width, img.height, 0, 0, img.width * scale, img.height * scale);
+
+                    const base64Str = canvas.toDataURL('image/webp', 0.8);
+                    
+                    // Save to Firestore
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) return;
+                        await db.collection('users').doc(user.uid).update({ photoBase64: base64Str });
+                        
+                        // Update UI
+                        document.getElementById('acc-avatar').src = base64Str;
+                        document.getElementById('acc-avatar').style.display = 'block';
+                        document.getElementById('acc-avatar-fallback').style.display = 'none';
+                        showToast('Profile picture updated! 📸', 'success');
+
+                        // Small hack to reload navbar profile pic if possible
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (err) {
+                        showToast('Error saving picture.', 'error');
+                        console.error(err);
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function loadOrderHistory(uid) {

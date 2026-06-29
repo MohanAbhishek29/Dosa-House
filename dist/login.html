@@ -364,6 +364,10 @@
                 <label>Your Name</label>
                 <input type="text" id="name-input" placeholder="Your full name">
             </div>
+            <div class="form-group" id="invite-group" style="display:none; margin-top:0.5rem;">
+                <label style="color:#F57F17;">Staff Invite Code <span style="font-size:0.8rem;color:#999;font-weight:normal;">(Optional)</span></label>
+                <input type="text" id="invite-code-input" placeholder="e.g. DOSA_CHEF_99" style="border-color:#F57F17;">
+            </div>
             <button class="btn-submit" id="email-submit-btn">Sign In</button>
         </div>
 
@@ -463,6 +467,7 @@
             document.getElementById('tab-signin').classList.add('active');
             document.getElementById('tab-signup').classList.remove('active');
             document.getElementById('name-group').style.display = 'none';
+            document.getElementById('invite-group').style.display = 'none';
             document.getElementById('email-submit-btn').textContent = 'Sign In';
             document.getElementById('password-input').autocomplete = 'current-password';
         });
@@ -471,6 +476,7 @@
             document.getElementById('tab-signup').classList.add('active');
             document.getElementById('tab-signin').classList.remove('active');
             document.getElementById('name-group').style.display = 'block';
+            document.getElementById('invite-group').style.display = 'block';
             document.getElementById('email-submit-btn').textContent = 'Create Account';
             document.getElementById('password-input').autocomplete = 'new-password';
         });
@@ -490,6 +496,18 @@
                 if (isSignUp) {
                     const cred = await auth.createUserWithEmailAndPassword(email, password);
                     await cred.user.updateProfile({ displayName: name });
+                    
+                    let role = 'customer';
+                    const inviteCode = document.getElementById('invite-code-input').value.trim();
+                    if (inviteCode === 'DOSA_CHEF_99') role = 'kitchen';
+                    if (inviteCode === 'DOSA_RIDER_99') role = 'delivery';
+                    
+                    await db.collection('users').doc(cred.user.uid).set({
+                        name: name,
+                        email: email,
+                        role: role,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                 } else {
                     await auth.signInWithEmailAndPassword(email, password);
                 }

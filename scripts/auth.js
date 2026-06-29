@@ -92,8 +92,9 @@ async function setupNavAuth() {
         const avatarEl = document.getElementById('user-avatar');
         if (nameEl) nameEl.textContent = user.name?.split(' ')[0] || 'Me';
         if (emailEl) emailEl.textContent = user.email || user.phone || 'User';
-        if (avatarEl && user.photoURL) {
-            avatarEl.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" style="width:22px;height:22px;border-radius:50%;vertical-align:middle;">`;
+        const photo = user.photoBase64 || user.photoURL;
+        if (avatarEl && photo) {
+            avatarEl.innerHTML = `<img src="${photo}" alt="User Avatar" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;">`;
         }
     } else {
         // Guest — hide profile, show login button
