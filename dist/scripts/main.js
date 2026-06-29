@@ -489,6 +489,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
                 <label style="font-weight:700;font-size:0.9rem;color:#E65100;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
                     <div style="display:flex;align-items:center;gap:0.5rem;">
                         <input type="checkbox" id="use-dosa-coins" style="width:18px;height:18px;accent-color:#F57F17;">
+                        <img src="assets/images/Dosa_House_coin.png" alt="Coin" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;object-fit:cover;">
                         <span>Use Dosa Coins (Bal: ${user.dosaCoins})</span>
                     </div>
                     <span style="color:#3E2723;font-weight:bold;">-₹<span id="dosa-coins-discount">0</span></span>
