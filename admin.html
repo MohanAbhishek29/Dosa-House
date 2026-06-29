@@ -200,8 +200,9 @@
                 <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('month')">This Month</button>
                 <button class="action-btn" style="background:#333;color:white" onclick="calcRevenue('year')">This Year</button>
                 
-                <div style="flex:1;text-align:right;min-width:150px;">
-                    <input type="date" id="calendar-picker" onchange="calcRevenue('custom')" style="padding:0.6rem;border-radius:8px;border:1px solid #555;background:#000;color:white;font-family:Outfit;width:100%;">
+                <div style="flex:1;text-align:right;min-width:150px;position:relative;">
+                    <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:1.2rem;pointer-events:none;">📅</span>
+                    <input type="date" id="calendar-picker" onchange="calcRevenue('custom')" onclick="if(this.showPicker) this.showPicker()" style="padding:0.6rem 0.6rem 0.6rem 2.5rem;border-radius:8px;border:1px solid #555;background:#000;color:white;font-family:Outfit;width:100%;cursor:pointer;">
                 </div>
             </div>
 
