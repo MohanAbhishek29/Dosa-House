@@ -23,5 +23,13 @@ service cloud.firestore {
       // Staff can read and update all orders
       allow read, update, delete: if isStaff();
     }
+
+    match /bookings/{bookingId} {
+      allow read, write: if true;
+    }
+
+    match /tableLocks/{lockId} {
+      allow read, write: if true;
+    }
   }
 }

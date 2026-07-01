@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!timeInput.value) timeInput.value = "19:00";
         }
 
+        renderTables(); // Initial render to show empty tables instantly
         setTimeout(setupRealtime, 1000); // delay to let firebase load
 
         dateInput.addEventListener('change', setupRealtime);
