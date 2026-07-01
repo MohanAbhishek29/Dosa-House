@@ -265,6 +265,7 @@ function closeModal() {
 // --- Cart Logic ---
 
 function addToCart(itemId, qty) {
+    if (qty <= 0) return; // Prevent negative quantities
     const existing = cart.find(i => i.itemId === itemId);
     const item = menuItems.find(i => i.id === itemId);
 
@@ -707,8 +708,10 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
         let finalTotal = total;
         const coinsCheckbox = document.getElementById('use-dosa-coins');
         if (coinsCheckbox && coinsCheckbox.checked) {
-            coinsUsed = Math.min(total, user.dosaCoins || 0);
-            finalTotal = total - coinsUsed;
+            // Strictly cap coins used to user's available balance and the total bill
+            const availableCoins = Math.max(0, user.dosaCoins || 0);
+            coinsUsed = Math.min(Math.max(0, total), availableCoins);
+            finalTotal = Math.max(0, total - coinsUsed);
         }
 
         const table = document.getElementById('checkout-table').value.trim();
@@ -774,6 +777,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             deliveryOTP: null,
             rating: null,
             review: null,
+            createdAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
             updatedAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
         };
 
