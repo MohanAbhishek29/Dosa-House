@@ -355,3 +355,4 @@
         transform: translateX(5px);
     }
 }
+.legend-locked { background: #FFC107; }
