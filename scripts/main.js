@@ -787,16 +787,31 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
 
         try {
             if (typeof db !== 'undefined') {
-                await db.collection('orders').add(newOrder);
+                const orderRef = db.collection('orders').doc();
+                // Ensure order object is ready
                 
                 if (customerId && !customerId.startsWith('guest_')) {
-                    const coinDiff = coinsEarned - coinsUsed;
-                    if (coinDiff !== 0) {
-                        await db.collection('users').doc(customerId).update({
-                            dosaCoins: firebase.firestore.FieldValue.increment(coinDiff)
-                        }).catch(e => console.error("Coin update error:", e));
-                    }
+                    // Run transaction to ensure double-spending of coins is impossible
+                    await db.runTransaction(async (transaction) => {
+                        const userRef = db.collection('users').doc(customerId);
+                        const userDoc = await transaction.get(userRef);
+                        
+                        if (!userDoc.exists) throw new Error("User data missing!");
+                        
+                        const currentCoins = userDoc.data().dosaCoins || 0;
+                        if (coinsUsed > 0 && currentCoins < coinsUsed) {
+                            throw new Error("Insufficient Dosa Coins! (Race condition detected)");
+                        }
+                        
+                        const newCoinBalance = currentCoins - coinsUsed + coinsEarned;
+                        transaction.update(userRef, { dosaCoins: newCoinBalance });
+                        transaction.set(orderRef, newOrder);
+                    });
+                } else {
+                    // Guest user or no coins involved
+                    await orderRef.set(newOrder);
                 }
+                
                 showToast(`🎉 Order placed! You earned ${coinsEarned} Dosa Coins!`, 'success');
             } else {
                 // Fallback to localStorage if Firebase not loaded
@@ -807,7 +822,11 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             }
         } catch (e) {
             console.error('Firebase save error:', e);
-            showToast('Order placed (offline mode)!', 'success');
+            showToast('Order failed: ' + e.message, 'error');
+            const btn = document.getElementById('place-order-btn');
+            btn.textContent = 'Place Order';
+            btn.disabled = false;
+            return; // Abort checkout UI closing
         }
 
         overlay.remove();

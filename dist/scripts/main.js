@@ -265,6 +265,7 @@ function closeModal() {
 // --- Cart Logic ---
 
 function addToCart(itemId, qty) {
+    if (qty <= 0) return; // Prevent negative quantities
     const existing = cart.find(i => i.itemId === itemId);
     const item = menuItems.find(i => i.id === itemId);
 
@@ -707,8 +708,10 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
         let finalTotal = total;
         const coinsCheckbox = document.getElementById('use-dosa-coins');
         if (coinsCheckbox && coinsCheckbox.checked) {
-            coinsUsed = Math.min(total, user.dosaCoins || 0);
-            finalTotal = total - coinsUsed;
+            // Strictly cap coins used to user's available balance and the total bill
+            const availableCoins = Math.max(0, user.dosaCoins || 0);
+            coinsUsed = Math.min(Math.max(0, total), availableCoins);
+            finalTotal = Math.max(0, total - coinsUsed);
         }
 
         const table = document.getElementById('checkout-table').value.trim();
@@ -774,6 +777,7 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             deliveryOTP: null,
             rating: null,
             review: null,
+            createdAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
             updatedAt: firebase.firestore ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
         };
 
@@ -783,16 +787,31 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
 
         try {
             if (typeof db !== 'undefined') {
-                await db.collection('orders').add(newOrder);
+                const orderRef = db.collection('orders').doc();
+                // Ensure order object is ready
                 
                 if (customerId && !customerId.startsWith('guest_')) {
-                    const coinDiff = coinsEarned - coinsUsed;
-                    if (coinDiff !== 0) {
-                        await db.collection('users').doc(customerId).update({
-                            dosaCoins: firebase.firestore.FieldValue.increment(coinDiff)
-                        }).catch(e => console.error("Coin update error:", e));
-                    }
+                    // Run transaction to ensure double-spending of coins is impossible
+                    await db.runTransaction(async (transaction) => {
+                        const userRef = db.collection('users').doc(customerId);
+                        const userDoc = await transaction.get(userRef);
+                        
+                        if (!userDoc.exists) throw new Error("User data missing!");
+                        
+                        const currentCoins = userDoc.data().dosaCoins || 0;
+                        if (coinsUsed > 0 && currentCoins < coinsUsed) {
+                            throw new Error("Insufficient Dosa Coins! (Race condition detected)");
+                        }
+                        
+                        const newCoinBalance = currentCoins - coinsUsed + coinsEarned;
+                        transaction.update(userRef, { dosaCoins: newCoinBalance });
+                        transaction.set(orderRef, newOrder);
+                    });
+                } else {
+                    // Guest user or no coins involved
+                    await orderRef.set(newOrder);
                 }
+                
                 showToast(`🎉 Order placed! You earned ${coinsEarned} Dosa Coins!`, 'success');
             } else {
                 // Fallback to localStorage if Firebase not loaded
@@ -803,7 +822,11 @@ function showCheckoutModal({ orderId, subtotal, tax, packingCharge, total, now, 
             }
         } catch (e) {
             console.error('Firebase save error:', e);
-            showToast('Order placed (offline mode)!', 'success');
+            showToast('Order failed: ' + e.message, 'error');
+            const btn = document.getElementById('place-order-btn');
+            btn.textContent = 'Place Order';
+            btn.disabled = false;
+            return; // Abort checkout UI closing
         }
 
         overlay.remove();
