@@ -34,6 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveLocks = [];
     let unsubBookings = null;
     let unsubLocks = null;
+    let currentLockId = null;
+
+    window.addEventListener('beforeunload', () => {
+        if (currentLockId && typeof db !== 'undefined') {
+            db.collection('tableLocks').doc(currentLockId).delete();
+        }
+    });
 
     if (bookingForm) {
         if (dateInput) {
@@ -80,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const success = await saveBooking(booking);
             
             if (success) {
+                if (currentLockId && typeof db !== 'undefined') {
+                    db.collection('tableLocks').doc(currentLockId).delete().catch(console.error);
+                    currentLockId = null;
+                }
                 bookingForm.style.display = 'none';
                 successMsg.style.display = 'block';
                 if (window.showToast) window.showToast("Table Booked Successfully! \ud83c\udf89", "success");
@@ -191,6 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const lockedUntil = Date.now() + (5 * 60 * 1000);
         
         try {
+            if (currentLockId && currentLockId !== lockId) {
+                db.collection('tableLocks').doc(currentLockId).delete().catch(console.error);
+            }
+            currentLockId = lockId;
             await db.collection('tableLocks').doc(lockId).set({
                 tableId, date, time, lockedBy: currentUserId, lockedUntil
             });
@@ -212,16 +227,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const docRef = db.collection('bookings').doc();
+            const tableDayRef = db.collection('tableDays').doc(`${newBooking.tableId}_${newBooking.date}`);
+            
             return await db.runTransaction(async (transaction) => {
-                const snap = await transaction.get(db.collection('bookings').where('date', '==', newBooking.date).where('tableId', '==', newBooking.tableId));
+                const tableDayDoc = await transaction.get(tableDayRef);
+                const bookedTimes = tableDayDoc.exists ? tableDayDoc.data().bookedTimes : [];
+                
                 const selMins = timeToMins(newBooking.time);
-                let conflict = false;
-                snap.forEach(doc => {
-                    const b = doc.data();
-                    if (Math.abs(timeToMins(b.time) - selMins) < 60) conflict = true;
-                });
+                const conflict = bookedTimes.some(t => Math.abs(t - selMins) < 60);
                 
                 if (conflict) return false;
+                
+                bookedTimes.push(selMins);
+                transaction.set(tableDayRef, { bookedTimes });
                 transaction.set(docRef, newBooking);
                 return true;
             });

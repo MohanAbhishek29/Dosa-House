@@ -31,5 +31,9 @@ service cloud.firestore {
     match /tableLocks/{lockId} {
       allow read, write: if true;
     }
+
+    match /tableDays/{tableDayId} {
+      allow read, write: if true;
+    }
   }
 }
