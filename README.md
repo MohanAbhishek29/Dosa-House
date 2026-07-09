@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/images/logo_dosa_house.png" alt="Dosa House Logo" width="120" height="120">
+<img src="assets/images/logo_dosa_house.png" alt="Dosa House Logo" width="250" height="250">
 
 # 🍛 Dosa House
 ### *Full-Stack Restaurant Management System*
