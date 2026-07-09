@@ -10,9 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableMapContainer = document.getElementById('table-map-container');
 
     let currentUserId = 'guest_' + Math.floor(Math.random() * 100000);
+    let _isGuest = true;
     if (typeof auth !== 'undefined') {
         auth.onAuthStateChanged(user => {
-            if (user) currentUserId = user.uid;
+            if (user) {
+                currentUserId = user.uid;
+                _isGuest = false;
+                renderTables(); // Re-render if locks change on auth
+            } else {
+                currentUserId = 'guest_' + Math.floor(Math.random() * 100000);
+                _isGuest = true;
+            }
         });
     }
 
@@ -34,11 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveLocks = [];
     let unsubBookings = null;
     let unsubLocks = null;
-    let currentLockId = null;
 
     window.addEventListener('beforeunload', () => {
-        if (currentLockId && typeof db !== 'undefined') {
-            db.collection('tableLocks').doc(currentLockId).delete();
+        if (!_isGuest && typeof db !== 'undefined') {
+            db.collection('tableLocks').doc(currentUserId).delete().catch(() => {});
         }
     });
 
@@ -87,9 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const success = await saveBooking(booking);
             
             if (success) {
-                if (currentLockId && typeof db !== 'undefined') {
-                    db.collection('tableLocks').doc(currentLockId).delete().catch(console.error);
-                    currentLockId = null;
+                if (!_isGuest && typeof db !== 'undefined') {
+                    db.collection('tableLocks').doc(currentUserId).delete().catch(() => {});
                 }
                 bookingForm.style.display = 'none';
                 successMsg.style.display = 'block';
@@ -197,16 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function acquireLock(tableId, date, time) {
-        if (typeof db === 'undefined') return;
-        const lockId = `${tableId}_${date}_${time.replace(':','-')}`;
+        if (typeof db === 'undefined' || _isGuest) return; // Guests cannot lock tables
         const lockedUntil = Date.now() + (5 * 60 * 1000);
         
         try {
-            if (currentLockId && currentLockId !== lockId) {
-                db.collection('tableLocks').doc(currentLockId).delete().catch(console.error);
-            }
-            currentLockId = lockId;
-            await db.collection('tableLocks').doc(lockId).set({
+            await db.collection('tableLocks').doc(currentUserId).set({
                 tableId, date, time, lockedBy: currentUserId, lockedUntil
             });
         } catch(e) {
