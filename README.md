@@ -42,12 +42,13 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🛒 **Smart Cart** — add items, adjust quantities, auto-calculate bill
 - 💳 **Dual Payment** — Cash on Delivery or UPI with dynamic QR code
 - 🚚 **Real-time Order Tracking** — live progress bar (Placed ➔ Cooking ➔ On Way ➔ Delivered)
-- 🔔 **Notification Sounds & Push Alerts** — audio and browser push notifications on order status updates
+- 🔔 **Native OS Push Notifications** — meal-time based, personalized Telugu/English craving alerts (works on mobile & desktop)
 - 🔑 **OTP Delivery Verification** — receive unique OTP, share with delivery partner
-- 🌟 **Post-Delivery Rating** — rate your experience and leave reviews after order delivery
-- 📅 **Table Booking** — reserve a table with date, time & party size
+- 🌟 **Enhanced Reviews** — submit star ratings along with detailed text reviews directly from a modal popup
+- 📅 **Table Booking** — reserve a table with date, time & party size, and view your history in the profile
 - 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
 - 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
+- 🔄 **Unified UI Loading** — seamless animated logo transition across all authenticated pages
 
 ### 🛡️ Admin Dashboard
 - 📊 **Live Stats & Advanced Analytics** — Today's revenue, custom date ranges, pending count, avg rating
