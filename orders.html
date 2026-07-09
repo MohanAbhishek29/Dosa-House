@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="styles/ui.css">
     <link rel="icon" type="image/png" href="assets/images/logo_dosa_house.png">
     <link rel="manifest" href="manifest.json">
+    <script>!function(){var e=document.createElement('div');e.id='__auth_loader';e.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s';e.innerHTML='<img src="assets/images/logo_dosa_house.png" alt="Logo" style="width:180px;height:auto;margin-bottom:1.5rem;object-fit:contain;"><div style="width:40px;height:4px;background:#F57F17;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>';document.documentElement.appendChild(e)}()</script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -408,13 +409,10 @@
             let ratingSection = '';
             if (order.status === 'delivered' && !order.rating) {
                 ratingSection = `
-                    <div class="rating-section">
-                        <p class="rate-label">Rate your experience:</p>
-                        <div class="stars" id="stars-${order.id}">
-                            ${[1,2,3,4,5].map(n =>
-                                `<span onclick="rateOrder('${order.id}', ${n})">⭐</span>`
-                            ).join('')}
-                        </div>
+                    <div style="text-align:right; margin-top:1rem; padding:0 1.2rem 1.2rem;">
+                        <button onclick="openRatingModal('${order.id}')" style="background:#F57F17;color:white;border:none;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.9rem;font-weight:700;cursor:pointer;">
+                            ⭐ Rate Order
+                        </button>
                     </div>`;
             } else if (order.rating) {
                 ratingSection = `<div style="text-align:center;padding:0.8rem;color:#F57F17;font-size:0.9rem;">
@@ -462,17 +460,87 @@
             }
         }
 
-        async function rateOrder(orderId, stars) {
+        function openRatingModal(orderId) {
+            document.getElementById('rating-order-id').value = orderId;
+            document.getElementById('rating-value').value = "0";
+            document.getElementById('rating-review-text').value = "";
+            const stars = document.getElementById('star-rating-container').querySelectorAll('span');
+            stars.forEach(s => s.style.color = '#ccc');
+            document.getElementById('rating-modal').style.display = 'flex';
+        }
+
+        async function submitRating() {
+            const orderId = document.getElementById('rating-order-id').value;
+            const stars = parseInt(document.getElementById('rating-value').value);
+            const review = document.getElementById('rating-review-text').value.trim();
+
+            if (stars === 0) {
+                alert('Please select a star rating first!');
+                return;
+            }
+
+            const btn = document.getElementById('submit-rating-btn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
             try {
                 await db.collection('orders').doc(orderId).update({
                     rating: stars,
+                    review: review,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-            } catch(e) {
-                console.error(e);
+                document.getElementById('rating-modal').style.display = 'none';
+            } catch (e) {
+                console.error("Error submitting rating:", e);
+                alert("Failed to submit rating. Please try again.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Rating';
             }
         }
+
+        // Initialize star clicking logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('star-rating-container');
+            if (container) {
+                const stars = container.querySelectorAll('span');
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const val = parseInt(this.getAttribute('data-value'));
+                        document.getElementById('rating-value').value = val;
+                        stars.forEach((s, index) => {
+                            if (index < val) s.style.color = '#F57F17';
+                            else s.style.color = '#ccc';
+                        });
+                    });
+                });
+            }
+        });
     </script>
     <script src="scripts/ui.js"></script>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:2rem; border-radius:12px; width:90%; max-width:400px; text-align:center;">
+            <h3 style="margin:0 0 1rem; color:#3E2723;">Rate Your Order</h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:1.5rem;">How was the food and delivery experience?</p>
+            <div id="star-rating-container" style="font-size:2.5rem; color:#ccc; cursor:pointer; margin-bottom:1rem; user-select:none;">
+                <span data-value="1">★</span>
+                <span data-value="2">★</span>
+                <span data-value="3">★</span>
+                <span data-value="4">★</span>
+                <span data-value="5">★</span>
+            </div>
+            <textarea id="rating-review-text" rows="3" placeholder="Leave an optional review..." style="width:100%; padding:0.8rem; border:2px solid #eee; border-radius:8px; font-size:0.95rem; resize:none; outline:none; box-sizing:border-box; margin-bottom:1.5rem; font-family:inherit;"></textarea>
+            
+            <input type="hidden" id="rating-order-id" value="">
+            <input type="hidden" id="rating-value" value="0">
+            
+            <div style="display:flex; justify-content:center; gap:1rem;">
+                <button onclick="document.getElementById('rating-modal').style.display='none'" style="padding:0.6rem 1.2rem; border-radius:8px; border:1px solid #ccc; background:white; cursor:pointer; font-weight:bold;">Cancel</button>
+                <button id="submit-rating-btn" onclick="submitRating()" style="padding:0.6rem 1.2rem; border-radius:8px; border:none; background:#F57F17; color:white; font-weight:bold; cursor:pointer;">Submit Rating</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

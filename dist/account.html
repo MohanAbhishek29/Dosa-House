@@ -539,7 +539,7 @@
         async function loadTableBookings(uid) {
             const list = document.getElementById('account-bookings-list');
             try {
-                const snap = await db.collection('bookings').where('customerId', '==', uid).get();
+                const snap = await db.collection('bookings').where('userId', '==', uid).get();
                 if (snap.empty) {
                     list.innerHTML = '<p style="text-align:center;color:#888;">You have no past or upcoming table bookings.</p>';
                     return;

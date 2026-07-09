@@ -263,7 +263,7 @@ window.openMyBookings = async function() {
     const listEl = document.getElementById('my-bookings-list');
     listEl.innerHTML = '<p style="color:#888; text-align:center;">Loading your bookings...</p>';
     try {
-        const snap = await db.collection('bookings').where('customerId', '==', currentUserId).get();
+        const snap = await db.collection('bookings').where('userId', '==', currentUserId).get();
         if (snap.empty) {
             listEl.innerHTML = '<p style="color:#888; text-align:center;">You have no table bookings yet.</p>';
             return;
