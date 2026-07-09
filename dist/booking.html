@@ -107,7 +107,10 @@
 
     <!-- Booking Content -->
     <div class="booking-container">
-        <a href="index.html" class="back-btn">← Back to Home</a>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <a href="index.html" class="back-btn">← Back to Home</a>
+            <button type="button" onclick="openMyBookings()" class="btn-confirm" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem; background:var(--color-banana-leaf);">📋 My Bookings</button>
+        </div>
         <form id="booking-form" class="booking-form">
             <div class="form-group">
                 <label for="name">Full Name</label>
@@ -175,6 +178,19 @@
             <h3>🎉 Booking Confirmed!</h3>
             <p>Your table has been reserved. We'll see you soon!</p>
             <p style="font-size: 0.9rem; margin-top: 0.5rem;">Redirecting to orders...</p>
+        </div>
+    </div>
+
+    <!-- My Bookings Modal -->
+    <div id="my-bookings-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center; padding:1rem; opacity:0; transition:opacity 0.3s ease;">
+        <div style="background:white; border-radius:20px; width:100%; max-width:500px; max-height:80vh; overflow-y:auto; padding:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.2); transform:translateY(20px); transition:transform 0.3s ease;" id="my-bookings-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f5f5f5; padding-bottom:1rem; margin-bottom:1rem;">
+                <h3 style="color:var(--color-charcoal); margin:0; font-size:1.5rem;">My Table Bookings</h3>
+                <button type="button" onclick="closeMyBookings()" style="background:none; border:none; font-size:2rem; cursor:pointer; color:#888; line-height:1;">×</button>
+            </div>
+            <div id="my-bookings-list">
+                <p style="color:#888; text-align:center;">Loading your bookings...</p>
+            </div>
         </div>
     </div>
 

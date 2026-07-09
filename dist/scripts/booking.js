@@ -250,3 +250,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+window.openMyBookings = async function() {
+    if (typeof _isGuest !== 'undefined' && _isGuest) {
+        if (window.requireLogin) requireLogin('Please sign in to view your bookings.');
+        return;
+    }
+    const modal = document.getElementById('my-bookings-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    setTimeout(() => modal.style.opacity = '1', 10);
+    const listEl = document.getElementById('my-bookings-list');
+    listEl.innerHTML = '<p style="color:#888; text-align:center;">Loading your bookings...</p>';
+    try {
+        const snap = await db.collection('bookings').where('customerId', '==', currentUserId).get();
+        if (snap.empty) {
+            listEl.innerHTML = '<p style="color:#888; text-align:center;">You have no table bookings yet.</p>';
+            return;
+        }
+        listEl.innerHTML = '';
+        let userBookings = snap.docs.map(d => d.data());
+        userBookings.sort((a, b) => {
+            const dA = new Date(`${a.date}T${a.time || '00:00'}`);
+            const dB = new Date(`${b.date}T${b.time || '00:00'}`);
+            return dB - dA;
+        });
+        
+        userBookings.slice(0, 20).forEach(b => {
+            const item = document.createElement('div');
+            item.style.padding = '1rem';
+            item.style.borderBottom = '1px solid #eee';
+            item.innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <strong style="color:var(--color-charcoal); font-size:1.1rem;">Table ${b.tableId.replace('T', '')}</strong>
+                    <span style="background:#E8F5E9; color:#2E7D32; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.8rem; font-weight:600;">${b.status}</span>
+                </div>
+                <div style="color:#666; font-size:0.9rem; display:flex; gap:1rem;">
+                    <span>📅 ${b.date}</span>
+                    <span>⏰ ${b.time}</span>
+                    <span>👥 ${b.guests} Guests</span>
+                </div>
+            `;
+            listEl.appendChild(item);
+        });
+    } catch(e) {
+        console.error(e);
+        listEl.innerHTML = '<p style="color:#d32f2f; text-align:center;">Failed to load bookings. Please try again.</p>';
+    }
+};
+
+window.closeMyBookings = function() {
+    const modal = document.getElementById('my-bookings-modal');
+    if (!modal) return;
+    modal.style.opacity = '0';
+    setTimeout(() => modal.style.display = 'none', 300);
+};

@@ -167,6 +167,7 @@
                 <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
                 <button class="tab-btn" onclick="switchTab('orders')">Order History</button>
                 <button class="tab-btn" onclick="switchTab('addresses')">Saved Addresses</button>
+                <button class="tab-btn" onclick="switchTab('bookings')">Table Bookings</button>
                 <button class="tab-btn" onclick="switchTab('notifications')">Notifications</button>
             </div>
         </div>
@@ -212,6 +213,12 @@
                         <button type="submit" id="save-profile-btn" style="background:#F57F17;color:white;border:none;padding:0.8rem 1.5rem;border-radius:8px;font-weight:700;cursor:pointer;">Save Changes</button>
                     </form>
                 </div>
+                
+                <div style="border-top:1px solid #eee;padding-top:1.5rem;margin-top:1.5rem; border-top-color:#ffebee;">
+                    <h4 style="margin:0 0 0.5rem;color:#d32f2f;">Danger Zone</h4>
+                    <p style="color:#666; font-size:0.9rem; margin-bottom:1rem;">Once you delete your account, there is no going back. Please be certain.</p>
+                    <button onclick="deleteUserAccount()" style="background:white;color:#d32f2f;border:2px solid #ef9a9a;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all 0.2s;">Delete Account</button>
+                </div>
             </div>
         </div>
 
@@ -233,6 +240,19 @@
                 </div>
                 <div id="addresses-list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:1rem;">
                     <p style="text-align:center;color:#888;grid-column:1/-1;">Loading addresses...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Bookings Tab -->
+        <div id="tab-bookings" class="tab-content">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+                    <h3 style="margin:0; color:#3E2723;">Your Table Bookings</h3>
+                    <a href="booking.html" style="background:#F57F17;color:white;text-decoration:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.9rem;font-weight:700;">Book a Table</a>
+                </div>
+                <div id="account-bookings-list">
+                    <p style="text-align:center;color:#888;">Loading your bookings...</p>
                 </div>
             </div>
         </div>
@@ -337,7 +357,36 @@
             loadOrderHistory(user.uid);
             loadAddresses(user.uid);
             loadNotifications(user.uid);
+            loadTableBookings(user.uid);
         });
+
+        async function deleteUserAccount() {
+            if (!confirm("Are you absolutely sure you want to delete your account? All your data will be permanently lost.")) return;
+            
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) return;
+                
+                // Show loading
+                document.getElementById('__auth_loader').style.display = 'flex';
+                
+                // 1. Delete user document from firestore
+                await db.collection('users').doc(user.uid).delete();
+                
+                // 2. Delete user from Firebase Auth
+                await user.delete();
+                
+                // Redirect will happen automatically via auth state listener in auth.js
+            } catch (e) {
+                console.error("Account deletion error:", e);
+                document.getElementById('__auth_loader').style.display = 'none';
+                if (e.code === 'auth/requires-recent-login') {
+                    alert("Please log out and log back in before deleting your account for security reasons.");
+                } else {
+                    alert("An error occurred while deleting your account. Please try again later.");
+                }
+            }
+        }
 
         async function updateProfile() {
             const btn = document.getElementById('save-profile-btn');
@@ -485,6 +534,46 @@
                       `;
                   });
               });
+        }
+
+        async function loadTableBookings(uid) {
+            const list = document.getElementById('account-bookings-list');
+            try {
+                const snap = await db.collection('bookings').where('customerId', '==', uid).get();
+                if (snap.empty) {
+                    list.innerHTML = '<p style="text-align:center;color:#888;">You have no past or upcoming table bookings.</p>';
+                    return;
+                }
+                let bookings = snap.docs.map(d => d.data());
+                bookings.sort((a, b) => {
+                    const dA = new Date(`${a.date}T${a.time || '00:00'}`);
+                    const dB = new Date(`${b.date}T${b.time || '00:00'}`);
+                    return dB - dA;
+                });
+
+                list.innerHTML = '';
+                bookings.forEach(order => {
+                    let statusColor = order.status === 'Confirmed' ? '#2E7D32' : (order.status === 'Cancelled' ? '#d32f2f' : '#E65100');
+                    let statusBg = order.status === 'Confirmed' ? '#E8F5E9' : (order.status === 'Cancelled' ? '#FFEBEE' : '#FFF8E1');
+
+                    list.innerHTML += `
+                        <div style="background:white;border-radius:12px;padding:1.5rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;border-left:4px solid ${statusColor};">
+                            <div style="flex:1;min-width:200px;">
+                                <div style="color:#888;font-size:0.85rem;margin-bottom:0.3rem;">Booking ID: ${order.id}</div>
+                                <div style="font-weight:600;color:#3E2723;margin-bottom:0.5rem;font-size:1.1rem;">Table ${order.tableId.replace('T', '')} &bull; ${order.guests} Guests</div>
+                                <div style="display:inline-block;background:${statusBg};color:${statusColor};padding:0.2rem 0.6rem;border-radius:4px;font-size:0.8rem;font-weight:700;text-transform:uppercase;">${order.status}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:1.1rem;font-weight:800;color:#3E2723;">📅 ${order.date}</div>
+                                <div style="font-size:0.9rem;color:#666;margin-top:0.2rem;">⏰ ${order.time}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = '<p style="text-align:center;color:#d32f2f;">Error loading bookings.</p>';
+            }
         }
 
         function loadAddresses(userObj) {
