@@ -83,13 +83,24 @@ function checkAndSendNotification() {
                 const dialogues = NOTIFICATIONS_CONFIG[currentHour];
                 const randomMsg = dialogues[Math.floor(Math.random() * dialogues.length)];
                 
-                // Send the Native Notification
-                new Notification("Dosa House 🛖", {
+                // Send the Native Notification (Mobile friendly via Service Worker)
+                const title = "Dosa House 🛖";
+                const options = {
                     body: randomMsg,
                     icon: "assets/images/logo_dosa_house.png",
                     badge: "assets/images/logo_dosa_house.png",
                     vibrate: [200, 100, 200]
-                });
+                };
+
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification(title, options);
+                    }).catch(() => {
+                        new Notification(title, options);
+                    });
+                } else {
+                    new Notification(title, options);
+                }
                 
                 // Save state so we don't spam them again in this hour
                 localStorage.setItem(LAST_NOTIFIED_KEY, JSON.stringify({

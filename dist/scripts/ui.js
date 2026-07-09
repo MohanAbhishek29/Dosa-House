@@ -59,14 +59,14 @@
         document.body.appendChild(waBtn);
     }
 
-    // 4. Force Unregister all Service Workers to fix caching issues
+    // 4. Register Service Worker for Mobile Push Notifications & PWA
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-            for(let registration of registrations) {
-                registration.unregister().then(bool => {
-                    console.log('Unregistered Service Worker:', bool);
-                });
-            }
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('SW registered for push notifications:', registration);
+            }).catch(error => {
+                console.log('SW registration failed:', error);
+            });
         });
     }
 

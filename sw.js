@@ -8,9 +8,6 @@ self.addEventListener('activate', event => {
       return Promise.all(keys.map(key => caches.delete(key)));
     }).then(() => {
       return self.clients.claim();
-    }).then(() => {
-      // Unregister this service worker
-      return self.registration.unregister();
     })
   );
 });
