@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/images/logo_dosa_house.png" alt="Dosa House Logo" width="120" height="120">
+
 # 🍛 Dosa House
 ### *Full-Stack Restaurant Management System*
 
@@ -146,27 +148,7 @@ Dosa House/
 | **Build** | Custom Node.js build script |
 | **Version Control** | Git & GitHub |
 
----
 
-## ⚡ Local Setup
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/MohanAbhishek29/Dosa-House.git
-cd Dosa-House
-
-# 2. Open in browser (no server needed for basic view)
-open index.html
-
-# 3. For full Firebase features, configure scripts/firebase-config.js
-#    with your own Firebase project credentials
-
-# 4. Build & Deploy
-node scripts/build.js
-firebase deploy --only hosting
-```
-
----
 
 ## 🔄 Order Flow (Complete)
 
