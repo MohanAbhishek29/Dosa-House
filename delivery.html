@@ -9,72 +9,86 @@
     <script>!function(){var e=document.createElement('div');e.id='__auth_loader';e.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#0f1a0f;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s';e.innerHTML='<div style="font-size:3rem">🛵</div><div style="font-weight:800;color:#4CAF50;margin-top:0.5rem;font-size:1.1rem">Delivery</div><div style="width:40px;height:4px;background:#4CAF50;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>';document.documentElement.appendChild(e)}()</script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0f1a0f; color: #f0f0f0; font-family: 'Outfit', sans-serif; min-height: 100vh; }
+        body { background: var(--bg-dark-earth, #0b110b); color: #f0f0f0; font-family: 'Outfit', sans-serif; min-height: 100vh; }
 
         .top-nav {
-            background: #1a2a1a;
+            background: var(--glass-bg, rgba(19, 28, 19, 0.7));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #2a3a2a;
+            border-bottom: 1px solid var(--glass-border, rgba(46, 125, 50, 0.15));
             position: sticky; top: 0; z-index: 100;
         }
-        .top-nav h1 { font-size: 1.2rem; color: #4CAF50; font-weight: 800; }
-        .btn-logout { background: transparent; border: 1px solid #555; color: #aaa; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer; }
+        .top-nav h1 { font-size: 1.2rem; color: var(--color-banana-leaf, #4CAF50); font-weight: 800; }
+        .btn-logout { background: transparent; border: 1px solid #555; color: #ccc; padding: 0.4rem 1rem; border-radius: var(--border-radius-pill, 50px); cursor: pointer; transition: var(--bouncy-transition, all 0.3s ease); }
+        .btn-logout:hover { border-color: #d32f2f; color: white; background: #d32f2f; transform: translateY(-2px); }
 
         .delivery-card {
-            background: #1a2a1a;
-            border-radius: 16px;
-            border: 1px solid #2a3a2a;
+            background: var(--bg-dark-surface, #1a261a);
+            border-radius: var(--border-radius-card, 20px);
+            border: 1px solid var(--glass-border, rgba(46, 125, 50, 0.15));
             margin: 1rem;
             overflow: hidden;
+            transition: var(--bouncy-transition, all 0.3s ease);
+            box-shadow: var(--shadow-clay, 0 4px 15px rgba(0,0,0,0.2));
+        }
+        .delivery-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-banana-leaf, #4CAF50);
+            box-shadow: var(--shadow-ambient, 0 12px 24px rgba(0,0,0,0.4));
         }
         .delivery-card-header {
-            padding: 1rem 1.2rem;
-            background: #0d1f0d;
+            padding: 1.2rem;
+            background: rgba(0,0,0,0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .order-id { color: #4CAF50; font-weight: 800; font-size: 1rem; }
+        .order-id { color: var(--color-banana-leaf, #4CAF50); font-weight: 800; font-size: 1rem; }
         .order-time { color: #888; font-size: 0.8rem; }
 
         .delivery-body { padding: 1.2rem; }
-        .customer-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
-        .address { color: #aaa; font-size: 0.9rem; margin-bottom: 1rem; }
+        .customer-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; color: white; }
+        .address { color: #ccc; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4; }
 
-        .items-summary { background: #0d1f0d; border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem; }
-        .item-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: #ccc; padding: 0.2rem 0; }
+        .items-summary { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1rem; margin-bottom: 1.2rem; }
+        .item-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #ddd; padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .item-row:last-child { border-bottom: none; }
 
-        .total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; margin-bottom: 1rem; }
-        .total-amount { color: #4CAF50; }
+        .total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; margin-bottom: 1.2rem; align-items: center; }
+        .total-amount { color: var(--color-banana-leaf, #4CAF50); }
 
-        .payment-badge { padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
-        .payment-cash { background: #2E7D32; color: #C8E6C9; }
-        .payment-upi { background: #7B1FA2; color: #E1BEE7; }
+        .payment-badge { padding: 0.4rem 1rem; border-radius: var(--border-radius-pill, 50px); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .payment-cash { background: rgba(46, 125, 50, 0.2); color: #A5D6A7; border: 1px solid #4CAF50; }
+        .payment-upi { background: rgba(123, 31, 162, 0.2); color: #E1BEE7; border: 1px solid #9C27B0; }
 
         /* OTP Confirm */
-        .otp-section { margin-top: 1rem; }
-        .otp-label { font-size: 0.85rem; color: #aaa; margin-bottom: 0.5rem; }
-        .otp-input-row { display: flex; gap: 0.5rem; }
+        .otp-section { margin-top: 1.2rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .otp-label { font-size: 0.85rem; color: #aaa; margin-bottom: 0.8rem; font-weight: 600; }
+        .otp-input-row { display: flex; gap: 0.8rem; }
         .otp-input {
-            flex: 1; padding: 0.8rem; background: #0d1f0d; border: 2px solid #2a3a2a;
-            border-radius: 10px; color: white; font-size: 1.2rem; font-weight: 800;
-            text-align: center; letter-spacing: 0.2em; outline: none;
+            flex: 1; padding: 0.8rem; background: var(--bg-dark-panel, #131c13); border: 2px solid #333;
+            border-radius: 12px; color: var(--color-saffron, #F57F17); font-size: 1.3rem; font-weight: 800;
+            text-align: center; letter-spacing: 0.3em; outline: none; transition: var(--bouncy-transition, all 0.3s ease);
         }
-        .otp-input:focus { border-color: #4CAF50; }
+        .otp-input:focus { border-color: var(--color-saffron, #F57F17); box-shadow: var(--shadow-glow, 0 0 15px rgba(245, 127, 23, 0.4)); }
         .btn-confirm {
-            padding: 0.8rem 1.5rem; background: #2E7D32; color: white;
-            border: none; border-radius: 10px; font-weight: 700; font-size: 1rem;
-            cursor: pointer; transition: background 0.2s; white-space: nowrap;
+            padding: 0.8rem 1.5rem; background: var(--color-banana-leaf, #2E7D32); color: white;
+            border: none; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: var(--bouncy-transition, all 0.3s ease); white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(46,125,50,0.3);
         }
-        .btn-confirm:hover { background: #1B5E20; }
+        .btn-confirm:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(46,125,50,0.5); }
+        .btn-confirm:active { transform: translateY(1px); }
 
-        .empty-state { text-align: center; padding: 4rem 2rem; color: #555; }
-        .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
+        .empty-state { text-align: center; padding: 5rem 2rem; color: #888; background: var(--glass-bg); margin: 1rem; border-radius: var(--border-radius-card); border: 1px dashed #444; }
+        .empty-state .emoji { font-size: 4rem; display: block; margin-bottom: 1.5rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); }
 
-        #delivery-greeting { font-size: 0.8rem; color: #888; }
+        #delivery-greeting { font-size: 0.8rem; color: #aaa; }
     </style>
 </head>
 <body>

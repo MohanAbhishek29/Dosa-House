@@ -73,7 +73,7 @@ img {
     justify-content: center;
     padding: 1rem 2.5rem;
     font-family: var(--font-body);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -81,10 +81,32 @@ img {
     color: var(--color-saffron);
     background: transparent;
     cursor: pointer;
-    transition: var(--transition-smooth);
+    transition: var(--bouncy-transition);
     position: relative;
     overflow: hidden;
-    border-radius: 50px;
+    border-radius: var(--border-radius-pill);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    background: var(--color-saffron);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--border-radius-card);
 }
 
 .hero-section {
