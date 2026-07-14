@@ -249,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-});
 
 window.openMyBookings = async function() {
     if (typeof _isGuest !== 'undefined' && _isGuest) {
@@ -305,3 +304,4 @@ window.closeMyBookings = function() {
     modal.style.opacity = '0';
     setTimeout(() => modal.style.display = 'none', 300);
 };
+});
