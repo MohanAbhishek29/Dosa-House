@@ -181,6 +181,7 @@
         <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
         <button class="tab-btn" onclick="showAnalytics(this)" style="color:#2196F3">📈 Analytics</button>
         <button class="tab-btn" onclick="showReviews(this)" style="color:#F57F17">⭐ Reviews</button>
+        <button class="tab-btn" onclick="showStaff(this)" style="color:#4CAF50">👥 Staff</button>
     </div>
 
     <!-- Orders Grid -->
@@ -231,6 +232,20 @@
             <h2 style="color:#F57F17;margin-bottom:1rem;">Customer Reviews</h2>
             <div id="reviews-list" style="display:flex; flex-direction:column; gap:1rem;">
                 <p style="color:#888;">No reviews yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Panel -->
+    <div id="staff-panel" style="display:none; padding:1.5rem 2rem;">
+        <div style="background:#1a1a1a;border-radius:16px;padding:1.5rem;border:1px solid #333;">
+            <h2 style="color:#4CAF50;margin-bottom:1rem;">Staff Management</h2>
+            <p style="color:#888; margin-bottom:1.5rem;">Assign roles to registered users. Changes take effect on their next login or page refresh.</p>
+            <div style="margin-bottom:1.5rem;">
+                <input type="text" id="staff-search-input" placeholder="Search by name or email..." oninput="filterStaff()" style="padding:0.8rem; width:100%; max-width:400px; border-radius:8px; border:1px solid #555; background:#000; color:white; font-family:Outfit;">
+            </div>
+            <div id="staff-list" style="display:flex; flex-direction:column; gap:1rem;">
+                <p style="color:#888;">Loading users...</p>
             </div>
         </div>
     </div>
@@ -321,6 +336,7 @@
             
             document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'none';
+            document.getElementById('staff-panel').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'block';
             calcRevenue('today');
         }
@@ -331,6 +347,7 @@
             
             document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('staff-panel').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'block';
             
             renderReviews();
@@ -367,8 +384,78 @@
             currentFilter = status;
             document.getElementById('analytics-panel').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'none';
+            document.getElementById('staff-panel').style.display = 'none';
             document.getElementById('orders-grid').style.display = 'grid';
             renderOrders();
+        }
+
+        let allUsers = [];
+        
+        function showStaff(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            document.getElementById('orders-grid').style.display = 'none';
+            document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('reviews-panel').style.display = 'none';
+            document.getElementById('staff-panel').style.display = 'block';
+            
+            loadStaff();
+        }
+
+        function loadStaff() {
+            db.collection('users').get().then(snap => {
+                allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderStaff(allUsers);
+            }).catch(err => {
+                console.error(err);
+                showToast("Failed to load users", "error");
+            });
+        }
+
+        function renderStaff(users) {
+            const list = document.getElementById('staff-list');
+            if (users.length === 0) {
+                list.innerHTML = '<p style="color:#888;">No users found.</p>';
+                return;
+            }
+
+            list.innerHTML = users.map(u => `
+                <div style="background:#0a0a0a; border-radius:12px; padding:1.2rem; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:bold; color:#fff; font-size:1.1rem;">${u.name || 'Unknown User'}</div>
+                        <div style="color:#888; font-size:0.85rem;">${u.email || u.phone || 'No contact info'}</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span style="color:#aaa; font-size:0.85rem;">Role:</span>
+                        <select onchange="changeUserRole('${u.id}', this.value)" style="padding:0.4rem; background:#222; color:white; border:1px solid #555; border-radius:6px; cursor:pointer;" ${u.email === 'admin@dosahouse.com' ? 'disabled' : ''}>
+                            <option value="customer" ${u.role === 'customer' ? 'selected' : ''}>Customer</option>
+                            <option value="delivery" ${u.role === 'delivery' ? 'selected' : ''}>Delivery Boy</option>
+                            <option value="kitchen" ${u.role === 'kitchen' ? 'selected' : ''}>Kitchen / Chef</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterStaff() {
+            const q = document.getElementById('staff-search-input').value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                (u.name || '').toLowerCase().includes(q) || 
+                (u.email || '').toLowerCase().includes(q)
+            );
+            renderStaff(filtered);
+        }
+
+        async function changeUserRole(userId, newRole) {
+            try {
+                await db.collection('users').doc(userId).update({ role: newRole });
+                showToast("Role updated successfully!", "success");
+            } catch(e) {
+                console.error(e);
+                showToast("Failed to update role", "error");
+            }
         }
 
         function calcRevenue(period) {

@@ -15,21 +15,21 @@ function getCurrentUser() {
             unsubscribe();
             if (!user) { resolve(null); return; }
             try {
-                // Always check STAFF_ROLES first — overrides any Firestore value
-                const staffRole = user.email ? STAFF_ROLES[user.email] : null;
+                // The root admin is unchangeable
+                const isRootAdmin = user.email === 'admin@dosahouse.com';
 
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (userDoc.exists) {
                     const data = userDoc.data();
-                    // If staff email, always use correct role (fix old 'customer' role)
-                    const role = staffRole || data.role || 'customer';
-                    if (staffRole && data.role !== staffRole) {
-                        // Update wrong role in Firestore silently
-                        db.collection('users').doc(user.uid).update({ role: staffRole });
+                    let role = isRootAdmin ? 'admin' : (data.role || 'customer');
+                    
+                    if (isRootAdmin && data.role !== 'admin') {
+                        db.collection('users').doc(user.uid).update({ role: 'admin' });
                     }
+                    
                     resolve({ uid: user.uid, email: user.email || data.email || null, phone: user.phoneNumber || data.phone || null, name: user.displayName || data.name || 'Customer', ...data, role });
                 } else {
-                    const role = staffRole || 'customer';
+                    const role = isRootAdmin ? 'admin' : 'customer';
                     // Generate a name from email, or phone, or default to Customer
                     const defaultName = user.displayName || (user.email ? user.email.split('@')[0] : (user.phoneNumber ? user.phoneNumber : 'Customer'));
                     const userData = {

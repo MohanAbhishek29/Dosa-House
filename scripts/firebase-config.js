@@ -18,9 +18,4 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Staff emails → roles mapping (used to assign roles on first login)
-const STAFF_ROLES = {
-    'admin@dosahouse.com': 'admin',
-    'kitchen@dosahouse.com': 'kitchen',
-    'delivery@dosahouse.com': 'delivery'
-};
+

@@ -146,12 +146,37 @@ function updateKitchenStats() {
         });
 }
 
+window.switchKitchenTab = function(tab) {
+    if (tab === 'summary') {
+        document.getElementById('k-tab-summary').style.borderBottomColor = '#4CAF50';
+        document.getElementById('k-tab-summary').style.color = '#4CAF50';
+        document.getElementById('k-tab-tickets').style.borderBottomColor = 'transparent';
+        document.getElementById('k-tab-tickets').style.color = '#888';
+        
+        document.getElementById('summary-content').style.display = 'block';
+        document.getElementById('tickets-content').style.display = 'none';
+    } else {
+        document.getElementById('k-tab-tickets').style.borderBottomColor = '#4CAF50';
+        document.getElementById('k-tab-tickets').style.color = '#4CAF50';
+        document.getElementById('k-tab-summary').style.borderBottomColor = 'transparent';
+        document.getElementById('k-tab-summary').style.color = '#888';
+        
+        document.getElementById('tickets-content').style.display = 'block';
+        document.getElementById('summary-content').style.display = 'none';
+    }
+}
+
 window.openKitchenSummary = function() {
     const modal = document.getElementById('summary-modal');
     const content = document.getElementById('summary-content');
+    const tContent = document.getElementById('tickets-content');
     
+    // Reset to summary tab open
+    switchKitchenTab('summary');
+
     if (todayCompletedOrders.length === 0) {
         content.innerHTML = '<p style="color:#aaa;">No orders completed today yet.</p>';
+        tContent.innerHTML = '<p style="color:#aaa;">No tickets found.</p>';
         modal.style.display = 'flex';
         return;
     }
@@ -188,5 +213,26 @@ window.openKitchenSummary = function() {
     
     html += `</ul>`;
     content.innerHTML = html;
+
+    // Render Past Tickets
+    // Sort completed newest first
+    const sortedTickets = [...todayCompletedOrders].sort((a, b) => {
+        const ta = a.updatedAt?.toDate ? a.updatedAt.toDate() : 0;
+        const tb = b.updatedAt?.toDate ? b.updatedAt.toDate() : 0;
+        return tb - ta;
+    });
+
+    tContent.innerHTML = sortedTickets.map(o => `
+        <div style="background:#1a1a1a; padding:1rem; border:1px solid #333; border-radius:8px; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; border-bottom:1px solid #333; padding-bottom:0.5rem;">
+                <span style="font-weight:bold; color:#F57F17;">${o.orderId || 'Order'}</span>
+                <span style="color:#aaa; font-size:0.85rem;">${o.updatedAt?.toDate ? o.updatedAt.toDate().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : ''}</span>
+            </div>
+            <ul style="list-style:none; padding:0; margin:0;">
+                ${o.items.map(i => `<li style="padding:0.2rem 0; font-size:0.9rem; color:#ccc;">${i.quantity}x ${i.title}</li>`).join('')}
+            </ul>
+        </div>
+    `).join('');
+
     modal.style.display = 'flex';
 }
