@@ -123,12 +123,70 @@ async function markReady(orderId, orderType) {
     }
 }
 
-function updateKitchenStats(snapshot) {
-    // Count completed today (delivered orders — shown separately)
+let todayCompletedOrders = [];
+let statsListenerSet = false;
+
+function updateKitchenStats() {
+    if (statsListenerSet) return;
+    statsListenerSet = true;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Fetch all orders created today to avoid composite index requirements
     db.collection('orders')
-        .where('status', '==', 'delivered')
-        .get()
-        .then(snap => {
-            document.getElementById('count-completed').textContent = snap.size;
+        .where('createdAt', '>=', startOfDay)
+        .onSnapshot(snap => {
+            const completedStatuses = ['packaging', 'sent_to_delivery', 'out_for_delivery', 'delivered', 'served'];
+            todayCompletedOrders = snap.docs
+                .map(d => d.data())
+                .filter(o => completedStatuses.includes(o.status));
+            
+            document.getElementById('count-completed').textContent = todayCompletedOrders.length;
         });
+}
+
+window.openKitchenSummary = function() {
+    const modal = document.getElementById('summary-modal');
+    const content = document.getElementById('summary-content');
+    
+    if (todayCompletedOrders.length === 0) {
+        content.innerHTML = '<p style="color:#aaa;">No orders completed today yet.</p>';
+        modal.style.display = 'flex';
+        return;
+    }
+
+    const itemCounts = {};
+    todayCompletedOrders.forEach(order => {
+        if (order.items) {
+            order.items.forEach(item => {
+                if (!itemCounts[item.title]) itemCounts[item.title] = 0;
+                itemCounts[item.title] += (item.quantity || 1);
+            });
+        }
+    });
+
+    let html = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-size:1.2rem;">
+            <span>Total Orders:</span>
+            <span style="font-weight:bold; color:#F57F17;">${todayCompletedOrders.length}</span>
+        </div>
+        <h3 style="color:#aaa; border-bottom:1px solid #333; padding-bottom:0.5rem; margin-bottom:1rem;">Items Cooked Today</h3>
+        <ul style="list-style:none; padding:0; margin:0;">
+    `;
+
+    Object.entries(itemCounts)
+        .sort((a, b) => b[1] - a[1]) // Sort by quantity (highest first)
+        .forEach(([title, qty]) => {
+            html += `
+                <li style="display:flex; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid #222;">
+                    <span style="font-size:1.05rem;">${title}</span>
+                    <span style="background:#333; color:#4CAF50; padding:0.2rem 0.8rem; border-radius:6px; font-weight:800;">${qty}x</span>
+                </li>
+            `;
+        });
+    
+    html += `</ul>`;
+    content.innerHTML = html;
+    modal.style.display = 'flex';
 }

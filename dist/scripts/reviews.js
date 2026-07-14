@@ -9,18 +9,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const stars = document.querySelectorAll('.star-rating span');
     const ratingInput = document.getElementById('review-rating');
 
-    // 1. Initial State (Seed Data)
-    const defaultReviews = [
-        { name: "Priya Reddy", role: "Food Blogger", rating: 5, text: "The Ghee Roast is absolutely divine! Reminds me of my trips to Bangalore. Highly recommended." },
-        { name: "Rajesh Kumar", role: "Local Guide", rating: 5, text: "Best place for family dinner. The Podi Idli is a must-try. Fast service and authentic taste." },
-        { name: "Sneha Gupta", role: "Student", rating: 5, text: "Clean, hygienic, and tasty. Their Sambar is just perfect. Will visit again for sure!" }
-    ];
+    // 1. Fetch Real Reviews from Firebase
+    let reviews = [];
 
-    let reviews = JSON.parse(localStorage.getItem('dosaHouseReviews'));
+    // Fallback if db is not loaded (should not happen if Firebase is included)
+    if (typeof db === 'undefined') {
+        renderFallbackReviews();
+        return;
+    }
 
-    if (!reviews || reviews.length === 0) {
-        reviews = defaultReviews;
-        localStorage.setItem('dosaHouseReviews', JSON.stringify(reviews));
+    // Fetch orders that have a rating >= 4
+    db.collection('orders')
+        .where('rating', '>=', 4)
+        .orderBy('rating', 'desc')
+        .limit(10) // Get top 10 recent best reviews
+        .get()
+        .then(snap => {
+            reviews = snap.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    name: data.customerName || "Happy Customer",
+                    role: "Verified Order",
+                    rating: data.rating,
+                    text: data.review || "Amazing food and great service! Highly recommended." // Fallback text if they just left a star rating
+                };
+            });
+            
+            if (reviews.length === 0) {
+                renderFallbackReviews();
+            } else {
+                renderReviews();
+            }
+        })
+        .catch(err => {
+            console.error("Error fetching reviews:", err);
+            renderFallbackReviews();
+        });
+
+    function renderFallbackReviews() {
+        reviews = [
+            { name: "Priya Reddy", role: "Food Blogger", rating: 5, text: "The Ghee Roast is absolutely divine! Reminds me of my trips to Bangalore. Highly recommended." },
+            { name: "Rajesh Kumar", role: "Local Guide", rating: 5, text: "Best place for family dinner. The Podi Idli is a must-try. Fast service and authentic taste." },
+            { name: "Sneha Gupta", role: "Student", rating: 5, text: "Clean, hygienic, and tasty. Their Sambar is just perfect. Will visit again for sure!" }
+        ];
+        renderReviews();
     }
 
     // 2. Render Function

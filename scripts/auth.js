@@ -118,10 +118,18 @@ async function setupNavAuth() {
                         if (status === 'delivered') msg = "✅ Order Delivered! Enjoy your meal!";
                         
                         if (typeof Notification !== 'undefined' && Notification.permission === "granted") {
-                            new Notification("Dosa House", {
+                            const title = "Dosa House";
+                            const options = {
                                 body: msg,
                                 icon: "assets/images/logo_dosa_house.png"
-                            });
+                            };
+                            if ('serviceWorker' in navigator) {
+                                navigator.serviceWorker.ready.then(reg => {
+                                    reg.showNotification(title, options);
+                                });
+                            } else {
+                                new Notification(title, options);
+                            }
                         } else {
                             if(window.showToast) window.showToast(msg, 'success');
                         }
