@@ -21,29 +21,40 @@
 
         /* Top Nav */
         .top-bar {
-            background: white;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 1rem 1.2rem;
             display: flex;
             align-items: center;
             gap: 0.8rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 15px rgba(62, 39, 35, 0.08);
             position: sticky; top: 0; z-index: 100;
         }
         .back-btn {
             background: none; border: none; font-size: 1.4rem; cursor: pointer;
-            color: #3E2723; padding: 0.2rem 0.5rem;
+            color: #3E2723; padding: 0.2rem 0.5rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .back-btn:hover { transform: translateX(-4px); }
         .top-bar h1 { font-size: 1.2rem; font-weight: 800; color: #3E2723; }
 
         /* Order Cards */
         .orders-list { padding: 1rem; }
 
         .order-card {
-            background: white;
-            border-radius: 18px;
-            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(245, 127, 23, 0.1);
+            border-radius: 20px;
+            margin-bottom: 1.2rem;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            box-shadow: 0 4px 20px rgba(62, 39, 35, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .order-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(62, 39, 35, 0.12);
         }
 
         .order-header {
