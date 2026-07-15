@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v-mobile-responsive-4'; // Update this to force SW refresh
+const CACHE_VERSION = 'v-mobile-responsive-5'; // Update this to force SW refresh
 
 self.addEventListener('install', event => {
   // Force the new service worker to become active immediately

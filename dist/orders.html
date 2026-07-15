@@ -6,6 +6,7 @@
     <title>My Orders | Dosa House</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/ui.css">
+    <link rel="stylesheet" href="styles/mobile.css">
     <link rel="icon" type="image/png" href="assets/images/logo_dosa_house.png">
     <link rel="manifest" href="manifest.json">
     <script>!function(){var e=document.createElement('div');e.id='__auth_loader';e.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#FFF8E1;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Outfit,sans-serif;transition:opacity 0.2s';e.innerHTML='<img src="assets/images/logo_dosa_house.png" alt="Logo" style="width:180px;height:auto;margin-bottom:1.5rem;object-fit:contain;"><div style="width:40px;height:4px;background:#F57F17;border-radius:2px;margin-top:1rem;animation:p 1s ease-in-out infinite"></div><style>@keyframes p{0%,100%{opacity:.3;transform:scaleX(.5)}50%{opacity:1;transform:scaleX(1)}}</style>';document.documentElement.appendChild(e)}()</script>
@@ -16,27 +17,7 @@
             background: #FFF8E1;
             font-family: 'Outfit', sans-serif;
             min-height: 100vh;
-            padding-bottom: 5rem;
         }
-
-        /* Top Nav */
-        .top-bar {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 1rem 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            box-shadow: 0 2px 15px rgba(62, 39, 35, 0.08);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .back-btn {
-            background: none; border: none; font-size: 1.4rem; cursor: pointer;
-            color: #3E2723; padding: 0.2rem 0.5rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .back-btn:hover { transform: translateX(-4px); }
-        .top-bar h1 { font-size: 1.2rem; font-weight: 800; color: #3E2723; }
 
         /* Order Cards */
         .orders-list { padding: 1rem; max-width: 800px; margin: 0 auto; }
@@ -285,31 +266,7 @@
         }
         .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 1rem; }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            display: flex;
-            border-top: 1px solid #f0e0c0;
-            z-index: 200;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0.6rem 0.3rem;
-            text-decoration: none;
-            color: #bbb;
-            font-size: 0.65rem;
-            font-weight: 600;
-            gap: 0.2rem;
-            transition: color 0.2s;
-        }
-        .nav-item .icon { font-size: 1.4rem; }
-        .nav-item.active { color: #F57F17; }
+        /* Bottom Nav (removed for consistency) */
     </style>
 </head>
 <body>
@@ -319,9 +276,45 @@
         <source src="assets/audio/bell.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="top-bar">
-        <button class="back-btn" onclick="history.back()">←</button>
-        <h1>🧾 My Orders</h1>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="index.html" class="logo">
+                <img src="assets/images/logo_dosa_house.png" alt="Dosa House Logo" width="40" height="40" style="object-fit: contain;">
+                <span style="color:var(--color-text-primary); margin-left:10px;">DOSA HOUSE</span>
+            </a>
+            <div class="nav-links" style="display: flex; gap: 2rem; align-items:center;">
+                <a href="index.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">HOME</a>
+                <a href="menu.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">MENU</a>
+                <a href="booking.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">BOOK TABLE</a>
+                <a href="orders.html" style="font-weight: 700; color: var(--color-sambar); text-decoration: none; font-size: 1.1rem;">ORDERS</a>
+                <a href="about.html" style="font-weight: 700; color: var(--color-text-secondary); text-decoration: none; font-size: 1.1rem;">ABOUT</a>
+                
+                <!-- Guest Login Button -->
+                <a id="nav-login-wrap" href="login.html" style="display:none;font-weight:700;background:#F57F17;color:white;text-decoration:none;padding:0.4rem 1.2rem;border-radius:20px;font-size:0.9rem;">Login / Sign Up</a>
+                
+                <!-- User Profile Dropdown -->
+                <div id="user-profile-wrap" style="position:relative;display:none;">
+                    <button id="user-profile-btn" onclick="toggleProfileMenu()" style="display:flex;align-items:center;gap:0.5rem;background:#F57F17;color:white;border:none;padding:0.4rem 1rem;border-radius:20px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:inherit;">
+                        <span id="user-avatar" style="font-size:1rem;">👤</span>
+                        <span id="user-name-nav">Me</span>
+                        <span>▾</span>
+                    </button>
+                    <div id="profile-dropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:white;border-radius:14px;min-width:180px;box-shadow:0 8px 30px rgba(0,0,0,0.15);overflow:hidden;z-index:999;">
+                        <div id="profile-email" style="padding:0.8rem 1rem;font-size:0.78rem;color:#888;border-bottom:1px solid #f5f5f5;"></div>
+                        <a href="account.html" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">⚙️ My Account</a>
+                        <a href="account.html#notifications" style="display:block;padding:0.8rem 1rem;color:#3E2723;font-weight:600;text-decoration:none;font-size:0.9rem;">🔔 Notifications</a>
+                        <div style="border-top:1px solid #f5f5f5;">
+                            <button onclick="logoutUser()" style="width:100%;text-align:left;background:none;border:none;padding:0.8rem 1rem;color:#d32f2f;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:inherit;">🚪 Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div style="max-width: 800px; margin: 2rem auto 0; padding: 0 1rem; display: flex; align-items: center; gap: 1rem;">
+        <h1 style="font-size: 1.8rem; font-weight: 800; color: #3E2723;">🧾 My Orders</h1>
     </div>
 
     <div class="orders-list" id="orders-list">
@@ -331,21 +324,7 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <span class="icon">🏠</span>Home
-        </a>
-        <a href="menu.html" class="nav-item">
-            <span class="icon">🍛</span>Menu
-        </a>
-        <a href="orders.html" class="nav-item active">
-            <span class="icon">📋</span>Orders
-        </a>
-        <a href="account.html" class="nav-item">
-            <span class="icon">⚙️</span>Account
-        </a>
-    </nav>
+    <!-- Bottom Nav removed -->
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
