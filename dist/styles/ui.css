@@ -72,5 +72,17 @@
         height: 50px;
         bottom: 80px;
         left: 20px;
-    }
+}
+
+/* Hide scrollbars on horizontally scrollable containers */
+.tabs, .filter-bar, .account-tabs, .table-map-container, .mobile-nav-sidebar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.tabs::-webkit-scrollbar, 
+.filter-bar::-webkit-scrollbar, 
+.account-tabs::-webkit-scrollbar, 
+.table-map-container::-webkit-scrollbar,
+.mobile-nav-sidebar::-webkit-scrollbar {
+    display: none;
 }
