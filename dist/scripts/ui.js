@@ -101,3 +101,127 @@
         });
     }
 })();
+window.addEventListener('load', () => {
+    // Check if the current page is a customer-facing page (not admin/kitchen/delivery)
+    const path = window.location.pathname;
+    const isCustomerPage = !path.includes('admin') && !path.includes('kitchen') && !path.includes('delivery');
+    
+    if (isCustomerPage) {
+        checkRestaurantStatusUI();
+        window.addEventListener('restaurantStatusChanged', checkRestaurantStatusUI);
+    }
+});
+
+function checkRestaurantStatusUI() {
+    if (typeof isRestaurantOpen === 'undefined') return; // Wait for firebase-config to load
+    
+    const isOpen = isRestaurantOpen();
+    
+    // 1. Update Live Indicator (if it exists on nav)
+    let liveIndicator = document.getElementById('global-live-indicator');
+    if (!liveIndicator) {
+        // Find navbar and inject if missing
+        const navRight = document.querySelector('.nav-links');
+        if (navRight && window.location.pathname.includes('index.html')) {
+            liveIndicator = document.createElement('div');
+            liveIndicator.id = 'global-live-indicator';
+            liveIndicator.style.cssText = `
+                display: flex; align-items: center; gap: 0.4rem; 
+                font-weight: 700; font-size: 0.85rem; padding: 0.3rem 0.8rem; 
+                border-radius: 20px; transition: all 0.3s;
+            `;
+            // Insert before the login button
+            const loginBtn = document.getElementById('nav-login-wrap');
+            if (loginBtn) {
+                navRight.insertBefore(liveIndicator, loginBtn);
+            } else {
+                navRight.appendChild(liveIndicator);
+            }
+        }
+    }
+    
+    if (liveIndicator) {
+        if (isOpen) {
+            liveIndicator.innerHTML = `<span style="color:#4CAF50; animation: blink 2s infinite;">●</span> <span style="color:#2E7D32;">OPEN</span>`;
+            liveIndicator.style.background = '#E8F5E9';
+        } else {
+            liveIndicator.innerHTML = `<span style="color:#EF5350; animation: blink 1s infinite;">●</span> <span style="color:#D32F2F;">CLOSED</span>`;
+            liveIndicator.style.background = '#FFEBEE';
+        }
+    }
+
+    // 2. Add style for blinking if not exists
+    if (!document.getElementById('blink-style')) {
+        const style = document.createElement('style');
+        style.id = 'blink-style';
+        style.textContent = `@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`;
+        document.head.appendChild(style);
+    }
+
+    // 3. Show "We Are Closed" full screen modal (once per session)
+    if (!isOpen && !sessionStorage.getItem('closedModalShown')) {
+        showClosedModal();
+        sessionStorage.setItem('closedModalShown', 'true');
+    }
+    
+    // 4. Show fixed banner on menu page if closed
+    const menuContainer = document.querySelector('.menu-controls');
+    if (menuContainer) {
+        let banner = document.getElementById('closed-banner');
+        if (!isOpen) {
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'closed-banner';
+                banner.style.cssText = `
+                    width: 100%; background: #FFEBEE; border: 1px solid #EF9A9A; 
+                    color: #D32F2F; padding: 1rem; border-radius: 12px; text-align: center; 
+                    font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+                `;
+                banner.innerHTML = `<span style="animation: blink 1s infinite;">🔴</span> Restaurant is Currently Closed. We accept orders from 9:00 AM to 11:30 PM.`;
+                menuContainer.parentNode.insertBefore(banner, menuContainer);
+            }
+        } else if (banner) {
+            banner.remove();
+        }
+    }
+}
+
+function showClosedModal() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px); z-index: 999999;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.5s ease;
+    `;
+    
+    const card = document.createElement('div');
+    card.style.cssText = `
+        background: white; padding: 3rem; border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center;
+        max-width: 90%; transform: translateY(20px); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    `;
+    
+    card.innerHTML = `
+        <div style="font-size: 4rem; margin-bottom: 1rem;">😴</div>
+        <h2 style="font-size: 2rem; color: #3E2723; margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">We're currently resting.</h2>
+        <p style="color: #666; font-size: 1.1rem; line-height: 1.5;">Dosa House is closed right now.<br>Please visit us between <strong>9:00 AM and 11:30 PM</strong>.</p>
+    `;
+    
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    
+    // Animate in
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+    }, 50);
+    
+    // Auto remove after 6 seconds
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        card.style.transform = 'translateY(-20px)';
+        setTimeout(() => overlay.remove(), 500);
+    }, 6000);
+}

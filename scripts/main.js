@@ -941,6 +941,10 @@ orderTypeBtns.forEach(btn => {
 const checkoutBtn = document.querySelector('.btn-checkout');
 if (checkoutBtn) {
     checkoutBtn.onclick = async () => {
+        if (typeof isRestaurantOpen === 'function' && !isRestaurantOpen()) {
+            showToast("Restaurant is currently closed. We accept orders from 9 AM to 11:30 PM.", "error");
+            return;
+        }
         if (cart.length === 0) {
             showToast("Your plate is empty! Add some delicious items first. 🍛", "error");
             return;

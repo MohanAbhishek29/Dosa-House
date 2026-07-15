@@ -107,6 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         btnNext.addEventListener('click', () => {
             if (currentStepIndex === 0) {
+                if (typeof isRestaurantOpen === 'function' && !isRestaurantOpen()) {
+                    showToast("Restaurant is currently closed. We accept bookings from 9 AM to 11:30 PM.", "error");
+                    return;
+                }
                 const name = document.getElementById('name').value;
                 const phone = document.getElementById('phone').value;
                 if (!name || !phone) {

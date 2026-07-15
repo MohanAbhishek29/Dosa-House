@@ -188,6 +188,7 @@
             <span id="admin-greeting">Loading...</span>
         </div>
         <div style="display:flex; gap:1rem; align-items:center;">
+            <button id="btn-emergency-close" onclick="toggleEmergencyClose()" style="padding:0.5rem 1rem; border-radius:8px; border:none; font-weight:800; cursor:pointer; background:#EF5350; color:white; display:none;">🔴 Close Restaurant</button>
             <span id="live-indicator" style="font-size:0.8rem; color:#4CAF50;">● LIVE</span>
             <button class="btn-logout" onclick="logoutUser()">Logout</button>
         </div>
@@ -223,6 +224,7 @@
         <button class="tab-btn" onclick="filterOrders('sent_to_delivery', this)">🛵 Assigned</button>
         <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛣️ On Way</button>
         <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
+        <button class="tab-btn" onclick="showBookings(this)" style="color:#00BCD4">📅 Bookings</button>
         <button class="tab-btn" onclick="showAnalytics(this)" style="color:#2196F3">📈 Analytics</button>
         <button class="tab-btn" onclick="showReviews(this)" style="color:#F57F17">⭐ Reviews</button>
         <button class="tab-btn" onclick="showStaff(this)" style="color:#4CAF50">👥 Staff</button>
@@ -233,6 +235,24 @@
         <div class="empty-state">
             <span class="emoji">⏳</span>
             <p>Loading orders...</p>
+        </div>
+    </div>
+
+    <!-- Bookings Panel -->
+    <div id="bookings-panel" style="display:none; padding:1.5rem 2rem;">
+        <div style="background:#1a1a1a;border-radius:16px;padding:1.5rem;border:1px solid #333;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="color:#00BCD4; margin:0;">Live Table Bookings</h2>
+                <div style="position:relative;">
+                    <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:1.2rem;pointer-events:none;">📅</span>
+                    <input type="date" id="bookings-date-picker" onchange="loadBookings()" style="padding:0.6rem 0.6rem 0.6rem 2.5rem;border-radius:8px;border:1px solid #555;background:#000;color:white;font-family:Outfit;cursor:pointer;">
+                </div>
+            </div>
+            <p style="color:#888; margin-bottom:1.5rem;">View and manage active table reservations. Free up a table early if customers leave.</p>
+            <div class="orders-grid" id="bookings-grid" style="padding:0;">
+                <!-- Bookings will populate here -->
+                <p style="color:#888;">Loading bookings...</p>
+            </div>
         </div>
     </div>
 
@@ -376,22 +396,24 @@
 
         function showAnalytics(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+            btn.classList.add('active');
             
             document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'none';
             document.getElementById('staff-panel').style.display = 'none';
+            document.getElementById('bookings-panel').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'block';
             calcRevenue('today');
         }
 
         function showReviews(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+            btn.classList.add('active');
             
             document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'none';
             document.getElementById('staff-panel').style.display = 'none';
+            document.getElementById('bookings-panel').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'block';
             
             renderReviews();
@@ -422,13 +444,14 @@
         }
 
         function filterOrders(status, btn) {
+            currentFilter = status;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
             
-            currentFilter = status;
             document.getElementById('analytics-panel').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'none';
             document.getElementById('staff-panel').style.display = 'none';
+            document.getElementById('bookings-panel').style.display = 'none';
             document.getElementById('orders-grid').style.display = 'grid';
             renderOrders();
         }
@@ -455,11 +478,12 @@
 
         function showStaff(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+            btn.classList.add('active');
             
             document.getElementById('orders-grid').style.display = 'none';
             document.getElementById('analytics-panel').style.display = 'none';
             document.getElementById('reviews-panel').style.display = 'none';
+            document.getElementById('bookings-panel').style.display = 'none';
             document.getElementById('staff-panel').style.display = 'block';
             
             renderStaff(allUsers);
@@ -776,6 +800,138 @@
                 showToast('Error. Try again.', 'error');
             }
         }
+
+        // ==========================================
+        // EMERGENCY CLOSE LOGIC
+        // ==========================================
+        let isEmergencyClosed = false;
+        
+        async function loadEmergencyStatus() {
+            try {
+                const doc = await db.collection('adminSettings').doc('status').get();
+                if (doc.exists) {
+                    isEmergencyClosed = doc.data().isEmergencyClosed || false;
+                    updateEmergencyBtn();
+                }
+            } catch(e) {
+                console.error("Failed to load emergency status", e);
+            }
+        }
+        
+        function updateEmergencyBtn() {
+            const btn = document.getElementById('btn-emergency-close');
+            btn.style.display = 'inline-block';
+            if (isEmergencyClosed) {
+                btn.innerHTML = '🟢 Open Restaurant';
+                btn.style.background = '#4CAF50';
+            } else {
+                btn.innerHTML = '🔴 Close Restaurant';
+                btn.style.background = '#EF5350';
+            }
+        }
+        
+        async function toggleEmergencyClose() {
+            const newState = !isEmergencyClosed;
+            const msg = newState ? 'Close the restaurant to new orders and bookings?' : 'Re-open the restaurant?';
+            if (!confirm(msg)) return;
+            
+            try {
+                await db.collection('adminSettings').doc('status').set({ isEmergencyClosed: newState }, { merge: true });
+                isEmergencyClosed = newState;
+                updateEmergencyBtn();
+                showToast(newState ? 'Restaurant is now CLOSED.' : 'Restaurant is now OPEN.', 'success');
+            } catch(e) {
+                showToast('Failed to update status', 'error');
+            }
+        }
+
+        // ==========================================
+        // BOOKINGS MANAGEMENT
+        // ==========================================
+        let unsubBookings = null;
+        
+        function showBookings(btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            document.getElementById('orders-grid').style.display = 'none';
+            document.getElementById('analytics-panel').style.display = 'none';
+            document.getElementById('reviews-panel').style.display = 'none';
+            document.getElementById('staff-panel').style.display = 'none';
+            document.getElementById('bookings-panel').style.display = 'block';
+            
+            const dp = document.getElementById('bookings-date-picker');
+            if (!dp.value) dp.value = new Date().toLocaleDateString('en-CA');
+            loadBookings();
+        }
+        
+        function loadBookings() {
+            if (unsubBookings) unsubBookings();
+            const date = document.getElementById('bookings-date-picker').value;
+            const grid = document.getElementById('bookings-grid');
+            grid.innerHTML = '<p style="color:#888;">Loading bookings...</p>';
+            
+            unsubBookings = db.collection('bookings')
+                .where('date', '==', date)
+                .onSnapshot(snap => {
+                    grid.innerHTML = '';
+                    if (snap.empty) {
+                        grid.innerHTML = '<p style="color:#888; text-align:center; padding:2rem;">No bookings for this date.</p>';
+                        return;
+                    }
+                    
+                    let bookingsHtml = '';
+                    snap.docs.forEach(doc => {
+                        const b = doc.data();
+                        const docId = doc.id;
+                        bookingsHtml += `
+                            <div class="order-card" style="padding:1.2rem;">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:0.8rem;">
+                                    <span style="color:#00BCD4;font-weight:800;">${b.id}</span>
+                                    <span style="color:#F57F17;font-weight:800;">Table ${b.tableId.replace('T','')}</span>
+                                </div>
+                                <div style="color:white;font-weight:700;margin-bottom:0.5rem;">${b.name} (${b.guests} Guests)</div>
+                                <div style="color:#aaa;font-size:0.9rem;margin-bottom:0.5rem;">🕒 ${b.time}</div>
+                                <div style="color:#aaa;font-size:0.9rem;margin-bottom:1rem;">📞 ${b.phone}</div>
+                                <button onclick="freeTable('${docId}', '${b.tableId}', '${b.date}', '${b.time}')" style="width:100%;padding:0.8rem;background:transparent;border:1px solid #4CAF50;color:#4CAF50;border-radius:8px;font-weight:800;cursor:pointer;">✅ Mark Completed & Free Table</button>
+                            </div>
+                        `;
+                    });
+                    grid.innerHTML = bookingsHtml;
+                });
+        }
+        
+        async function freeTable(bookingDocId, tableId, date, time) {
+            if (!confirm('Are you sure you want to free up this table? It will be deleted from today\'s active bookings.')) return;
+            try {
+                // Delete the booking doc
+                await db.collection('bookings').doc(bookingDocId).delete();
+                
+                // Also we need to clean up tableDays so it can be rebooked!
+                const tableDayRef = db.collection('tableDays').doc(`${tableId}_${date}`);
+                await db.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(tableDayRef);
+                    if (doc.exists) {
+                        const times = doc.data().bookedTimes || [];
+                        const [h, m] = time.split(':').map(Number);
+                        const selMins = h * 60 + m;
+                        // Filter out any booked times within 60 mins of this time (the conflict zone we originally set)
+                        // Actually, just remove exactly this booking's selMins if we can.
+                        const newTimes = times.filter(t => Math.abs(t - selMins) >= 60);
+                        transaction.set(tableDayRef, { bookedTimes: newTimes });
+                    }
+                });
+                
+                showToast('Table freed successfully!', 'success');
+            } catch(e) {
+                console.error(e);
+                showToast('Failed to free table', 'error');
+            }
+        }
+        
+        // Load emergency status on init
+        setTimeout(loadEmergencyStatus, 1500);
+
     </script>
     <script src="scripts/ui.js"></script>
 </body>
