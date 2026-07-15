@@ -51,6 +51,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
 - 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
 - 🔄 **Unified UI Loading** — seamless animated logo transition across all authenticated pages
+- 📱 **Fully Mobile Responsive** — fluid grid layouts, stacked components, horizontal scrolling, and a native-like slide-out hamburger menu for flawless mobile viewing
 
 ### 🛡️ Admin Dashboard
 - 📊 **Live Stats & Advanced Analytics** — Today's revenue, custom date ranges, pending count, avg rating
@@ -60,6 +61,8 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🔔 **New Order Sound Alert** — audio notification on new orders
 - 🗂️ **Filter by Status** — tab-based view for each order stage
 - ⭐ **Reviews Tab** — dedicated dashboard to read all customer ratings and feedback
+- 📅 **Live Table Bookings** — new dedicated tab to monitor today's active table reservations and manually free up tables
+- 🛑 **Emergency Close** — one-click toggle to instantly freeze all customer checkouts and bookings with a global "We are closed" alert
 - 🎟️ **Staff Invites** — generate secure invite codes to onboard Kitchen and Delivery staff
 
 ### 👨‍🍳 Kitchen Display System (KDS)
