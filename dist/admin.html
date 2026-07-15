@@ -340,10 +340,16 @@
         // Real-time listener
         function listenToOrders() {
             db.collection('orders')
-                .orderBy('createdAt', 'desc')
                 .onSnapshot(snapshot => {
                     const prevCount = allOrders.length;
                     allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Client-side sort by createdAt descending (newest first)
+                    allOrders.sort((a, b) => {
+                        const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+                        const tb = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+                        return tb - ta;
+                    });
 
                     // Play sound for new orders (after initial load)
                     if (!isFirstLoad && allOrders.length > prevCount) {
