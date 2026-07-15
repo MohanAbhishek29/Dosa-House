@@ -47,7 +47,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🔔 **Native OS Push Notifications** — meal-time based, personalized Telugu/English craving alerts (works on mobile & desktop)
 - 🔑 **OTP Delivery Verification** — receive unique OTP, share with delivery partner
 - 🌟 **Enhanced Reviews** — submit star ratings along with detailed text reviews directly from a modal popup
-- 📅 **Table Booking** — reserve a table with date, time & party size, and view your history in the profile
+- 📅 **Table Booking** — beautiful, glassmorphic multi-step wizard to reserve a table with an interactive Material-style analog clock (supports keyboard navigation!)
 - 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
 - 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
 - 🔄 **Unified UI Loading** — seamless animated logo transition across all authenticated pages
@@ -55,6 +55,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 ### 🛡️ Admin Dashboard
 - 📊 **Live Stats & Advanced Analytics** — Today's revenue, custom date ranges, pending count, avg rating
 - 🔄 **Full Order Lifecycle** — Accept → Preparing → Packaging → Dispatch
+- 🎯 **Smart Dispatch System** — explicitly assign accepted orders to specific Chefs, and packaging orders to specific Delivery Partners from active staff dropdowns
 - 💸 **UPI Payment Verification** — manually confirm received payments
 - 🔔 **New Order Sound Alert** — audio notification on new orders
 - 🗂️ **Filter by Status** — tab-based view for each order stage
@@ -62,12 +63,12 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🎟️ **Staff Invites** — generate secure invite codes to onboard Kitchen and Delivery staff
 
 ### 👨‍🍳 Kitchen Display System (KDS)
-- 🎫 **Live Order Tickets** — appear instantly when admin accepts
+- 🎫 **Live Order Tickets** — instantly view orders explicitly assigned to you by the Admin
 - ⏱️ **Priority Queue** — oldest orders shown first
 - ✅ **One-tap Status Update** — Start Preparing → Mark Ready
 
 ### 🛵 Delivery Dashboard
-- 📋 **Assigned Deliveries** — see orders ready for pickup
+- 📋 **Assigned Deliveries** — strictly see active trips assigned directly to your profile
 - 🚀 **Accept & Dispatch** — one button to start delivery
 - 🔐 **OTP Confirmation** — enter customer OTP to mark delivered
 
