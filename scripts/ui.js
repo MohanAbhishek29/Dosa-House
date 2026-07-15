@@ -100,6 +100,82 @@
             }
         });
     }
+
+    // 6. Setup Mobile Hamburger Menu
+    const navRight = document.querySelector('.nav-links') || document.querySelector('.nav-content > div:not(.logo)');
+    if (navRight) {
+        // 1. Create toggle button
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'mobile-menu-toggle';
+        toggleBtn.innerHTML = '☰';
+        
+        // Find logo and insert button after it
+        const logo = document.querySelector('.logo');
+        if (logo && logo.parentNode) {
+            logo.parentNode.insertBefore(toggleBtn, logo.nextSibling);
+        }
+
+        // 2. Create Sidebar Menu
+        const sidebar = document.createElement('div');
+        sidebar.className = 'mobile-nav-sidebar';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'mobile-nav-close';
+        closeBtn.innerHTML = '×';
+        sidebar.appendChild(closeBtn);
+        
+        // Clone links from navRight (excluding profile dropdown logic for simplicity, just keeping main links)
+        const linksToClone = navRight.querySelectorAll('a:not(#nav-login-wrap):not(#user-profile-wrap a)');
+        linksToClone.forEach(a => {
+            const clone = document.createElement('a');
+            clone.href = a.href;
+            clone.textContent = a.textContent;
+            sidebar.appendChild(clone);
+        });
+
+        // Add special links if they exist
+        const loginWrap = document.getElementById('nav-login-wrap');
+        const loginClone = document.createElement('a');
+        loginClone.href = 'login.html';
+        loginClone.textContent = 'Login / Sign Up';
+        loginClone.id = 'mobile-login-link';
+        loginClone.style.display = loginWrap && loginWrap.style.display !== 'none' ? 'block' : 'none';
+        sidebar.appendChild(loginClone);
+
+        const accountClone = document.createElement('a');
+        accountClone.href = 'account.html';
+        accountClone.textContent = 'My Account';
+        accountClone.id = 'mobile-account-link';
+        accountClone.style.display = loginWrap && loginWrap.style.display === 'none' ? 'block' : 'none';
+        sidebar.appendChild(accountClone);
+
+        document.body.appendChild(sidebar);
+
+        // 3. Create Overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-nav-overlay';
+        document.body.appendChild(overlay);
+
+        // 4. Toggle Logic
+        function openMenu() {
+            sidebar.classList.add('open');
+            overlay.classList.add('show');
+            // Update auth links visibility based on desktop version
+            const lw = document.getElementById('nav-login-wrap');
+            if(lw) {
+                document.getElementById('mobile-login-link').style.display = lw.style.display === 'none' ? 'none' : 'block';
+                document.getElementById('mobile-account-link').style.display = lw.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+        function closeMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        toggleBtn.addEventListener('click', openMenu);
+        closeBtn.addEventListener('click', closeMenu);
+        overlay.addEventListener('click', closeMenu);
+    }
 })();
 window.addEventListener('load', () => {
     // Check if the current page is a customer-facing page (not admin/kitchen/delivery)

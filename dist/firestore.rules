@@ -36,5 +36,10 @@ service cloud.firestore {
     match /tableDays/{tableDayId} {
       allow read, write: if true;
     }
+    
+    match /adminSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }
