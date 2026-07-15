@@ -120,11 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // Past time validation
-                const today = new Date().toISOString().split('T')[0];
+                const todayNow = new Date();
+                const today = todayNow.toLocaleDateString('en-CA');
                 if (dateInput.value === today) {
-                    const now = new Date();
-                    const currentHours = now.getHours();
-                    const currentMinutes = now.getMinutes();
+                    const currentHours = todayNow.getHours();
+                    const currentMinutes = todayNow.getMinutes();
                     
                     const [selectedHours, selectedMinutes] = timeInput.value.split(':').map(Number);
                     
@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (dateInput) {
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const today = now.toLocaleDateString('en-CA');
             dateInput.value = today;
             dateInput.min = today;
             if (!timeInput.value) timeInput.value = "19:00";
@@ -297,6 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Prevent premature submission via Enter key
+            if (currentStepIndex < steps.length - 1) {
+                btnNext.click();
+                return;
+            }
 
             const tableId = selectedTableInput.value;
             if (!tableId) {
