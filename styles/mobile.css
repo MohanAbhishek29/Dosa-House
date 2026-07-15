@@ -35,7 +35,7 @@
         justify-content: space-between;
     }
     
-    .nav-content > div:not(.logo) {
+    .nav-links {
         display: none !important; /* Hide standard nav on mobile */
     }
 
