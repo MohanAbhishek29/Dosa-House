@@ -51,6 +51,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
 - 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
 - 🔄 **Unified UI Loading** — seamless animated logo transition across all authenticated pages
+- 💎 **Premium Glassmorphism UI** — semi-transparent glass cards with blur effects for food items and booking forms
 - 📱 **Fully Mobile Responsive** — fluid grid layouts, stacked components, horizontal scrolling, and a native-like slide-out hamburger menu for flawless mobile viewing
 
 ### 🛡️ Admin Dashboard
