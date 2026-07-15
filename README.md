@@ -65,6 +65,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 📅 **Live Table Bookings** — new dedicated tab to monitor today's active table reservations and manually free up tables
 - 🛑 **Emergency Close** — one-click toggle to instantly freeze all customer checkouts and bookings with a global "We are closed" alert
 - 🎟️ **Staff Invites** — generate secure invite codes to onboard Kitchen and Delivery staff
+- 📡 **Offline-Robust Queries** — orders are fetched raw and sorted client-side to prevent Firestore from dropping orders with pending/null timestamps during network drops
 
 ### 👨‍🍳 Kitchen Display System (KDS)
 - 🎫 **Live Order Tickets** — instantly view orders explicitly assigned to you by the Admin
