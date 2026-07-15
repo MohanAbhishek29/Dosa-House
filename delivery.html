@@ -233,6 +233,10 @@
                 .where('status', 'in', ['sent_to_delivery', 'out_for_delivery'])
                 .onSnapshot(snapshot => {
                     let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Filter by assigned Delivery Boy
+                    orders = orders.filter(o => o.assignedDeliveryId === currentUser.uid);
+
                     // Sort locally
                     orders.sort((a, b) => {
                         const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();

@@ -50,18 +50,235 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (bookingForm) {
+        
+        // --- WIZARD LOGIC ---
+        const steps = [
+            document.getElementById('wizard-step-1'),
+            document.getElementById('wizard-step-2'),
+            document.getElementById('wizard-step-3')
+        ];
+        const tabs = document.querySelectorAll('.wizard-tab');
+        const btnPrev = document.getElementById('btn-wizard-prev');
+        const btnNext = document.getElementById('btn-wizard-next');
+        const btnSubmit = document.getElementById('btn-wizard-submit');
+        let currentStepIndex = 0; // 0, 1, 2
+
+        function updateWizard() {
+            // Update tabs
+            tabs.forEach((tab, index) => {
+                if (index === currentStepIndex) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Update steps
+            steps.forEach((step, index) => {
+                if (index === currentStepIndex) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+
+            // Update buttons
+            if (currentStepIndex === 0) {
+                btnPrev.style.visibility = 'hidden';
+            } else {
+                btnPrev.style.visibility = 'visible';
+            }
+
+            if (currentStepIndex === steps.length - 1) {
+                btnNext.style.display = 'none';
+                btnSubmit.style.display = 'inline-block';
+            } else {
+                btnNext.style.display = 'inline-block';
+                btnSubmit.style.display = 'none';
+            }
+        }
+
+        btnPrev.addEventListener('click', () => {
+            if (currentStepIndex > 0) {
+                currentStepIndex--;
+                updateWizard();
+            }
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (currentStepIndex === 0) {
+                if (!selectedTableInput.value) {
+                    showToast("Please select a table from the map! 🪑", "error");
+                    tableMapContainer.classList.add('error');
+                    setTimeout(() => tableMapContainer.classList.remove('error'), 500);
+                    return;
+                }
+            } else if (currentStepIndex === 1) {
+                if (!dateInput.value) {
+                    showToast("Please select a date!", "error");
+                    return;
+                }
+            }
+            if (currentStepIndex < steps.length - 1) {
+                currentStepIndex++;
+                updateWizard();
+            }
+        });
+
         if (dateInput) {
             const today = new Date().toISOString().split('T')[0];
             dateInput.value = today;
             dateInput.min = today;
             if (!timeInput.value) timeInput.value = "19:00";
+            
+            // Initialize Clock UI
+            const timeDisplay = document.getElementById('manual-time-input');
+            const btnAm = document.getElementById('btn-am');
+            const btnPm = document.getElementById('btn-pm');
+            const tabHours = document.getElementById('tab-hours');
+            const tabMinutes = document.getElementById('tab-minutes');
+            const clockNumbers = document.getElementById('clock-numbers');
+            const clockHand = document.querySelector('.clock-hand');
+            
+            let currentMode = 'hours'; // 'hours' or 'minutes'
+            let selectedHour = 7;
+            let selectedMinute = 0;
+            let isPm = true;
+
+            function updateTimeOutput() {
+                let h = selectedHour;
+                let m = selectedMinute.toString().padStart(2, '0');
+                
+                // Update Display
+                timeDisplay.value = `${h.toString().padStart(2, '0')}:${m}`;
+                
+                // Update hidden input (24hr format)
+                let h24 = h;
+                if (isPm && h !== 12) h24 += 12;
+                if (!isPm && h === 12) h24 = 0;
+                timeInput.value = `${h24.toString().padStart(2, '0')}:${m}`;
+                
+                // Trigger real-time listener update
+                if (typeof setupRealtime === 'function') {
+                    setupRealtime();
+                }
+            }
+
+            function setHandAngle(value, isMinutes) {
+                let degrees;
+                if (isMinutes) {
+                    degrees = value * 6; // 360 / 60
+                } else {
+                    degrees = value * 30; // 360 / 12
+                }
+                clockHand.style.transform = `rotate(${degrees}deg)`;
+            }
+
+            function renderClock() {
+                clockNumbers.innerHTML = '';
+                const values = currentMode === 'hours' 
+                    ? [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+                    : [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+                values.forEach((val, idx) => {
+                    const angle = idx * 30; // 360 / 12 items
+                    const radians = (angle - 90) * (Math.PI / 180);
+                    const radius = 90; // clock radius minus padding
+                    
+                    const x = Math.cos(radians) * radius;
+                    const y = Math.sin(radians) * radius;
+                    
+                    const numBtn = document.createElement('div');
+                    numBtn.className = 'clock-number';
+                    
+                    let displayVal = val;
+                    if (currentMode === 'minutes') {
+                        displayVal = val.toString().padStart(2, '0');
+                    }
+                    numBtn.textContent = displayVal;
+                    
+                    // Position from center
+                    numBtn.style.left = `calc(50% + ${x}px)`;
+                    numBtn.style.top = `calc(50% + ${y}px)`;
+
+                    // Active state
+                    if (currentMode === 'hours' && val === selectedHour) numBtn.classList.add('active');
+                    if (currentMode === 'minutes' && val === selectedMinute) numBtn.classList.add('active');
+
+                    numBtn.onclick = () => {
+                        if (currentMode === 'hours') {
+                            selectedHour = val;
+                            updateTimeOutput();
+                            setHandAngle(val, false);
+                            // Auto switch to minutes
+                            setTimeout(() => tabMinutes.click(), 300);
+                        } else {
+                            selectedMinute = val;
+                            updateTimeOutput();
+                            setHandAngle(val, true);
+                        }
+                        renderClock();
+                    };
+
+                    clockNumbers.appendChild(numBtn);
+                });
+                
+                // Set initial hand position for current mode
+                setHandAngle(currentMode === 'hours' ? selectedHour : selectedMinute, currentMode === 'minutes');
+            }
+
+            tabHours.onclick = () => {
+                currentMode = 'hours';
+                tabHours.classList.add('active');
+                tabMinutes.classList.remove('active');
+                renderClock();
+            };
+
+            tabMinutes.onclick = () => {
+                currentMode = 'minutes';
+                tabMinutes.classList.add('active');
+                tabHours.classList.remove('active');
+                renderClock();
+            };
+
+            btnAm.onclick = () => { isPm = false; btnAm.classList.add('active'); btnPm.classList.remove('active'); updateTimeOutput(); };
+            btnPm.onclick = () => { isPm = true; btnPm.classList.add('active'); btnAm.classList.remove('active'); updateTimeOutput(); };
+
+            // Keyboard navigation for Clock
+            document.addEventListener('keydown', (e) => {
+                if (currentStepIndex !== 1) return; // Only when Step 2 (Date & Time) is active
+                
+                const isUpOrRight = e.key === 'ArrowUp' || e.key === 'ArrowRight';
+                const isDownOrLeft = e.key === 'ArrowDown' || e.key === 'ArrowLeft';
+                
+                if (!isUpOrRight && !isDownOrLeft) return;
+                
+                e.preventDefault();
+
+                if (currentMode === 'hours') {
+                    if (isUpOrRight) selectedHour = selectedHour === 12 ? 1 : selectedHour + 1;
+                    if (isDownOrLeft) selectedHour = selectedHour === 1 ? 12 : selectedHour - 1;
+                    updateTimeOutput();
+                    setHandAngle(selectedHour, false);
+                } else {
+                    if (isUpOrRight) selectedMinute = (selectedMinute + 5) % 60;
+                    if (isDownOrLeft) selectedMinute = selectedMinute - 5 < 0 ? 55 : selectedMinute - 5;
+                    updateTimeOutput();
+                    setHandAngle(selectedMinute, true);
+                }
+                renderClock();
+            });
+
+            // Initial setup
+            updateTimeOutput();
+            renderClock();
+            updateWizard(); // Initialize wizard UI
         }
 
         renderTables(); // Initial render to show empty tables instantly
         setTimeout(setupRealtime, 1000); // delay to let firebase load
 
         dateInput.addEventListener('change', setupRealtime);
-        timeInput.addEventListener('change', setupRealtime);
 
         bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();

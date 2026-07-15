@@ -96,89 +96,128 @@
         </div>
     </nav>
 
-    <!-- Header -->
-    <header class="page-header"
-        style="background: var(--color-banana-leaf); color: white; padding: 4rem 0 2rem; padding-top: 140px; text-align: center;">
-        <div class="container">
-            <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem;">Reserve Your
-                Spot</h1>
-            <p>Skip the wait. Book a table for your family.</p>
-        </div>
-    </header>
-
-    <!-- Booking Content -->
-    <div class="booking-container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <a href="index.html" class="back-btn">← Back to Home</a>
-            <button type="button" onclick="openMyBookings()" class="btn-confirm" style="width:auto; padding:0.5rem 1rem; font-size:0.9rem; background:var(--color-banana-leaf);">📋 My Bookings</button>
-        </div>
-        <form id="booking-form" class="booking-form">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" placeholder="e.g. Rahul Verma" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" placeholder="+91 93924..." required>
-            </div>
-
-            <div class="form-group">
-                <div style="display: flex; gap: 1rem;">
-                    <div style="flex: 1;">
-                        <label for="date">Date</label>
-                        <input type="date" id="date" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label for="time">Time</label>
-                        <input type="time" id="time" required>
-                    </div>
+    <!-- Booking Background Wrapper -->
+    <div class="booking-bg-wrapper">
+        <div class="glass-wizard-card">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="color: var(--color-charcoal); margin:0; font-family:'Playfair Display', serif; font-size: 2.2rem;">Reserve Your Table</h2>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <a href="index.html" class="back-link-dark">← Home</a>
+                    <button type="button" onclick="openMyBookings()" class="btn-outline" style="padding:0.4rem 1rem; font-size:0.9rem;">📋 My Bookings</button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="guests">Number of Guests</label>
-                <select id="guests" required>
-                    <option value="2">2 People</option>
-                    <option value="3">3 People</option>
-                    <option value="4">4 People</option>
-                    <option value="5">5 People</option>
-                    <option value="6">6 People</option>
-                    <option value="8">8+ People</option>
-                </select>
+            <!-- Wizard Tabs -->
+            <div class="wizard-tabs">
+                <button type="button" class="wizard-tab active" data-step="1"><span class="tab-num">1</span> Table</button>
+                <button type="button" class="wizard-tab" data-step="2"><span class="tab-num">2</span> Date & Time</button>
+                <button type="button" class="wizard-tab" data-step="3"><span class="tab-num">3</span> Details</button>
             </div>
 
-            <!-- Table Map Section -->
-            <div class="table-map-container" id="table-map-container">
-                <!-- Zones Text -->
-                <div class="floor-zone zone-kitchen">Kitchen ♨️</div>
-                <div class="floor-zone zone-window">Window View 🪟</div>
-                <div class="floor-zone zone-entrance">Entrance 🚪</div>
+            <form id="booking-form" class="booking-form">
+                <div class="wizard-content-area">
+                    
+                    <!-- Step 1: Table Selection -->
+                    <div class="wizard-step active" id="wizard-step-1">
+                        <h3 class="step-title" style="border:none; justify-content:center; padding-bottom:0;">Choose Your Table</h3>
+                        <p style="text-align:center; color:#666; margin-bottom:1.5rem; font-size:0.9rem;">Select a table from the restaurant map.</p>
+                        <div class="table-map-container" id="table-map-container">
+                            <div class="floor-zone zone-kitchen">Kitchen ♨️</div>
+                            <div class="floor-zone zone-window">Window View 🪟</div>
+                            <div class="floor-zone zone-entrance">Entrance 🚪</div>
 
-                <div class="table-map-header">
-                    <h3>Select Your Table</h3>
-                    <div class="table-legend">
-                        <div class="legend-item"><span class="legend-color legend-available"></span> Available</div>
-                        <div class="legend-item"><span class="legend-color legend-booked"></span> Booked</div>
-                        <div class="legend-item"><span class="legend-color legend-locked"></span> Locked</div>
-                        <div class="legend-item"><span class="legend-color legend-selected"></span> Selected</div>
+                            <div class="table-map-header">
+                                <div class="table-legend">
+                                    <div class="legend-item"><span class="legend-color legend-available"></span> Available</div>
+                                    <div class="legend-item"><span class="legend-color legend-booked"></span> Booked</div>
+                                    <div class="legend-item"><span class="legend-color legend-locked"></span> Locked</div>
+                                    <div class="legend-item"><span class="legend-color legend-selected"></span> Selected</div>
+                                </div>
+                            </div>
+                            <div class="restaurant-floor" id="table-grid"></div>
+                            <input type="hidden" id="selected-table-id" required>
+                        </div>
                     </div>
+
+                    <!-- Step 2: Date & Time -->
+                    <div class="wizard-step" id="wizard-step-2">
+                        <h3 class="step-title" style="border:none; justify-content:center; padding-bottom:0;">When are you joining us?</h3>
+                        <div class="form-row" style="align-items: center; max-width:600px; margin: 2rem auto 0;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="date" style="text-align:center; display:block;">Select Date</label>
+                                <input type="date" id="date" required class="premium-input" style="width:100%; text-align:center;">
+                            </div>
+
+                            <div class="form-group" style="flex: 1.5; display:flex; flex-direction:column; align-items:center;">
+                                <label>Select Time</label>
+                                <input type="hidden" id="time" required value="19:00">
+                                
+                                <div class="custom-clock-wrapper">
+                                    <div class="clock-display">
+                                        <input type="text" id="manual-time-input" class="premium-input time-display-input" value="07:00" readonly>
+                                        <div class="ampm-toggle">
+                                            <button type="button" id="btn-am" class="ampm-btn">AM</button>
+                                            <button type="button" id="btn-pm" class="ampm-btn active">PM</button>
+                                        </div>
+                                    </div>
+                                    <div class="clock-face">
+                                        <div class="clock-center-dot"></div>
+                                        <div class="clock-hand">
+                                            <div class="clock-hand-line"></div>
+                                        </div>
+                                        <div id="clock-numbers" class="clock-numbers"></div>
+                                    </div>
+                                    <div class="clock-mode-tabs">
+                                        <button type="button" id="tab-hours" class="mode-tab active">Hours</button>
+                                        <button type="button" id="tab-minutes" class="mode-tab">Minutes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Personal Details -->
+                    <div class="wizard-step" id="wizard-step-3">
+                        <h3 class="step-title" style="border:none; justify-content:center; padding-bottom:0;">Your Details</h3>
+                        <div class="form-row" style="flex-direction:column; max-width: 400px; margin: 2rem auto 0;">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" placeholder="e.g. Rahul Verma" required class="premium-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" placeholder="+91 93924..." required class="premium-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="guests">Number of Guests</label>
+                                <select id="guests" required class="premium-input">
+                                    <option value="2">2 People</option>
+                                    <option value="3">3 People</option>
+                                    <option value="4">4 People</option>
+                                    <option value="5">5 People</option>
+                                    <option value="6">6 People</option>
+                                    <option value="8">8+ People</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="restaurant-floor" id="table-grid">
-                    <!-- Tables injected via JS into 3 columns -->
+                <!-- Wizard Footer -->
+                <div class="wizard-footer">
+                    <button type="button" id="btn-wizard-prev" class="btn-outline" style="visibility:hidden;">← Back</button>
+                    <button type="button" id="btn-wizard-next" class="btn-primary">Next Step →</button>
+                    <button type="submit" id="btn-wizard-submit" class="btn-primary" style="display:none; background:var(--color-banana-leaf);">Confirm Booking</button>
                 </div>
-                <!-- Hidden Input to store selection -->
-                <input type="hidden" id="selected-table-id" required>
+            </form>
+            
+            <div id="booking-success" class="success-message" style="display:none;">
+                <h3 style="color:#2E7D32;">🎉 Booking Confirmed!</h3>
+                <p style="color:#333;">Your table has been reserved. We'll see you soon!</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #666;">Redirecting to orders...</p>
             </div>
-
-            <button type="submit" class="btn-confirm">Confirm Booking</button>
-        </form>
-
-        <div id="booking-success" class="success-message">
-            <h3>🎉 Booking Confirmed!</h3>
-            <p>Your table has been reserved. We'll see you soon!</p>
-            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Redirecting to orders...</p>
         </div>
     </div>
 

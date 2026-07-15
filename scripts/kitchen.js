@@ -2,24 +2,28 @@
 // Flow: Admin accepts (status=accepted) → Kitchen sees → Kitchen marks ready (status=ready)
 
 let unsubscribe = null;
+let currentChefId = null;
 
 // Auth check
 document.addEventListener('DOMContentLoaded', async () => {
     // Quick auth check — kitchen only
     const user = await requireAuth(['kitchen']);
     if (!user) return;
+    currentChefId = user.uid;
     startKitchenListener();
 });
 
 function startKitchenListener() {
     const ordersGrid = document.getElementById('orders-grid');
 
-    // Listen for orders with status: accepted OR preparing
-    // Removed orderBy to avoid composite index requirement
     unsubscribe = db.collection('orders')
         .where('status', 'in', ['accepted', 'preparing'])
         .onSnapshot(snapshot => {
             let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Filter by assigned Chef
+            orders = orders.filter(o => o.assignedChefId === currentChefId);
+
             // Sort client-side by createdAt (asc = oldest first)
             orders.sort((a, b) => {
                 const ta = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
@@ -27,7 +31,7 @@ function startKitchenListener() {
                 return ta - tb;
             });
             renderKitchenBoard(orders);
-            updateKitchenStats(snapshot);
+            updateKitchenStats();
         }, err => {
             console.error('Kitchen listener error:', err);
         });
@@ -39,8 +43,8 @@ function renderKitchenBoard(orders) {
     if (orders.length === 0) {
         grid.innerHTML = `
             <div class="empty-kitchen">
-                <h2>😴 No Active Orders</h2>
-                <p>Waiting for new tickets...</p>
+                <h2>😴 No Active Orders Assigned</h2>
+                <p>Waiting for the admin to assign tickets to you...</p>
             </div>`;
         document.getElementById('count-pending').textContent = '0';
         document.getElementById('count-preparing').textContent = '0';
@@ -140,7 +144,7 @@ function updateKitchenStats() {
             const completedStatuses = ['packaging', 'sent_to_delivery', 'out_for_delivery', 'delivered', 'served'];
             todayCompletedOrders = snap.docs
                 .map(d => d.data())
-                .filter(o => completedStatuses.includes(o.status));
+                .filter(o => completedStatuses.includes(o.status) && o.assignedChefId === currentChefId);
             
             document.getElementById('count-completed').textContent = todayCompletedOrders.length;
         });

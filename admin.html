@@ -434,7 +434,25 @@
         }
 
         let allUsers = [];
-        
+        let kitchenStaff = [];
+        let deliveryStaff = [];
+
+        function loadStaff() {
+            db.collection('users').get().then(snap => {
+                allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                kitchenStaff = allUsers.filter(u => u.role === 'kitchen');
+                deliveryStaff = allUsers.filter(u => u.role === 'delivery');
+                renderStaff(allUsers);
+                // Also re-render orders to populate the dropdowns
+                if (currentFilter) renderOrders();
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+
+        // Call loadStaff on init so the assignment dropdowns have data
+        setTimeout(loadStaff, 1500);
+
         function showStaff(btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(btn) btn.classList.add('active');
@@ -444,17 +462,7 @@
             document.getElementById('reviews-panel').style.display = 'none';
             document.getElementById('staff-panel').style.display = 'block';
             
-            loadStaff();
-        }
-
-        function loadStaff() {
-            db.collection('users').get().then(snap => {
-                allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderStaff(allUsers);
-            }).catch(err => {
-                console.error(err);
-                showToast("Failed to load users", "error");
-            });
+            renderStaff(allUsers);
         }
 
         function renderStaff(users) {
@@ -496,6 +504,7 @@
             try {
                 await db.collection('users').doc(userId).update({ role: newRole });
                 showToast("Role updated successfully!", "success");
+                loadStaff(); // Reload lists
             } catch(e) {
                 console.error(e);
                 showToast("Failed to update role", "error");
@@ -533,7 +542,7 @@
 
             let periodRev = 0;
             let periodCount = 0;
-            let deliveryStaff = {};
+            let deliveryStaffDict = {};
 
             allOrders.forEach(o => {
                 if (o.status !== 'delivered') return;
@@ -545,10 +554,10 @@
 
                     // Track delivery boys
                     if (o.deliveryBoyId) {
-                        if (!deliveryStaff[o.deliveryBoyId]) {
-                            deliveryStaff[o.deliveryBoyId] = { name: o.deliveryBoyName || 'Unknown', count: 0 };
+                        if (!deliveryStaffDict[o.deliveryBoyId]) {
+                            deliveryStaffDict[o.deliveryBoyId] = { name: o.deliveryBoyName || 'Unknown', count: 0 };
                         }
-                        deliveryStaff[o.deliveryBoyId].count++;
+                        deliveryStaffDict[o.deliveryBoyId].count++;
                     }
                 }
             });
@@ -559,12 +568,12 @@
 
             // Render delivery stats
             const staffContainer = document.getElementById('delivery-stats');
-            if (Object.keys(deliveryStaff).length === 0) {
+            if (Object.keys(deliveryStaffDict).length === 0) {
                 staffContainer.innerHTML = '<div style="color:#555;text-align:center;padding:1rem;">No deliveries found for this period.</div>';
             } else {
                 let html = '<div style="display:flex;flex-direction:column;gap:0.5rem;">';
-                for (let key in deliveryStaff) {
-                    let st = deliveryStaff[key];
+                for (let key in deliveryStaffDict) {
+                    let st = deliveryStaffDict[key];
                     let comm = st.count * 40; // ₹40 flat commission
                     html += `
                         <div style="display:flex;justify-content:space-between;border-bottom:1px solid #222;padding:0.5rem 0;">
@@ -580,6 +589,7 @@
 
         function renderOrders() {
             const grid = document.getElementById('orders-grid');
+            if (!grid) return;
             const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
 
             if (filtered.length === 0) {
@@ -598,19 +608,36 @@
             const paymentLabel = order.paymentMethod === 'upi' ? '💸 UPI' : '💵 Cash';
 
             let actions = '';
+            
+            const chefOptions = kitchenStaff.map(c => `<option value="${c.id}">${c.name || c.email}</option>`).join('');
+            const deliveryOptions = deliveryStaff.map(d => `<option value="${d.id}">${d.name || d.email}</option>`).join('');
+
             if (order.status === 'pending') {
                 actions = `<button class="action-btn btn-accept" onclick="updateStatus('${order.id}', 'accepted')">✅ Accept</button>
                            <button class="action-btn btn-cancel" onclick="updateStatus('${order.id}', 'cancelled')">❌ Cancel</button>`;
             } else if (order.status === 'accepted') {
-                actions = `<button class="action-btn btn-preparing" onclick="updateStatus('${order.id}', 'preparing')">👨‍🍳 Mark Preparing</button>`;
+                actions = `
+                    <select id="chef-select-${order.id}" style="padding:0.5rem; border-radius:8px; border:1px solid #555; background:#222; color:white; margin-bottom:0.5rem; width:100%;">
+                        <option value="">-- Assign a Chef --</option>
+                        ${chefOptions}
+                    </select>
+                    <button class="action-btn btn-preparing" onclick="assignChefAndPrepare('${order.id}')" style="width:100%">👨‍🍳 Assign & Mark Preparing</button>
+                `;
             } else if (order.status === 'preparing') {
-                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">👨‍🍳 Cooking in Kitchen...</span>`;
+                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">👨‍🍳 Assigned Chef: ${order.assignedChefName || 'Unknown'} - Cooking...</span>`;
             } else if (order.status === 'packaging') {
-                actions = `<button class="action-btn btn-delivery" onclick="updateStatus('${order.id}', 'sent_to_delivery')">🛵 Assign to Delivery</button>`;
+                actions = `
+                    <select id="delivery-select-${order.id}" style="padding:0.5rem; border-radius:8px; border:1px solid #555; background:#222; color:white; margin-bottom:0.5rem; width:100%;">
+                        <option value="">-- Assign Delivery Boy --</option>
+                        ${deliveryOptions}
+                    </select>
+                    <button class="action-btn btn-delivery" onclick="assignDeliveryAndDispatch('${order.id}')" style="width:100%">🛵 Assign & Dispatch</button>
+                `;
             } else if (order.status === 'sent_to_delivery') {
-                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">🛵 Waiting for delivery pickup...</span>`;
+                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">🛵 Assigned to: ${order.assignedDeliveryName || 'Unknown'}</span>`;
             } else if (order.status === 'out_for_delivery') {
-                actions = `<div class="otp-display">OTP for Customer: <span class="otp-code">${order.deliveryOTP || '----'}</span></div>
+                actions = `<span style="color:#888;font-size:0.85rem;font-weight:600">🛵 Delivery Boy: ${order.assignedDeliveryName || 'Unknown'}</span>
+                           <div class="otp-display">OTP for Customer: <span class="otp-code">${order.deliveryOTP || '----'}</span></div>
                            <p style="color:#888;font-size:0.82rem;margin-top:0.5rem;">⏳ Waiting for delivery partner to confirm OTP...</p>`;
             }
 
@@ -684,6 +711,54 @@
                 showToast(`Order ${newStatus.replace(/_/g, ' ')}! ✅`, 'success');
             } catch (e) {
                 showToast('Action failed: ' + e.message, 'error');
+                console.error(e);
+            }
+        }
+
+        async function assignChefAndPrepare(orderId) {
+            const selectEl = document.getElementById(`chef-select-${orderId}`);
+            if (!selectEl || !selectEl.value) {
+                showToast("Please select a Chef first!", "error");
+                return;
+            }
+            const chefId = selectEl.value;
+            const chefName = selectEl.options[selectEl.selectedIndex].text;
+            
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    status: 'preparing',
+                    assignedChefId: chefId,
+                    assignedChefName: chefName,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast(`Assigned to ${chefName} and marked Preparing! 👨‍🍳`, 'success');
+            } catch (e) {
+                showToast('Failed to assign chef', 'error');
+                console.error(e);
+            }
+        }
+
+        async function assignDeliveryAndDispatch(orderId) {
+            const selectEl = document.getElementById(`delivery-select-${orderId}`);
+            if (!selectEl || !selectEl.value) {
+                showToast("Please select a Delivery Boy first!", "error");
+                return;
+            }
+            const deliveryId = selectEl.value;
+            const deliveryName = selectEl.options[selectEl.selectedIndex].text;
+            const otp = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            try {
+                await db.collection('orders').doc(orderId).update({
+                    status: 'sent_to_delivery',
+                    assignedDeliveryId: deliveryId,
+                    assignedDeliveryName: deliveryName,
+                    deliveryOTP: otp,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast(`Assigned to ${deliveryName} and dispatched! 🛵`, 'success');
+            } catch (e) {
+                showToast('Failed to assign delivery', 'error');
                 console.error(e);
             }
         }
