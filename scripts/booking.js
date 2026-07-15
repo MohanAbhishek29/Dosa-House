@@ -118,6 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast("Please select a date!", "error");
                     return;
                 }
+                
+                // Past time validation
+                const today = new Date().toISOString().split('T')[0];
+                if (dateInput.value === today) {
+                    const now = new Date();
+                    const currentHours = now.getHours();
+                    const currentMinutes = now.getMinutes();
+                    
+                    const [selectedHours, selectedMinutes] = timeInput.value.split(':').map(Number);
+                    
+                    if (selectedHours < currentHours || (selectedHours === currentHours && selectedMinutes < currentMinutes)) {
+                        showToast("Please select a time in the future! 🕰️", "error");
+                        return;
+                    }
+                }
             }
             if (currentStepIndex < steps.length - 1) {
                 currentStepIndex++;
