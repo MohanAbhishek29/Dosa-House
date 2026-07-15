@@ -11,6 +11,49 @@
     padding: 0.5rem;
 }
 
+/* Mobile Sidebar Menu (hidden on desktop) */
+.mobile-nav-sidebar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 250px;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+    z-index: 100000;
+    display: none; /* hidden on desktop */
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mobile-nav-sidebar.open {
+    right: 0;
+}
+
+.mobile-nav-close {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #333;
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.mobile-nav-sidebar a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.mobile-nav-sidebar a:hover {
+    color: var(--color-saffron);
+}
+
 @media (max-width: 768px) {
     /* Global Typography & Containers */
     html {
@@ -41,41 +84,7 @@
 
     /* Mobile Sidebar Menu */
     .mobile-nav-sidebar {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 250px;
-        height: 100vh;
-        background: white;
-        box-shadow: -5px 0 30px rgba(0,0,0,0.1);
-        z-index: 100000;
-        display: flex;
-        flex-direction: column;
-        padding: 2rem 1.5rem;
-        transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    
-    .mobile-nav-sidebar.open {
-        right: 0;
-    }
-    
-    .mobile-nav-sidebar a {
-        font-weight: 700;
-        color: var(--color-text-primary);
-        text-decoration: none;
-        font-size: 1.2rem;
-        padding: 1rem 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .mobile-nav-close {
-        align-self: flex-end;
-        font-size: 2rem;
-        cursor: pointer;
-        color: #d32f2f;
-        background: none;
-        border: none;
-        margin-bottom: 1rem;
+        display: flex; /* show on mobile */
     }
     
     .mobile-nav-overlay {

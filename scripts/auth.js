@@ -87,6 +87,12 @@ async function setupNavAuth() {
         // Logged in — show profile button, hide login button
         if (profileWrap) profileWrap.style.display = 'block';
         if (loginWrap) loginWrap.style.display = 'none';
+        
+        const mProfile = document.getElementById('mobile-account-link');
+        const mLogin = document.getElementById('mobile-login-link');
+        if (mProfile) mProfile.style.display = 'block';
+        if (mLogin) mLogin.style.display = 'none';
+        
         const nameEl = document.getElementById('user-name-nav');
         const emailEl = document.getElementById('profile-email');
         const avatarEl = document.getElementById('user-avatar');
@@ -141,6 +147,11 @@ async function setupNavAuth() {
         // Guest — hide profile, show login button
         if (profileWrap) profileWrap.style.display = 'none';
         if (loginWrap) loginWrap.style.display = 'block';
+        
+        const mProfile = document.getElementById('mobile-account-link');
+        const mLogin = document.getElementById('mobile-login-link');
+        if (mProfile) mProfile.style.display = 'none';
+        if (mLogin) mLogin.style.display = 'block';
     }
     return user; // caller can check if user is null to guard actions
 }
