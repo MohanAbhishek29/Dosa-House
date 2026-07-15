@@ -206,6 +206,8 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .clock-display {
@@ -231,6 +233,7 @@
     border-radius: 12px;
     border: 2px solid rgba(62, 39, 35, 0.1);
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .ampm-btn {
@@ -327,7 +330,7 @@
     border-bottom-color: var(--color-saffron);
 }
 
-.btn-confirm-booking {
+.btn-wizard-action {
     background: linear-gradient(135deg, var(--color-saffron), var(--color-turmeric));
     color: white;
     padding: 1.2rem;
@@ -341,7 +344,7 @@
     box-shadow: 0 4px 15px rgba(245, 127, 23, 0.2);
 }
 
-.btn-confirm-booking:hover {
+.btn-wizard-action:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(245, 127, 23, 0.4);
 }

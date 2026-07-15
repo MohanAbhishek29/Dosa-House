@@ -107,10 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         btnNext.addEventListener('click', () => {
             if (currentStepIndex === 0) {
-                if (!selectedTableInput.value) {
-                    showToast("Please select a table from the map! 🪑", "error");
-                    tableMapContainer.classList.add('error');
-                    setTimeout(() => tableMapContainer.classList.remove('error'), 500);
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
+                if (!name || !phone) {
+                    showToast("Please enter your name and phone number!", "error");
                     return;
                 }
             } else if (currentStepIndex === 1) {
