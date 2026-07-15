@@ -349,6 +349,24 @@
     box-shadow: 0 8px 25px rgba(245, 127, 23, 0.4);
 }
 
+.btn-wizard-back {
+    background: white;
+    color: var(--color-charcoal);
+    padding: 1.2rem;
+    border: 2px solid rgba(62, 39, 35, 0.1);
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+
+.btn-wizard-back:hover {
+    background: #fdfaf6;
+    border-color: rgba(62, 39, 35, 0.2);
+}
+
 .btn-outline {
     background: transparent;
     border: 2px solid var(--color-banana-leaf);

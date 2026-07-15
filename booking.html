@@ -147,13 +147,13 @@
                     <!-- Step 2: Date & Time -->
                     <div class="wizard-step" id="wizard-step-2">
                         <h3 class="step-title" style="border:none; justify-content:center; padding-bottom:0;">When are you joining us?</h3>
-                        <div class="form-row" style="align-items: center; max-width:600px; margin: 2rem auto 0;">
-                            <div class="form-group" style="flex: 1;">
+                        <div class="form-row" style="flex-direction: column; align-items: center; gap: 2rem; max-width:400px; margin: 2rem auto 0;">
+                            <div class="form-group" style="width: 100%;">
                                 <label for="date" style="text-align:center; display:block;">Select Date</label>
                                 <input type="date" id="date" required class="premium-input" style="width:100%; text-align:center;">
                             </div>
 
-                            <div class="form-group" style="flex: 1.5; display:flex; flex-direction:column; align-items:center;">
+                            <div class="form-group" style="width: 100%; display:flex; flex-direction:column; align-items:center;">
                                 <label>Select Time</label>
                                 <input type="hidden" id="time" required value="19:00">
                                 
@@ -205,7 +205,7 @@
 
                 <!-- Wizard Footer -->
                 <div class="wizard-footer">
-                    <button type="button" id="btn-wizard-prev" class="btn-outline" style="visibility:hidden;">← Back</button>
+                    <button type="button" id="btn-wizard-prev" class="btn-wizard-back" style="visibility:hidden; padding: 0.8rem 2rem; font-size: 1rem; border-radius: 12px; margin-top: 0;">← Back</button>
                     <button type="button" id="btn-wizard-next" class="btn-wizard-action" style="padding: 0.8rem 2rem; font-size: 1rem; border-radius: 12px; margin-top: 0;">Next Step →</button>
                     <button type="submit" id="btn-wizard-submit" class="btn-wizard-action" style="display:none; padding: 0.8rem 2rem; font-size: 1rem; border-radius: 12px; margin-top: 0;">Confirm Booking</button>
                 </div>
