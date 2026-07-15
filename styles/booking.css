@@ -248,18 +248,18 @@
 }
 
 .clock-face {
-    width: 240px;
-    height: 240px;
+    width: 260px;
+    height: 260px;
     border-radius: 50%;
-    background: white;
-    border: 6px solid #fdf5e6;
+    background: #fdfaf6;
+    border: none;
     position: relative;
-    box-shadow: inset 0 4px 15px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .clock-center-dot {
-    width: 14px;
-    height: 14px;
+    width: 8px;
+    height: 8px;
     background: var(--color-saffron);
     border-radius: 50%;
     position: absolute;
@@ -267,48 +267,26 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .clock-hand {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    bottom: 50%;
+    left: calc(50% - 1px);
     width: 2px;
-    height: 40%;
-    transform-origin: top center;
+    height: 38%; /* Adjust to reach the number */
+    background: var(--color-saffron);
+    transform-origin: bottom center;
     z-index: 5;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Instead of background here, we use child element to point UP */
 }
 
-/* The actual visible line of the hand pointing UP from the center */
-.clock-hand-line {
-    position: absolute;
-    bottom: 0;
-    left: -1px; /* center the 2px line */
-    width: 2px;
-    height: 100%;
-    background: var(--color-saffron);
-}
-
-/* The circle at the end of the hand */
-.clock-hand-line::after {
-    content: '';
-    position: absolute;
-    top: -15px;
-    left: -14px;
-    width: 30px;
-    height: 30px;
-    background: var(--color-saffron);
-    border-radius: 50%;
-    box-shadow: 0 4px 10px rgba(245, 127, 23, 0.4);
-}
+/* We don't need the pseudo circle on the hand anymore, we style the active number instead */
 
 .clock-number {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -319,13 +297,17 @@
     transform: translate(-50%, -50%);
     transition: all 0.2s;
     z-index: 6;
+    font-size: 1rem;
 }
 .clock-number:hover {
     background: rgba(245, 127, 23, 0.1);
 }
 .clock-number.active {
+    background: var(--color-saffron);
     color: white;
+    box-shadow: 0 4px 10px rgba(245, 127, 23, 0.3);
 }
+
 
 .clock-mode-tabs {
     display: flex;
