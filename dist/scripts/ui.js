@@ -122,7 +122,7 @@ function checkRestaurantStatusUI() {
     if (!liveIndicator) {
         // Find navbar and inject if missing
         const navRight = document.querySelector('.nav-links');
-        if (navRight && window.location.pathname.includes('index.html')) {
+        if (navRight) {
             liveIndicator = document.createElement('div');
             liveIndicator.id = 'global-live-indicator';
             liveIndicator.style.cssText = `

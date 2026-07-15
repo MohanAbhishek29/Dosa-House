@@ -811,11 +811,14 @@
                 const doc = await db.collection('adminSettings').doc('status').get();
                 if (doc.exists) {
                     isEmergencyClosed = doc.data().isEmergencyClosed || false;
-                    updateEmergencyBtn();
+                } else {
+                    isEmergencyClosed = false;
                 }
             } catch(e) {
                 console.error("Failed to load emergency status", e);
+                isEmergencyClosed = false;
             }
+            updateEmergencyBtn();
         }
         
         function updateEmergencyBtn() {
