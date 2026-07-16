@@ -49,6 +49,9 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🌟 **Enhanced Reviews** — submit star ratings along with detailed text reviews directly from a modal popup
 - 📅 **Table Booking** — beautiful, glassmorphic multi-step wizard to reserve a table with an interactive Material-style analog clock (supports keyboard navigation!)
 - 🪙 **Dosa Coins Loyalty** — earn 5% cashback as coins on every order and redeem them during checkout
+- 🎵 **Ambient Background Music** — fully custom Steam-style UI music player that persists track state seamlessly across page navigations
+- 🧾 **Digital Receipts** — beautiful, dynamic CSS-styled receipts generated for completed orders
+- 🍽️ **Dine-In Workflow** — bypass delivery fees and explicitly order to a specific Table Number from inside the restaurant
 - 📸 **Profile Management** — upload and manually crop your profile picture directly in the browser
 - 🔄 **Unified UI Loading** — seamless animated logo transition across all authenticated pages
 - 💎 **Premium Glassmorphism UI** — semi-transparent glass cards with blur effects for food items and booking forms
