@@ -36,21 +36,21 @@ graph TD
     F[(Firebase Firestore)]
 
     %% Customer Actions
-    C -- "Places Order" --> F
-    C -- "Real-time Tracking" --> F
+    C -->|Places Order| F
+    C -->|Real-time Tracking| F
 
     %% Admin Actions
-    F -- "New Order Alert" --> A
-    A -- "Accepts & Assigns Chef" --> F
-    A -- "Assigns Delivery Boy" --> F
+    F -->|New Order Alert| A
+    A -->|Accepts & Assigns Chef| F
+    A -->|Assigns Delivery Boy| F
 
     %% Kitchen Actions
-    F -- "Live Tickets" --> K
-    K -- "Marks Prepared" --> F
+    F -->|Live Tickets| K
+    K -->|Marks Prepared| F
 
     %% Delivery Actions
-    F -- "Assigned Trips" --> D
-    D -- "OTP Verification" --> F
+    F -->|Assigned Trips| D
+    D -->|OTP Verification| F
 ```
 
 | Role | Dashboard | What They Do |
@@ -97,14 +97,16 @@ graph TD
 - 📡 **Offline-Robust Queries** — orders are fetched raw and sorted client-side to prevent Firestore from dropping orders with pending/null timestamps during network drops
 
 ### 👨‍🍳 Kitchen Display System (KDS)
-- 🎫 **Live Order Tickets** — instantly view orders explicitly assigned to you by the Admin
-- ⏱️ **Priority Queue** — oldest orders shown first
-- ✅ **One-tap Status Update** — Start Preparing → Mark Ready
+- 🔒 **Role-Based Data Isolation** — Chefs ONLY see active orders explicitly assigned to their specific User ID by the Admin. They cannot see other chefs' orders or completed orders.
+- 🎫 **Real-Time Live Tickets** — Orders appear instantly without page refresh via Firestore `onSnapshot`.
+- ⏱️ **Priority Queue** — Oldest uncompleted orders are dynamically shown first.
+- ✅ **One-tap Status Update** — Chefs update status from "Start Preparing" to "Ready", instantly notifying the Admin Dashboard.
 
 ### 🛵 Delivery Dashboard
-- 📋 **Assigned Deliveries** — strictly see active trips assigned directly to your profile
-- 🚀 **Accept & Dispatch** — one button to start delivery
-- 🔐 **OTP Confirmation** — enter customer OTP to mark delivered
+- 🔒 **Trip Isolation** — Delivery boys strictly see ONLY active trips explicitly dispatched to their profile.
+- 🚀 **Accept & Dispatch** — Partner accepts the trip and triggers "On the Way" status for the customer.
+- 📍 **Customer Calling** — Direct one-tap phone link to call the customer for directions.
+- 🔐 **OTP Confirmation** — Highly secure physical verification; delivery partner MUST enter the 4-digit OTP shown on the customer's phone to successfully complete the trip.
 
 ---
 
@@ -151,10 +153,10 @@ Dosa House/
 ├── 📁 scripts/
 │   ├── firebase-config.js → Firebase init + RBAC roles
 │   ├── auth.js            → Auth helpers (setupNavAuth, requireLogin)
-│   ├── main.js            → Cart, Checkout, Order Placement
+│   ├── main.js            → Cart, Checkout, Order Placement & Order History
 │   ├── booking.js         → Table Booking logic
 │   ├── kitchen.js         → KDS real-time listener
-│   ├── orders.js          → Order history utilities
+│   ├── push-notifications.js → Background native push alerts
 │   ├── reviews.js         → Review submission
 │   ├── music.js           → Background music player
 │   └── ui.js              → Toast, Dropdown, PWA install
