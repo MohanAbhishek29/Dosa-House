@@ -255,9 +255,12 @@
                 </div>
                 
                 <div style="border-top:1px solid #eee;padding-top:1.5rem;margin-top:1.5rem; border-top-color:#ffebee;">
-                    <h4 style="margin:0 0 0.5rem;color:#d32f2f;">Danger Zone</h4>
-                    <p style="color:#666; font-size:0.9rem; margin-bottom:1rem;">Once you delete your account, there is no going back. Please be certain.</p>
-                    <button onclick="deleteUserAccount()" style="background:white;color:#d32f2f;border:2px solid #ef9a9a;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all 0.2s;">Delete Account</button>
+                    <h4 style="margin:0 0 0.5rem;color:#d32f2f;">Account Actions</h4>
+                    <p style="color:#666; font-size:0.9rem; margin-bottom:1rem;">Manage your session or permanently delete your account.</p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button onclick="logoutUser()" style="background:white;color:#F57F17;border:2px solid #FFE0B2;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all 0.2s;">🚪 Log Out</button>
+                        <button onclick="deleteUserAccount()" style="background:white;color:#d32f2f;border:2px solid #ef9a9a;padding:0.6rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all 0.2s;">🗑️ Delete Account</button>
+                    </div>
                 </div>
             </div>
         </div>
