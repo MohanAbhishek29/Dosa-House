@@ -122,7 +122,7 @@
         .status-accepted { background: rgba(100, 181, 246, 0.2); color: #90CAF9; border: 1px solid #64B5F6; }
         .status-preparing { background: rgba(129, 199, 132, 0.2); color: #A5D6A7; border: 1px solid #81C784; }
         .status-out_for_delivery { background: rgba(206, 147, 216, 0.2); color: #E1BEE7; border: 1px solid #CE93D8; }
-        .status-delivered { background: rgba(46, 125, 50, 0.3); color: #81C784; border: 1px solid var(--color-banana-leaf, #2E7D32); }
+        .status-delivered, .status-served { background: rgba(46, 125, 50, 0.3); color: #81C784; border: 1px solid var(--color-banana-leaf, #2E7D32); }
         .status-cancelled { background: rgba(211, 47, 47, 0.2); color: #EF9A9A; border: 1px solid #D32F2F; }
 
         .card-body { padding: 1.2rem; }
@@ -224,7 +224,7 @@
         <button class="tab-btn" onclick="filterOrders('packaging', this)">📦 Packaging</button>
         <button class="tab-btn" onclick="filterOrders('sent_to_delivery', this)">🛵 Assigned</button>
         <button class="tab-btn" onclick="filterOrders('out_for_delivery', this)">🛣️ On Way</button>
-        <button class="tab-btn" onclick="filterOrders('delivered', this)">✔️ Delivered</button>
+        <button class="tab-btn" onclick="filterOrders('completed', this)">✔️ Completed</button>
         <button class="tab-btn" onclick="showBookings(this)" style="color:#00BCD4">📅 Bookings</button>
         <button class="tab-btn" onclick="showAnalytics(this)" style="color:#2196F3">📈 Analytics</button>
         <button class="tab-btn" onclick="showReviews(this)" style="color:#F57F17">⭐ Reviews</button>
@@ -376,11 +376,11 @@
             
             allOrders.forEach(o => {
                 const dateStr = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString() : '';
-                if (dateStr === today && o.status === 'delivered') {
+                if (dateStr === today && (o.status === 'delivered' || o.status === 'served')) {
                     todayRev += (o.total || 0);
                     todayCount++;
                 }
-                if (o.status !== 'delivered' && o.status !== 'cancelled') {
+                if (o.status !== 'delivered' && o.status !== 'served' && o.status !== 'cancelled') {
                     pendingCount++;
                 }
                 if (o.rating && o.rating > 0) {
@@ -576,7 +576,7 @@
             let deliveryStaffDict = {};
 
             allOrders.forEach(o => {
-                if (o.status !== 'delivered') return;
+                if (o.status !== 'delivered' && o.status !== 'served') return;
                 const d = o.deliveredAt?.toDate ? o.deliveredAt.toDate() : (o.createdAt?.toDate ? o.createdAt.toDate() : new Date(o.createdAt));
                 
                 if (d >= start && d <= end) {
@@ -622,20 +622,21 @@
             const grid = document.getElementById('orders-grid');
             if (!grid) return;
             
-            // DEBUG DISPLAY
-            let debugStr = "<div style='background:red;color:white;padding:10px;margin-bottom:10px;'>DEBUG ALL ORDERS:<br>" + JSON.stringify(allOrders) + "</div>";
-            
-            const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+            const filtered = currentFilter === 'all' 
+                ? allOrders 
+                : currentFilter === 'completed'
+                    ? allOrders.filter(o => o.status === 'delivered' || o.status === 'served')
+                    : allOrders.filter(o => o.status === currentFilter);
 
             if (filtered.length === 0) {
-                grid.innerHTML = debugStr + `<div class="empty-state"><span class="emoji">🍽️</span><p>No orders here yet!</p></div>`;
+                grid.innerHTML = `<div class="empty-state"><span class="emoji">🍽️</span><p>No orders here yet!</p></div>`;
                 return;
             }
 
             try {
-                grid.innerHTML = debugStr + filtered.map(order => createOrderCard(order)).join('');
+                grid.innerHTML = filtered.map(order => createOrderCard(order)).join('');
             } catch (e) {
-                grid.innerHTML = debugStr + `<div style='background:red;color:white;padding:20px;'>CRASH IN RENDER: ${e.message} <br> ${e.stack}</div>`;
+                grid.innerHTML = `<div style='background:red;color:white;padding:20px;'>CRASH IN RENDER: ${e.message} <br> ${e.stack}</div>`;
             }
         }
 
