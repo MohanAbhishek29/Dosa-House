@@ -24,8 +24,33 @@ This isn't just a menu website. It's a **complete end-to-end restaurant ecosyste
 
 ## 🗺️ System Architecture
 
-```text
-Customer  →  Checkout  →  Admin Dashboard  →  Kitchen Display  →  Delivery / Waiter  →  Completed
+The entire ecosystem is deeply integrated with **Firebase Firestore**, leveraging real-time `onSnapshot` listeners to instantly push updates to all active clients without manual polling.
+
+```mermaid
+graph TD
+    %% Core Entities
+    C[Customer App]
+    A[Admin Dashboard]
+    K[Kitchen Display System]
+    D[Delivery App]
+    F[(Firebase Firestore)]
+
+    %% Customer Actions
+    C -- "Places Order" --> F
+    C -- "Real-time Tracking" --> F
+
+    %% Admin Actions
+    F -- "New Order Alert" --> A
+    A -- "Accepts & Assigns Chef" --> F
+    A -- "Assigns Delivery Boy" --> F
+
+    %% Kitchen Actions
+    F -- "Live Tickets" --> K
+    K -- "Marks Prepared" --> F
+
+    %% Delivery Actions
+    F -- "Assigned Trips" --> D
+    D -- "OTP Verification" --> F
 ```
 
 | Role | Dashboard | What They Do |
@@ -99,12 +124,12 @@ Customer  →  Checkout  →  Admin Dashboard  →  Kitchen Display  →  Delive
 
 ## 📱 Progressive Web App (PWA)
 
-- 📲 **Installable** on Android & iOS — works like a native app
-- ⚡ **Service Worker** caching for fast repeat visits
-- 📶 **Offline-friendly** — key assets cached locally
-- 🎨 **Custom Launch Screen** — premium branded loading experience with logo
-
----
+Built to feel indistinguishable from a native mobile application.
+- 📲 **Fully Installable** — Adds an app icon directly to your Android or iOS home screen via `manifest.json`.
+- ⚡ **Service Worker Caching** — A custom `sw.js` heavily caches all images, CSS, and fonts, resulting in near-instant load times on repeat visits.
+- 📶 **Offline-Friendly UI** — Key static assets remain accessible even during network drops.
+- 🎨 **Custom Launch Screen** — Premium branded splash screen seamlessly fades into the application logo upon launch.
+- 📱 **Native-Like Navigation** — Hideable URL bars, custom pull-to-refresh handling, and fluid slide-out mobile sidebars.
 
 ## 🗂️ Project Structure
 
@@ -145,19 +170,20 @@ Dosa House/
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Architecture Deep Dive
 
-| Category | Technology |
-|----------|-----------|
-| **Frontend** | HTML5, CSS3, JavaScript (ES6+) |
-| **Database** | Firebase Firestore (real-time) |
-| **Auth** | Firebase Authentication |
-| **Hosting** | Firebase Hosting |
-| **PWA** | Service Workers, Web Manifest |
-| **Build** | Custom Node.js build script |
-| **Version Control** | Git & GitHub |
+**Zero Frameworks. Pure Performance.** 
+This project purposely avoids massive frameworks like React or Angular to demonstrate deep mastery of the DOM, Native Web APIs, and real-time database architecture.
 
-
+| Layer | Technology | Details |
+|-------|-----------|---------|
+| **Frontend UI** | HTML5, CSS3, ES6+ JS | Custom glassmorphism, CSS grid/flexbox, native DOM manipulation |
+| **Database** | Firebase Firestore | NoSQL structure, highly optimized `onSnapshot` real-time listeners |
+| **Authentication** | Firebase Auth | Google OAuth 2.0 and Email/Password with Role-Based Access Control (RBAC) |
+| **State Management** | LocalStorage & JS Objects | Persistent cart state, user session data, and background music player state |
+| **PWA & Offline** | Service Workers | `sw.js` with Cache-First strategy for assets, Network-First for dynamic data |
+| **Build System** | Node.js (Custom Script) | Bespoke build pipeline copying source to `dist/`, injecting environment variables |
+| **Hosting** | Firebase Hosting | Secure global CDN, custom rewrite rules in `firebase.json` |
 
 ## 🔄 Order Flow (Dual Workflows)
 
@@ -184,19 +210,23 @@ Dosa House/
 
 ---
 
-## 🎨 Design System
+## 🎨 Design System & Aesthetics
 
-Inspired by authentic South Indian culture:
+The UI breaks away from boring flat design by utilizing a highly modern, **Glassmorphism** aesthetic combined with authentic South Indian cultural themes.
 
 | Token | Color | Usage |
 |-------|-------|-------|
-| Saffron Orange | `#F57F17` | Primary CTA, accents |
-| Banana Leaf | `#2E7D32` | Success, nature elements |
-| Sambar Brown | `#3E2723` | Text, headings |
-| Cream White | `#FFF8E1` | Backgrounds |
-| Clay Red | `#E65100` | Alerts, highlights |
+| **Saffron Orange** | `#F57F17` | Primary calls to action, active tabs, energetic highlights |
+| **Banana Leaf** | `#2E7D32` | Success states, completed orders, vegetarian badges |
+| **Sambar Brown** | `#3E2723` | Deep textual contrast, typography headers |
+| **Cream White** | `#FFF8E1` | Secondary backgrounds, receipt paper simulation |
+| **Clay Red** | `#E65100` | Critical alerts, emergency close banners |
 
----
+### UI/UX Micro-Interactions
+- **Glassmorphism Panels:** Semi-transparent cards with `backdrop-filter: blur(12px)` creating a premium frosted-glass effect over the dynamic restaurant background.
+- **Steam Animations:** CSS-driven animated steam rising dynamically from hot dishes in the Kitchen Display System.
+- **Pulse Glowing:** Neon-like CSS `box-shadow` animations that throb continuously to alert admins of brand new incoming orders.
+- **Fluid Layouts:** Complete CSS Grid mastery ensuring the POS and KDS systems perfectly scale across massive desktop monitors down to 4-inch mobile screens without breaking.
 
 <div align="center">
 
