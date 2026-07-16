@@ -621,14 +621,22 @@
         function renderOrders() {
             const grid = document.getElementById('orders-grid');
             if (!grid) return;
+            
+            // DEBUG DISPLAY
+            let debugStr = "<div style='background:red;color:white;padding:10px;margin-bottom:10px;'>DEBUG ALL ORDERS:<br>" + JSON.stringify(allOrders) + "</div>";
+            
             const filtered = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="empty-state"><span class="emoji">🍽️</span><p>No orders here yet!</p></div>`;
+                grid.innerHTML = debugStr + `<div class="empty-state"><span class="emoji">🍽️</span><p>No orders here yet!</p></div>`;
                 return;
             }
 
-            grid.innerHTML = filtered.map(order => createOrderCard(order)).join('');
+            try {
+                grid.innerHTML = debugStr + filtered.map(order => createOrderCard(order)).join('');
+            } catch (e) {
+                grid.innerHTML = debugStr + `<div style='background:red;color:white;padding:20px;'>CRASH IN RENDER: ${e.message} <br> ${e.stack}</div>`;
+            }
         }
 
         function createOrderCard(order) {
