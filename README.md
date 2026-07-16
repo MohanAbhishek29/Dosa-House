@@ -24,8 +24,8 @@ This isn't just a menu website. It's a **complete end-to-end restaurant ecosyste
 
 ## 🗺️ System Architecture
 
-```
-Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  Delivery  →  OTP Confirm  →  ⭐ Review
+```text
+Customer  →  Checkout  →  Admin Dashboard  →  Kitchen Display  →  Delivery / Waiter  →  Completed
 ```
 
 | Role | Dashboard | What They Do |
@@ -67,7 +67,8 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - ⭐ **Reviews Tab** — dedicated dashboard to read all customer ratings and feedback
 - 📅 **Live Table Bookings** — new dedicated tab to monitor today's active table reservations and manually free up tables
 - 🛑 **Emergency Close** — one-click toggle to instantly freeze all customer checkouts and bookings with a global "We are closed" alert
-- 🎟️ **Staff Invites** — generate secure invite codes to onboard Kitchen and Delivery staff
+- 👥 **Staff Role Management** — view all registered users and directly assign them "Kitchen" or "Delivery" roles right from the dashboard (no invite codes needed)
+- 📅 **Advanced Date Analytics** — track total revenue, order volume, and delivery staff performance by Today, This Week, This Month, or custom date ranges
 - 📡 **Offline-Robust Queries** — orders are fetched raw and sorted client-side to prevent Firestore from dropping orders with pending/null timestamps during network drops
 
 ### 👨‍🍳 Kitchen Display System (KDS)
@@ -135,7 +136,6 @@ Dosa House/
 │
 ├── 📁 styles/             → Modular CSS (main, cart, booking, etc.)
 ├── 📁 assets/             → Images, audio, icons
-├── 📁 dist/               → Production build (deployed to Firebase)
 │
 ├── 📄 sw.js               → Service Worker (PWA)
 ├── 📄 manifest.json       → PWA manifest
@@ -159,19 +159,27 @@ Dosa House/
 
 
 
-## 🔄 Order Flow (Complete)
+## 🔄 Order Flow (Dual Workflows)
 
+**A. Takeaway & Delivery Workflow**
 ```
-1. Customer browses menu (no login needed)
-2. Customer adds items to cart
-3. Customer clicks Checkout → Login prompt if not signed in
-4. Customer enters address + payment method → Places Order
-5. Admin sees new order (with sound alert) → Accepts it
-6. Kitchen sees ticket → Starts preparing → Marks Ready
-7. Admin sends to Delivery → OTP generated & shown to customer
-8. Delivery partner accepts → Picks up → Delivers
-9. Delivery partner asks for customer OTP → Enters it → Confirmed ✅
-10. Customer rates the experience ⭐
+1. Customer clicks Checkout → login prompt if not signed in
+2. Customer selects Takeaway/Delivery, enters address + payment (Cash/UPI)
+3. Admin sees new order (sound alert) → Accepts it
+4. Admin assigns Chef → Kitchen sees ticket → Starts cooking
+5. Kitchen marks Ready → Admin assigns Delivery Boy → Dispatches
+6. Delivery partner drives to location → asks for OTP
+7. Partner enters OTP → Order Delivered ✅
+8. Customer rates the experience ⭐ + Detailed Review
+```
+
+**B. Dine-In Workflow**
+```
+1. Customer seated at Table → Selects "Dine-In" at Checkout
+2. Selects Table Number (e.g., Table 5) → Places Order
+3. Admin accepts order → Assigns Chef
+4. Kitchen marks Ready → Waiter physically serves food
+5. Waiter/Admin marks order as "Served" ✅ (bypasses delivery)
 ```
 
 ---
