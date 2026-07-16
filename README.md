@@ -60,7 +60,7 @@ Customer  →  Places Order  →  Admin Dashboard  →  Kitchen Display  →  De
 - 🎯 **Smart Dispatch System** — explicitly assign accepted orders to specific Chefs, and packaging orders to specific Delivery Partners from active staff dropdowns
 - 💸 **UPI Payment Verification** — manually confirm received payments
 - 🔔 **New Order Sound Alert** — audio notification on new orders
-- 🗂️ **Filter by Status** — tab-based view for each order stage
+- 🗂️ **Filter by Status** — tab-based view for each order stage, including a unified "Completed" view that gracefully merges Takeaway "delivered" and Dine-In "served" states
 - ⭐ **Reviews Tab** — dedicated dashboard to read all customer ratings and feedback
 - 📅 **Live Table Bookings** — new dedicated tab to monitor today's active table reservations and manually free up tables
 - 🛑 **Emergency Close** — one-click toggle to instantly freeze all customer checkouts and bookings with a global "We are closed" alert

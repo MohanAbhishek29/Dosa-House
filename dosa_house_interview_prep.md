@@ -402,15 +402,20 @@
 > **Bug:** When a customer's internet dropped slightly during checkout, the `createdAt` timestamp was cached locally as `null` until the server restored connection. Our admin dashboard used a strict `.orderBy('createdAt')` Firestore query, which completely **dropped and hid** any documents with `null` timestamps. So the customer saw the order on their phone, but the admin didn't!
 > **Fix:** I refactored the admin dashboard to fetch raw orders without the strict Firestore `orderBy` rule, and instead implemented **client-side sorting** in JavaScript. Now, even if the connection fluctuates and the timestamp is delayed, the admin dashboard never drops an order.
 
-**Q35. How did you handle Staff Assignment dynamically?**
+**Q35. How did you handle branching workflow states for different order types?**
+
+> **Bug:** I created a Dine-In order feature, which bypassed delivery. Instead of being marked as `"delivered"` when finished, Dine-In orders were marked as `"served"`. However, my Admin Dashboard analytics and UI tabs were strictly filtering for `status === 'delivered'` to mark an order as fully completed. This caused `"served"` dine-in orders to become "ghost orders" — they bumped up the "Active Orders" count because they weren't cancelled/delivered, but they disappeared from the UI because no tab specifically queried for the `"served"` status!
+> **Fix:** I refactored the admin logic to group both `"delivered"` and `"served"` statuses under a unified `"completed"` tab and included both in the Daily Revenue Analytics. It was a great lesson in how branching database states (Takeaway vs Dine-In) can easily create hidden UI bugs if not carefully synchronized with your query filters.
+
+**Q36. How did you handle Staff Assignment dynamically?**
 
 > Instead of hardcoding delivery boy names or kitchen staff, I built a dynamic Staff Management Panel in the Admin dashboard. The admin fetches all registered `users` from Firestore, filters them by `role === 'kitchen'` or `role === 'delivery'`, and dynamically populates the assignment dropdowns. This ensures orders are tied directly to real user IDs, allowing us to track exactly how many deliveries a specific driver completed and calculate their earnings.
 
-**Q36. Have you implemented any global state controls?**
+**Q37. Have you implemented any global state controls?**
 
 > Yes, I built an **Emergency Close** toggle. If the restaurant is overwhelmed with orders, the admin clicks a single "Close Restaurant" button. This updates a global `store_status` document in Firestore. Every customer's app listens to this document via `onSnapshot` and instantly disables their checkout buttons, turning the UI red and showing "Currently Not Accepting Orders." It works instantly across all connected devices.
 
-**Q37. What UI design principles did you use?**
+**Q38. What UI design principles did you use?**
 
 > I used a modern **Glassmorphism** aesthetic. Instead of flat, boring colors, I utilized semi-transparent backgrounds with `backdrop-filter: blur(10px)`, vibrant accent gradients (like `#F57F17` for buttons), and smooth CSS transitions. I also standardized the top navigation bar across all pages (including orders and mobile views) so the app feels incredibly consistent and premium, rather than pieced together.
 
